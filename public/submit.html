@@ -1,3 +1,5 @@
+<!-- fixed: now uses correct action URL -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,12 +70,12 @@
     }
   </style>
 </head>
-<body>
+<body onclick="activateSounds()">
 
   <h1>▓▓▓ SUBMIT YOUR SCORE ▓▓▓</h1>
 
   <div class="form-wrapper">
-    <form method="POST" action="http://localhost:3000/submit">
+    <form method="POST" action="https://silkave-backend.onrender.com/submit">
       <label for="alias">Alias</label>
       <input type="text" id="alias" name="alias" required />
 
@@ -100,20 +102,22 @@
   <!-- Sound effects -->
   <audio id="bleep" src="sounds/bleep.wav" preload="auto"></audio>
   <audio id="typing" src="sounds/typing.wav" preload="auto"></audio>
-  <audio id="crackles" src="sounds/crackles.wav" autoplay loop></audio>
+  <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
 
   <script>
     const bleep = document.getElementById("bleep");
     const typing = document.getElementById("typing");
+    const crackles = document.getElementById("crackles");
 
     function playBleep() {
       bleep.currentTime = 0;
       bleep.play();
     }
 
-    function playTyping() {
-      typing.currentTime = 0;
+    function activateSounds() {
       typing.play();
+      crackles.play();
+      document.body.onclick = null;
     }
   </script>
 
