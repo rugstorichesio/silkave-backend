@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leaderboard | Silk Ave</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .table-container {
+      max-height: 600px;
+      overflow-y: auto;
+      border: 1px solid #0f0;
+      box-shadow: 0 0 10px #0f0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #000;
+    }
+
+    th, td {
+      border: 1px solid #0f0;
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    th {
+      background-color: #0f0;
+      color: #000;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tr:nth-child(even) {
+      background-color: #222;
+    }
+
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    a {
+      color: #0f0;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>▓▓▓ LEADERBOARD ▓▓▓</h1>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Alias</th>
+          <th>Final BTC</th>
+          <th>Glock</th>
+          <th>Game Hash</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body">
+        <tr><td colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    🕹️ <a href="index.html">Back to Game</a> | 💾 <a href="submit.html">Submit a Score</a>
+  </footer>
+
+  <script>
+    fetch('http://localhost:3000/scores')
+      .then(res => res.json())
+      .then(data => {
+        const body = document.getElementById('leaderboard-body');
+        body.innerHTML = '';
+        data.slice().reverse().forEach(entry => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${entry.alias}</td>
+            <td>${entry.finalBTC}</td>
+            <td>${entry.glock}</td>
+            <td>${entry.gameHash}</td>
+          `;
+          body.appendChild(row);
+        });
+      })
+      .catch(() => {
+        const body = document.getElementById('leaderboard-body');
+        body.innerHTML = '<tr><td colspan="4">Error loading leaderboard.</td></tr>';
+      });
+  </script>
+</body>
+</html>

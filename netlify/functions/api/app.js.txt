@@ -1,0 +1,30 @@
+const express = require('express');
+const serverless = require('serverless-http');
+
+const app = express();
+
+// Middleware to parse URL-encoded bodies (for form submissions)
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from the 'public' directory
+app.use(express.static('public'));
+
+// Root route to serve the form (submit.html)
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/submit.html');
+});
+
+// Handle form submissions (POST)
+app.post('/submit', (req, res) => {
+  const { name, score } = req.body;
+  console.log(`Received submission: Name = ${name}, Score = ${score}`);
+  res.redirect('/leaderboard.html'); // Redirect to leaderboard after submission
+});
+
+// Route for leaderboard page
+app.get('/leaderboard.html', (req, res) => {
+  res.sendFile(__dirname + '/public/leaderboard.html');
+});
+
+// Export as serverless function
+module.exports.handler = serverless(app);

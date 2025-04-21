@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Submit Your Score | Silk Ave</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #111;
+      color: #0f0;
+      padding: 2rem;
+      margin: 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.8rem;
+    }
+
+    .form-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 70vh;
+    }
+
+    form {
+      border: 1px solid #0f0;
+      padding: 1.5rem;
+      max-width: 400px;
+      width: 100%;
+      background-color: #000;
+      box-shadow: 0 0 15px #0f0;
+    }
+
+    input, select, button {
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background: #222;
+      color: #0f0;
+      border: 1px solid #0f0;
+      font-family: monospace;
+      font-size: 1rem;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0f0;
+      color: #000;
+    }
+
+    a {
+      color: #0f0;
+      text-decoration: underline;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>▓▓▓ SUBMIT YOUR SCORE ▓▓▓</h1>
+
+  <div class="form-wrapper">
+    <form method="POST" action="http://localhost:3000/submit">
+      <label for="alias">Alias</label>
+      <input type="text" id="alias" name="alias" required />
+
+      <label for="btc">Final BTC</label>
+      <input type="number" id="btc" name="btc" required />
+
+      <label for="glock">Glock Status</label>
+      <select id="glock" name="glock" required>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+
+      <label for="hash">Game Hash</label>
+      <input type="text" id="hash" name="hash" required />
+
+      <button type="submit" onclick="playBleep()">Submit Score</button>
+    </form>
+  </div>
+
+  <footer>
+    📝 Scores will appear on the <a href="leaderboard.html">Leaderboard</a>.
+  </footer>
+
+  <!-- Sound effects -->
+  <audio id="bleep" src="sounds/bleep.wav" preload="auto"></audio>
+  <audio id="typing" src="sounds/typing.wav" preload="auto"></audio>
+  <audio id="crackles" src="sounds/crackles.wav" autoplay loop></audio>
+
+  <script>
+    const bleep = document.getElementById("bleep");
+    const typing = document.getElementById("typing");
+
+    function playBleep() {
+      bleep.currentTime = 0;
+      bleep.play();
+    }
+
+    function playTyping() {
+      typing.currentTime = 0;
+      typing.play();
+    }
+  </script>
+
+</body>
+</html>
