@@ -90,7 +90,7 @@
       document.body.onclick = null;
     }
 
-    fetch('https://silkave-backend.onrender.com/scores')
+    fetch('/scores')
       .then(res => res.json())
       .then(data => {
         const body = document.getElementById('leaderboard-body');
