@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Silk Ave | Underground Access Point</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #000;
+      color: #0f0;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    a {
+      display: inline-block;
+      margin: 1rem;
+      font-size: 1.2rem;
+      color: #0f0;
+      text-decoration: underline;
+      transition: color 0.2s ease;
+    }
+
+    a:hover {
+      color: #fff;
+    }
+
+    footer {
+      margin-top: 4rem;
+      font-size: 0.9rem;
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body onclick="activateSounds()">
+
+  <h1>▓▓▓ SILK AVE: ENTRY NODE ▓▓▓</h1>
+
+  <p>Welcome, Operator. Choose your next action:</p>
+
+  <a href="submit.html">📤 Submit a Score</a><br/>
+  <a href="leaderboard.html">📊 View Leaderboard</a>
+
+  <footer>
+    Crackles active. All transmissions are monitored.
+  </footer>
+
+  <!-- Sound FX -->
+  <audio id="typing" src="sounds/typing.wav" preload="auto"></audio>
+  <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
+
+  <script>
+    const typing = document.getElementById("typing");
+    const crackles = document.getElementById("crackles");
+
+    function activateSounds() {
+      typing.play();
+      crackles.play();
+      document.body.onclick = null; // only once
+    }
+  </script>
+
+</body>
+</html>
