@@ -1,84 +1,75 @@
+// Import necessary modules
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
-const cors = require('cors');
+const fs = require('fs');
 
+// Initialize the Express app
 const app = express();
-const PORT = 3000;
-const SCORES_FILE = path.join(__dirname, 'scores.json');
 
-app.use(cors());
+// Set the port for the server
+const PORT = process.env.PORT || 3000;
+
+// Middleware to parse URL-encoded bodies (for form submissions)
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 
-// Serve static files (HTML, CSS, JS)
+// Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Endpoint to receive score submissions
+// Route to display the form (submit.html)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'submit.html'));
+});
+
+// Route to handle form submissions
 app.post('/submit', (req, res) => {
   const { alias, btc, glock, hash } = req.body;
 
-  if (!alias || !btc || !glock || !hash) {
-    return res.status(400).send('Missing required fields');
-  }
-
-  const newEntry = {
+  // Create a new score object
+  const newScore = {
     alias,
-    finalBTC: parseInt(btc, 10),
+    btc: parseFloat(btc),
     glock,
-    gameHash: hash,
+    hash,
     timestamp: new Date().toISOString()
   };
 
+  // Read existing scores from scores.json
+  const scoresFilePath = path.join(__dirname, 'scores.json');
   let scores = [];
 
-  try {
-    if (fs.existsSync(SCORES_FILE)) {
-      const data = fs.readFileSync(SCORES_FILE, 'utf8');
-      scores = JSON.parse(data);
-    }
-  } catch (err) {
-    console.error('Error reading scores file:', err);
+  if (fs.existsSync(scoresFilePath)) {
+    const data = fs.readFileSync(scoresFilePath);
+    scores = JSON.parse(data);
   }
 
-  scores.push(newEntry);
+  // Add the new score to the scores array
+  scores.push(newScore);
 
-  try {
-    fs.writeFileSync(SCORES_FILE, JSON.stringify(scores, null, 2));
-  } catch (err) {
-    console.error('Error writing scores file:', err);
-    return res.status(500).send('Failed to save score');
-  }
+  // Write the updated scores back to scores.json
+  fs.writeFileSync(scoresFilePath, JSON.stringify(scores, null, 2));
 
+  // Redirect to the thank you page
   res.redirect('/thanks.html');
 });
 
-// Endpoint to serve leaderboard data
-app.get('/scores', (req, res) => {
-  try {
-    const data = fs.readFileSync(SCORES_FILE, 'utf8');
-    const scores = JSON.parse(data);
-    res.json(scores);
-  } catch (err) {
-    console.error('Error loading scores:', err);
-    res.status(500).json({ error: 'Failed to load scores' });
-  }
-});
-
-// Fallback routes for static HTML files
+// Route to display the leaderboard (leaderboard.html)
 app.get('/leaderboard.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'leaderboard.html'));
 });
 
-app.get('/submit.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'submit.html'));
-});
-
-app.get('/thanks.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'thanks.html'));
+// Route to serve the scores as JSON
+app.get('/scores', (req, res) => {
+  const scoresFilePath = path.join(__dirname, 'scores.json');
+  if (fs.existsSync(scoresFilePath)) {
+    const data = fs.readFileSync(scoresFilePath);
+    const scores = JSON.parse(data);
+    res.json(scores);
+  } else {
+    res.json([]);
+  }
 });
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
