@@ -3,26 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Silk Ave | Underground Access Point</title>
+  <title>Silk Ave | Underground Game</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     body {
       font-family: monospace;
       background-color: #000;
       color: #0f0;
-      padding: 3rem;
+      padding: 2rem;
       text-align: center;
+      animation: flicker 0.2s infinite alternate;
+    }
+
+    @keyframes flicker {
+      from { opacity: 1; }
+      to { opacity: 0.97; }
     }
 
     h1 {
       font-size: 2rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     a {
       display: inline-block;
-      margin: 1rem;
-      font-size: 1.2rem;
+      margin: 0.75rem;
+      font-size: 1.1rem;
       color: #0f0;
       text-decoration: underline;
       transition: color 0.2s ease;
@@ -35,6 +48,7 @@
     footer {
       margin-top: 4rem;
       font-size: 0.9rem;
+      opacity: 0.8;
     }
 
     audio {
@@ -44,29 +58,40 @@
 </head>
 <body onclick="activateSounds()">
 
-  <h1>▓▓▓ SILK AVE: ENTRY NODE ▓▓▓</h1>
+  <h1>▓▓▓ WELCOME TO SILK AVE ▓▓▓</h1>
 
-  <p>Welcome, Operator. Choose your next action:</p>
+  <p>
+    The solo card-based crime economy sim.<br/>
+    Flip burner deals. Stack dirty crypto. Escape filthy rich.
+  </p>
 
-  <a href="submit.html">📤 Submit a Score</a><br/>
-  <a href="leaderboard.html">📊 View Leaderboard</a>
+  <p>
+    Build your empire round by round: buy low, sell high, dodge FBI stings and bad karma.
+    All you start with is 100 BTC and a dream. Can you flip your way to legend, or will Silk Ave eat you alive?
+  </p>
+
+  <a href="submit.html">📤 Submit Score</a>
+  <a href="leaderboard.html">📊 Leaderboard</a>
+  <a href="rules.html">📕 Read the Rules</a>
+  <a href="https://chat.openai.com/g/g-yourgptid" target="_blank">🤖 Play via GPT</a>
 
   <footer>
-    Crackles active. All transmissions are monitored.
+    🔒 All entries are final. Scores submitted to the chain cannot be altered.<br/>
+    &copy; 2025 Silk Ave. No affiliation with anything real. This is satire.
   </footer>
 
-  <!-- Sound FX -->
-  <audio id="typing" src="sounds/typing.wav" preload="auto"></audio>
+  <!-- Audio -->
+  <audio id="clink" src="sounds/bleep.wav" preload="auto"></audio>
   <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
 
   <script>
-    const typing = document.getElementById("typing");
+    const clink = document.getElementById("clink");
     const crackles = document.getElementById("crackles");
 
     function activateSounds() {
-      typing.play();
+      clink.play();
       crackles.play();
-      document.body.onclick = null; // only once
+      document.body.onclick = null;
     }
   </script>
 
