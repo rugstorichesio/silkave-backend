@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Silk Ave | Underground Game</title>
+  <title>Silk Ave | Terminal Access</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
     body {
@@ -12,57 +12,90 @@
       font-family: monospace;
       text-align: center;
       padding: 2rem;
+      overflow-x: hidden;
+      animation: flicker 0.15s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 1; }
+      100% { opacity: 0.97; }
     }
 
     h1 {
       font-size: 2rem;
-      text-shadow: 0 0 10px #0f0;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 6px #0f0, 0 0 12px #0f0;
     }
 
-    a {
+    p {
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+
+    .glitch-links a {
       display: block;
-      margin: 1rem auto;
+      margin: 0.75rem auto;
+      font-size: 1.1rem;
       color: #0f0;
+      background-color: transparent;
       text-decoration: none;
       border: 1px solid #0f0;
-      padding: 0.75rem;
-      max-width: 300px;
-      transition: background 0.3s, color 0.3s;
+      padding: 0.75rem 1rem;
+      width: 90%;
+      max-width: 320px;
+      transition: background 0.2s ease, color 0.2s ease;
+      text-shadow: 0 0 4px #0f0;
     }
 
-    a:hover {
+    .glitch-links a:hover {
       background-color: #0f0;
       color: #000;
+      text-shadow: none;
     }
 
     footer {
       margin-top: 3rem;
       font-size: 0.9rem;
+      opacity: 0.75;
+    }
+
+    audio {
+      display: none;
     }
   </style>
 </head>
-<body>
+<body onclick="activateSounds()">
 
-  <audio id="typing" src="sounds/typing.wav" preload="auto" autoplay loop></audio>
-  <audio id="crackles" src="sounds/crackles.wav" preload="auto" autoplay loop></audio>
+  <h1>▓▓▓ SILK AVE ACCESS POINT ▓▓▓</h1>
 
-  <h1>▓▓▓ WELCOME TO SILK AVE ▓▓▓</h1>
+  <p>
+    The solo card-based crime economy sim.<br>
+    Flip burner deals. Stack dirty crypto. Escape filthy rich.
+  </p>
 
-  <a href="https://chatgpt.com/g/g-67fe5d1afaa88191a2185a0d61e6958d-silk-ave-dealer" target="_blank">💻 Play Silk Ave (GPT)</a>
-  <a href="submit.html">📤 Submit a Score</a>
-  <a href="leaderboard.html">📊 View Leaderboard</a>
-  <a href="rules.html">📕 View Rules</a>
+  <div class="glitch-links">
+    <a href="https://chatgpt.com/g/g-67fe5d1afaa88191a2185a0d61e6958d-silk-ave-dealer" target="_blank">💻 Play via GPT</a>
+    <a href="submit.html">📤 Submit Score</a>
+    <a href="leaderboard.html">📊 View Leaderboard</a>
+    <a href="rules.html">📕 Game Rules</a>
+  </div>
 
   <footer>
-    🛠 Built with static HTML + Render server. Vibe with caution.  
+    &copy; 2025 Silk Ave. All transmissions are logged.<br>
+    This is a fictional experience. Stay paranoid.
   </footer>
 
+  <!-- Audio FX -->
+  <audio id="typing" src="sounds/typing.wav" preload="auto" loop></audio>
+  <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
+
   <script>
-    // Restart typing audio on load
-    const typing = document.getElementById("typing");
-    typing.currentTime = 0;
-    typing.play();
+    function activateSounds() {
+      document.getElementById("typing").play();
+      document.getElementById("crackles").play();
+      document.body.onclick = null;
+    }
   </script>
 
 </body>
