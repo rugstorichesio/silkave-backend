@@ -4,12 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leaderboard | Silk Ave</title>
+  <link rel="stylesheet" href="styles.css" />
   <style>
     body {
+      font-family: monospace;
       background-color: #111;
       color: #0f0;
-      font-family: monospace;
       padding: 2rem;
+      margin: 0;
     }
 
     h1 {
@@ -18,93 +20,98 @@
       margin-bottom: 2rem;
     }
 
-    .table-container {
-      max-height: 600px;
-      overflow-y: auto;
-      border: 1px solid #0f0;
-      box-shadow: 0 0 10px #0f0;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      background-color: #000;
+      margin-top: 1rem;
     }
 
     th, td {
       border: 1px solid #0f0;
-      padding: 0.75rem;
+      padding: 0.5rem;
       text-align: center;
     }
 
     th {
-      background-color: #0f0;
+      background-color: #00ff00;
       color: #000;
-      position: sticky;
-      top: 0;
-      z-index: 1;
     }
 
-    tr:nth-child(even) {
-      background-color: #222;
+    td {
+      background-color: #000;
     }
 
     footer {
-      margin-top: 2rem;
       text-align: center;
-      font-size: 0.9rem;
+      margin-top: 2rem;
     }
 
     a {
       color: #0f0;
       text-decoration: underline;
+      margin: 0 1rem;
     }
   </style>
 </head>
-<body>
+<body onclick="activateSounds()">
+
   <h1>▓▓▓ LEADERBOARD ▓▓▓</h1>
 
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Alias</th>
-          <th>Final BTC</th>
-          <th>Glock</th>
-          <th>Game Hash</th>
-        </tr>
-      </thead>
-      <tbody id="leaderboard-body">
-        <tr><td colspan="4">Loading...</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Alias</th>
+        <th>Final BTC</th>
+        <th>Glock</th>
+        <th>Game Hash</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboard-body">
+      <tr><td colspan="4">Loading leaderboard...</td></tr>
+    </tbody>
+  </table>
 
   <footer>
-    🕹️ <a href="index.html">Back to Game</a> | 💾 <a href="submit.html">Submit a Score</a>
+    <a href="index.html">🔙 Back to Game</a> |
+    <a href="submit.html">📋 Submit a Score</a>
   </footer>
 
+  <!-- Sound effects -->
+  <audio id="typing" src="sounds/typing.wav" preload="auto"></audio>
+  <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
+
   <script>
-    fetch('http://localhost:3000/scores')
+    const typing = document.getElementById("typing");
+    const crackles = document.getElementById("crackles");
+
+    function activateSounds() {
+      typing.play();
+      crackles.play();
+      document.body.onclick = null;
+    }
+
+    fetch('https://silkave-backend.onrender.com/scores')
       .then(res => res.json())
       .then(data => {
         const body = document.getElementById('leaderboard-body');
         body.innerHTML = '';
-        data.slice().reverse().forEach(entry => {
+        data.forEach(entry => {
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${entry.alias}</td>
-            <td>${entry.finalBTC}</td>
+            <td>${entry.btc || entry.finalBTC || '???'}</td>
             <td>${entry.glock}</td>
-            <td>${entry.gameHash}</td>
+            <td>${entry.hash || entry.gameHash || '???'}</td>
           `;
           body.appendChild(row);
         });
       })
-      .catch(() => {
+      .catch(err => {
         const body = document.getElementById('leaderboard-body');
-        body.innerHTML = '<tr><td colspan="4">Error loading leaderboard.</td></tr>';
+        body.innerHTML = `<tr><td colspan="4">⚠️ ${err.message}</td></tr>`;
+        console.error('Fetch failed:', err);
       });
   </script>
+
 </body>
 </html>
