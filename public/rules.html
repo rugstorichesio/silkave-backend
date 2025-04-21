@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Silk Ave Rules</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #000;
+      color: #0f0;
+      padding: 2rem;
+      line-height: 1.6;
+      animation: flicker 0.2s infinite alternate;
+    }
+
+    @keyframes flicker {
+      from { opacity: 1; }
+      to { opacity: 0.97; }
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    p, li {
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    ul {
+      text-align: left;
+      margin-top: 1rem;
+    }
+
+    a {
+      color: #0f0;
+      text-decoration: underline;
+      display: inline-block;
+      margin: 2rem 1rem 0;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    audio {
+      display: none;
+    }
+  </style>
+</head>
+<body onclick="activateSounds()">
+
+  <h1>▓▓▓ RULES OF SILK AVE ▓▓▓</h1>
+
+  <p>This is a solo card-based dark web trading sim. You flip digital goods for profit over 10 rounds. The goal: stack as much BTC as possible before the street pulls you under.</p>
+
+  <h2>🎲 Starting Loadout</h2>
+  <ul>
+    <li>100 BTC</li>
+    <li>0 inventory (Max: 20 units)</li>
+    <li>No Glock (must be purchased)</li>
+  </ul>
+
+  <h2>📦 Round Structure</h2>
+  <ol>
+    <li>Flip an Event Card (affects that round only)</li>
+    <li>Roll market die (1–6) to set item prices</li>
+    <li>Sell anything from inventory</li>
+    <li>Buy new items (if you have space)</li>
+    <li>Advance to next round</li>
+  </ol>
+
+  <h2>🛒 Inventory Rules</h2>
+  <ul>
+    <li>You may only hold 20 units of product</li>
+    <li>Items take 1 slot each</li>
+    <li>Glock does <strong>not</strong> take up a slot</li>
+  </ul>
+
+  <h2>🔫 The Glock</h2>
+  <ul>
+    <li>Costs 20 BTC</li>
+    <li>Protects against certain Event penalties</li>
+    <li>You must buy one — it is not included at the start</li>
+  </ul>
+
+  <h2>🧠 Tips</h2>
+  <ul>
+    <li>Buy low, sell high. Obvious, but critical.</li>
+    <li>Some event cards are brutal. Protect yourself with a Glock.</li>
+    <li>Track inventory carefully. Max 20 items means every slot matters.</li>
+    <li>You may play with physical cards or through the GPT version.</li>
+  </ul>
+
+  <a href="index.html">🏠 Back to Home</a>
+  <a href="submit.html">📤 Submit a Score</a>
+
+  <footer>
+    &copy; 2025 Silk Ave Game. All deals are final. Stay paranoid.
+  </footer>
+
+  <!-- Sound FX -->
+  <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
+  <script>
+    const crackles = document.getElementById("crackles");
+    function activateSounds() {
+      crackles.play();
+      document.body.onclick = null;
+    }
+  </script>
+
+</body>
+</html>
