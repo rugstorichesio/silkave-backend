@@ -6,86 +6,69 @@
   <title>Leaderboard | Silk Ave</title>
   <link rel="stylesheet" href="styles.css" />
   <style>
+    @keyframes flicker {
+      from { opacity: 1; }
+      to { opacity: 0.97; }
+    }
+
     body {
       font-family: monospace;
-      background-color: #111;
+      background-color: #000;
       color: #0f0;
       padding: 2rem;
-      margin: 0;
+      animation: flicker 0.2s infinite alternate;
     }
 
     h1 {
       text-align: center;
-      font-size: 2rem;
+      font-size: 1.8rem;
       margin-bottom: 2rem;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
+    ul {
+      list-style: none;
+      padding: 0;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: left;
     }
 
-    th, td {
-      border: 1px solid #0f0;
+    li {
       padding: 0.5rem;
-      text-align: center;
+      border-bottom: 1px solid #0f0;
     }
 
-    th {
-      background-color: #00ff00;
-      color: #000;
-    }
-
-    td {
-      background-color: #000;
-    }
-
-    footer {
+    .back-link {
+      display: block;
       text-align: center;
       margin-top: 2rem;
-    }
-
-    a {
       color: #0f0;
       text-decoration: underline;
-      margin: 0 1rem;
+    }
+
+    .back-link:hover {
+      color: #fff;
+    }
+
+    audio {
+      display: none;
     }
   </style>
 </head>
 <body onclick="activateSounds()">
 
-  <h1>▓▓▓ LEADERBOARD ▓▓▓</h1>
+  <h1>▓▓▓ Silk Ave Leaderboard ▓▓▓</h1>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Alias</th>
-        <th>Final BTC</th>
-        <th>Glock</th>
-        <th>Game Hash</th>
-      </tr>
-    </thead>
-    <tbody id="leaderboard-body">
-      <tr><td colspan="4">Loading leaderboard...</td></tr>
-    </tbody>
-  </table>
+  <ul id="scoreList">
+    <li>Loading scores...</li>
+  </ul>
 
-  <footer>
-    <a href="https://silkavegame.com">🔙 Back to Home</a> |
-    <a href="submit.html">📋 Submit a Score</a>
-  </footer>
+  <a href="index.html" class="back-link">← Back to Home</a>
 
-  <!-- Sound effects -->
-  <audio id="typing" src="sounds/typing.wav" preload="auto"></audio>
   <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
-
   <script>
-    const typing = document.getElementById("typing");
     const crackles = document.getElementById("crackles");
-
     function activateSounds() {
-      typing.play();
       crackles.play();
       document.body.onclick = null;
     }
@@ -93,23 +76,23 @@
     fetch('/scores')
       .then(res => res.json())
       .then(data => {
-        const body = document.getElementById('leaderboard-body');
-        body.innerHTML = '';
-        data.forEach(entry => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${entry.alias}</td>
-            <td>${entry.btc || entry.finalBTC || '???'}</td>
-            <td>${entry.glock}</td>
-            <td>${entry.hash || entry.gameHash || '???'}</td>
-          `;
-          body.appendChild(row);
+        const list = document.getElementById('scoreList');
+        list.innerHTML = '';
+
+        if (data.length === 0) {
+          list.innerHTML = '<li>No scores yet. Be the first.</li>';
+          return;
+        }
+
+        data.reverse().forEach(entry => {
+          const item = document.createElement('li');
+          item.textContent = `${entry.alias} – ${entry.btc} BTC – Glock: ${entry.glock}`;
+          list.appendChild(item);
         });
       })
       .catch(err => {
-        const body = document.getElementById('leaderboard-body');
-        body.innerHTML = `<tr><td colspan="4">⚠️ ${err.message}</td></tr>`;
-        console.error('Fetch failed:', err);
+        console.error('Failed to fetch scores:', err);
+        document.getElementById('scoreList').innerHTML = '<li>Failed to load scores.</li>';
       });
   </script>
 
