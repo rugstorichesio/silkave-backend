@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Silk Ave Companion</title>
   <style>
     body {
@@ -32,15 +32,20 @@
       padding: 0.5rem;
       text-align: center;
     }
-    .inventory, .market, .actions {
-      margin-top: 2rem;
-    }
-    .log {
+    .log, .inventory-status {
       white-space: pre-line;
-      margin-top: 2rem;
       background: #000;
       border: 1px solid #0f0;
       padding: 1rem;
+      margin-top: 2rem;
+    }
+    .bottom-bar {
+      text-align: center;
+      margin-top: 2rem;
+      font-weight: bold;
+      font-size: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #0f0;
     }
   </style>
 </head>
@@ -100,170 +105,216 @@
   </div>
 
   <div class="log" id="log"></div>
+  <div class="inventory-status" id="inventoryStatus"></div>
 
-  <button onclick="advanceCycle()">Advance to Next Cycle</button>
+  <div class="bottom-bar">
+    Cycle: <span id="cycleBottom">1</span> / 10 |
+    BTC: <span id="btcBottom">100</span> |
+    Glock: <span id="glockBottom">No</span> |
+    Inventory: <span id="invCountBottom">0</span>/20
+  </div>
 
   <script>
-    const items = ["lsd", "weed", "cocaine", "mdma", "passports", "accounts", "ccs", "files"];
-    const itemNames = {
-      lsd: "LSD",
-      weed: "Weed",
-      cocaine: "Cocaine",
-      mdma: "MDMA",
-      passports: "Fake Passports",
-      accounts: "Hacked Accounts",
-      ccs: "Credit Cards",
-      files: "Stolen Files"
-    };
-    const priceMatrix = {
-      lsd:      [1, 1, 2, 3, 4, 5],
-      weed:     [1, 2, 3, 3, 4, 5],
-      cocaine:  [4, 5, 6, 7, 8, 9],
-      mdma:     [3, 4, 5, 6, 7, 8],
-      passports:[2, 3, 4, 5, 6, 7],
-      accounts: [3, 4, 5, 6, 7, 8],
-      ccs:      [2, 3, 5, 6, 7, 9],
-      files:    [4, 5, 6, 7, 8, 10]
-    };
+const items = ["lsd", "weed", "cocaine", "mdma", "passports", "accounts", "ccs", "files"];
+const itemNames = {
+  lsd: "LSD",
+  weed: "Weed",
+  cocaine: "Cocaine",
+  mdma: "MDMA",
+  passports: "Fake Passports",
+  accounts: "Hacked Accounts",
+  ccs: "Credit Cards",
+  files: "Stolen Files"
+};
+const priceMatrix = {
+  lsd: [1, 1, 2, 3, 4, 5],
+  weed: [1, 2, 3, 3, 4, 5],
+  cocaine: [4, 5, 6, 7, 8, 9],
+  mdma: [3, 4, 5, 6, 7, 8],
+  passports: [2, 3, 4, 5, 6, 7],
+  accounts: [3, 4, 5, 6, 7, 8],
+  ccs: [2, 3, 5, 6, 7, 9],
+  files: [4, 5, 6, 7, 8, 10]
+};
 
-    let inventory = {};
-    let btc = 100;
-    let glock = false;
-    let cycle = 1;
-    let currentPrices = {};
-    let burnerItem = "";
+let inventory = {};
+let btc = 100;
+let glock = false;
+let cycle = 1;
+let currentPrices = {};
+let burnerItem = "";
 
-    function rollDice() {
-      const roll = Math.floor(Math.random() * 6) + 1;
-      document.getElementById("diceResult").textContent = `Rolled: ${roll}`;
-      updateMarketPrices(roll);
-    }
+function rollDice() {
+  const roll = Math.floor(Math.random() * 6) + 1;
+  document.getElementById("diceResult").textContent = `🎲 Rolled: ${roll}`;
+  updateMarketPrices(roll);
+}
 
-    function updateMarketPrices(roll) {
-      currentPrices = {};
-      let tbody = document.querySelector("#marketTable tbody");
-      tbody.innerHTML = "";
-      items.forEach(item => {
-        let price = priceMatrix[item][roll - 1];
-        currentPrices[item] = price;
-        tbody.innerHTML += `<tr><td>${itemNames[item]}</td><td>${price} BTC</td></tr>`;
-      });
-      populateTransactionTable();
-    }
+function updateMarketPrices(roll) {
+  currentPrices = {};
+  let tbody = document.querySelector("#marketTable tbody");
+  tbody.innerHTML = "";
+  items.forEach(item => {
+    let price = priceMatrix[item][roll - 1];
+    currentPrices[item] = price;
+    tbody.innerHTML += `<tr><td>${itemNames[item]}</td><td>${price} BTC</td></tr>`;
+  });
+  populateTransactionTable();
+}
 
-    function applyBurnerDeal() {
-      let item = document.getElementById("burnerDeal").value;
-      if (item && currentPrices[item]) {
-        currentPrices[item] = priceMatrix[item][0];
-        updateMarketPricesDisplay();
-        burnerItem = item;
-      }
-    }
+function applyBurnerDeal() {
+  let item = document.getElementById("burnerDeal").value;
+  if (item && currentPrices[item]) {
+    currentPrices[item] = priceMatrix[item][0];
+    updateMarketPricesDisplay();
+    log(`-- Burner Deal Applied: ${itemNames[item]} set to ${currentPrices[item]} BTC`);
+  }
+}
 
-    function updateMarketPricesDisplay() {
-      let tbody = document.querySelector("#marketTable tbody");
-      tbody.innerHTML = "";
-      items.forEach(item => {
-        tbody.innerHTML += `<tr><td>${itemNames[item]}</td><td>${currentPrices[item]} BTC</td></tr>`;
-      });
-    }
+function updateMarketPricesDisplay() {
+  let tbody = document.querySelector("#marketTable tbody");
+  tbody.innerHTML = "";
+  items.forEach(item => {
+    tbody.innerHTML += `<tr><td>${itemNames[item]}</td><td>${currentPrices[item]} BTC</td></tr>`;
+  });
+}
 
-    function populateTransactionTable() {
-      let tbody = document.querySelector("#transactionTable tbody");
-      tbody.innerHTML = "";
-      items.forEach(item => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${itemNames[item]}</td>
-            <td><input type="number" id="buy-${item}" min="0"></td>
-            <td><input type="number" id="sell-${item}" min="0"></td>
-          </tr>
-        `;
-      });
-    }
+function populateTransactionTable() {
+  let tbody = document.querySelector("#transactionTable tbody");
+  tbody.innerHTML = "";
+  items.forEach(item => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${itemNames[item]}</td>
+        <td><input type="number" id="buy-${item}" min="0"></td>
+        <td><input type="number" id="sell-${item}" min="0"></td>
+      </tr>
+    `;
+  });
+}
 
-    function executeTransactions() {
-      let log = "";
-      let totalInventory = Object.values(inventory).reduce((acc, val) => acc + val.length, 0);
-      items.forEach(item => {
-        const buyQty = parseInt(document.getElementById(`buy-${item}`).value) || 0;
-        const sellQty = parseInt(document.getElementById(`sell-${item}`).value) || 0;
+function executeTransactions() {
+  let output = "";
+  let totalInventory = Object.values(inventory).reduce((acc, val) => acc + val.length, 0);
 
-        if (buyQty > 0) {
-          let cost = currentPrices[item] * buyQty;
-          if (btc >= cost && totalInventory + buyQty <= 20) {
-            btc -= cost;
-            inventory[item] = inventory[item] || [];
-            let prices = [];
-            for (let i = 0; i < buyQty; i++) {
-              inventory[item].push(currentPrices[item]);
-              prices.push(currentPrices[item]);
-            }
-            log += `Bought ${buyQty} ${itemNames[item]} for ${cost} BTC (${prices.join(", ")} BTC each)\n`;
-            totalInventory += buyQty;
-          } else {
-            log += `⛔ Cannot buy ${buyQty} ${itemNames[item]} (Not enough BTC or inventory space)\n`;
-          }
+  items.forEach(item => {
+    const buyQty = parseInt(document.getElementById(`buy-${item}`).value) || 0;
+    const sellQty = parseInt(document.getElementById(`sell-${item}`).value) || 0;
+
+    if (buyQty > 0) {
+      let cost = currentPrices[item] * buyQty;
+      if (btc >= cost && totalInventory + buyQty <= 20) {
+        btc -= cost;
+        inventory[item] = inventory[item] || [];
+        for (let i = 0; i < buyQty; i++) {
+          inventory[item].push(currentPrices[item]);
         }
-
-        if (sellQty > 0 && inventory[item]?.length >= sellQty) {
-          let gain = currentPrices[item] * sellQty;
-          btc += gain;
-          inventory[item].splice(0, sellQty);
-          log += `Sold ${sellQty} ${itemNames[item]} for ${gain} BTC\n`;
-          totalInventory -= sellQty;
-        } else if (sellQty > 0) {
-          log += `⛔ Cannot sell ${sellQty} ${itemNames[item]} (Not enough inventory)\n`;
-        }
-      });
-
-      document.getElementById("btc").textContent = btc;
-      document.getElementById("invCount").textContent = totalInventory;
-      document.getElementById("log").textContent = log;
-      populateTransactionTable();
-    }
-
-    function buyGlock() {
-      if (!glock && btc >= 20) {
-        btc -= 20;
-        glock = true;
-        document.getElementById("glock").textContent = "Yes";
-        document.getElementById("btc").textContent = btc;
-        document.getElementById("log").textContent += `\nBought a Glock for 20 BTC.`;
+        output += `>>> Bought ${buyQty} ${itemNames[item]} for ${cost} BTC (${currentPrices[item]} BTC each)\n`;
+        totalInventory += buyQty;
       } else {
-        document.getElementById("log").textContent += `\n⛔ Cannot buy Glock (Already owned or insufficient BTC).`;
+        output += `⛔ Cannot buy ${buyQty} ${itemNames[item]} (Insufficient BTC or space)\n`;
       }
     }
 
-    function advanceCycle() {
-      if (cycle < 10) {
-        cycle++;
-        document.getElementById("cycle").textContent = cycle;
-        document.getElementById("log").textContent += `\n--- Starting Cycle ${cycle} ---`;
+    if (sellQty > 0) {
+      if (inventory[item]?.length >= sellQty) {
+        let gain = currentPrices[item] * sellQty;
+        btc += gain;
+        inventory[item].splice(0, sellQty);
+        output += `>>> Sold ${sellQty} ${itemNames[item]} for ${gain} BTC\n`;
+        totalInventory -= sellQty;
       } else {
-        document.getElementById("log").textContent += `\n\nGame Over! Calculating final score...`;
-        finalizeScore();
+        output += `⛔ Cannot sell ${sellQty} ${itemNames[item]} (Not enough in inventory)\n`;
       }
     }
+  });
 
-    function finalizeScore() {
-      let log = "";
-      let totalInventory = 0;
-      items.forEach(item => {
-        if (inventory[item]?.length > 0) {
-          let price = currentPrices[item];
-          let qty = inventory[item].length;
-          let total = price * qty;
-          btc += total;
-          log += `Sold ${qty} ${itemNames[item]} @ ${price} BTC each = +${total} BTC\n`;
-          inventory[item] = [];
-        }
-      });
-      log += `\n💰 Final BTC: ${btc}\n🔫 Glock: ${glock ? "Owned" : "Not Owned"}`;
-      document.getElementById("btc").textContent = btc;
-      document.getElementById("invCount").textContent = 0;
-      document.getElementById("log").textContent = log;
+  log(output.trim());
+  updateStatusBars();
+  updateInventoryDisplay();
+  populateTransactionTable();
+}
+
+function updateInventoryDisplay() {
+  let totalInventory = 0;
+  let output = "-- Inventory:\n";
+  items.forEach(item => {
+    if (inventory[item]?.length > 0) {
+      totalInventory += inventory[item].length;
+      const units = inventory[item];
+      const unique = [...new Set(units)];
+      if (unique.length === 1) {
+        output += `- ${itemNames[item]}: ${units.length} @ ${unique[0]} BTC each\n`;
+      } else {
+        output += `- ${itemNames[item]}: ${units.length} (${units.join(", ")} BTC)\n`;
+      }
     }
-  </script>
+  });
+  if (totalInventory === 0) output += "- Empty\n";
+  document.getElementById("inventoryStatus").textContent = output.trim();
+}
+
+function buyGlock() {
+  if (!glock && btc >= 20) {
+    btc -= 20;
+    glock = true;
+    log(">>> Glock acquired (20 BTC deducted)");
+    updateStatusBars();
+  } else {
+    log("⛔ Cannot buy Glock (already owned or not enough BTC)");
+  }
+}
+
+function advanceCycle() {
+  if (cycle < 10) {
+    cycle++;
+    log(`=== Starting Cycle ${cycle} ===`);
+    updateStatusBars();
+  } else {
+    log("=== GAME OVER: Final Round ===");
+    finalizeScore();
+  }
+}
+
+function finalizeScore() {
+  let output = "";
+  items.forEach(item => {
+    if (inventory[item]?.length > 0) {
+      let qty = inventory[item].length;
+      let payout = qty * currentPrices[item];
+      btc += payout;
+      output += `>>> Auto-sold ${qty} ${itemNames[item]} @ ${currentPrices[item]} = ${payout} BTC\n`;
+      inventory[item] = [];
+    }
+  });
+  output += `\n=== FINAL BTC: ${btc} ===\n>>> Glock: ${glock ? "Yes" : "No"}`;
+  log(output.trim());
+  updateStatusBars();
+  updateInventoryDisplay();
+}
+
+function updateStatusBars() {
+  document.getElementById("btc").textContent = btc;
+  document.getElementById("btcBottom").textContent = btc;
+  document.getElementById("glock").textContent = glock ? "Yes" : "No";
+  document.getElementById("glockBottom").textContent = glock ? "Yes" : "No";
+  let totalInventory = Object.values(inventory).reduce((acc, val) => acc + val.length, 0);
+  document.getElementById("invCount").textContent = totalInventory;
+  document.getElementById("invCountBottom").textContent = totalInventory;
+  document.getElementById("cycle").textContent = cycle;
+  document.getElementById("cycleBottom").textContent = cycle;
+}
+
+function log(text) {
+  document.getElementById("log").textContent += text + "\n";
+}
+
+function applyEvent() {
+  let code = document.getElementById("eventCode").value.trim();
+  if (code !== "") {
+    log(`-- Event code ${code} applied.`);
+  }
+}
+</script>
 </body>
 </html>
