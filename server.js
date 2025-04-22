@@ -1,22 +1,40 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 // Middleware
-app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
-// Path to leaderboard file
-const scoresFile = path.join(__dirname, 'scores.json');
+// Route: Homepage
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
-// Submit route
+// Route: Load scores
+app.get('/scores', (req, res) => {
+  fs.readFile('scores.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading scores.json:', err);
+      return res.status(500).json({ error: 'Failed to load scores.' });
+    }
+    res.json(JSON.parse(data));
+  });
+});
+
+// Route: Submit score
 app.post('/submit', (req, res) => {
   const { alias, btc, glock, hash } = req.body;
 
-  const newScore = {
+  if (!alias || !btc || !glock || !hash) {
+    return res.status(400).send('Missing score data.');
+  }
+
+  const newEntry = {
     alias,
     btc: parseInt(btc),
     glock,
@@ -24,37 +42,35 @@ app.post('/submit', (req, res) => {
     timestamp: new Date().toISOString()
   };
 
-  fs.readFile(scoresFile, 'utf8', (err, data) => {
+  fs.readFile('scores.json', 'utf8', (err, data) => {
     let scores = [];
     if (!err && data) {
-      scores = JSON.parse(data);
+      try {
+        scores = JSON.parse(data);
+      } catch (parseErr) {
+        console.error('Error parsing scores.json:', parseErr);
+      }
     }
 
-    scores.unshift(newScore);
-    if (scores.length > 100) scores = scores.slice(0, 100);
+    scores.push(newEntry);
 
-    fs.writeFile(scoresFile, JSON.stringify(scores, null, 2), err => {
-      if (err) {
-        console.error('Error saving score:', err);
-        return res.status(500).send('Error saving score.');
+    fs.writeFile('scores.json', JSON.stringify(scores, null, 2), (writeErr) => {
+      if (writeErr) {
+        console.error('Error writing to scores.json:', writeErr);
+        return res.status(500).send('Failed to save score.');
       }
-      res.redirect('/thanks.html');
+
+      res.redirect('/leaderboard.html');
     });
   });
 });
 
-// GET leaderboard scores
-app.get('/scores', (req, res) => {
-  fs.readFile(scoresFile, 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading scores:', err);
-      return res.status(500).json([]);
-    }
-    res.json(JSON.parse(data));
-  });
+// Route: Leaderboard page
+app.get('/leaderboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'leaderboard.html'));
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });
