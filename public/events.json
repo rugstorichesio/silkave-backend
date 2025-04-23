@@ -1,0 +1,198 @@
+{
+  "001": {
+    "title": "FBI Sting",
+    "type": "Bad",
+    "effectType": "ROLL",
+    "effect": "Roll 1d6:\n1\u20132: Lose all inventory + 50 BTC\n3\u20136: Lose 1 Glock or 20 BTC",
+    "flavor": "You knew they were watching. You didn\u2019t know how close they were\u2026"
+  },
+  "002": {
+    "title": "Hacked!",
+    "type": "Bad",
+    "effectType": "ROLL",
+    "effect": "Roll 1d6:\n1\u20132: Lose 25% of BTC\n3\u20136: Recover half of what you almost lost",
+    "flavor": "Your wallet\u2019s draining fast. Someone\u2019s inside."
+  },
+  "003": {
+    "title": "Rival Ripoff",
+    "type": "Bad",
+    "effectType": "FORCED",
+    "effect": "Lose your most expensive item and 10 BTC",
+    "flavor": "He came, he saw, he ripped you off."
+  },
+  "004": {
+    "title": "Data Breach",
+    "type": "Bad",
+    "effectType": "FORCED",
+    "effect": "Lose all Passports and Fake Accounts",
+    "flavor": "Your drop identities just got doxxed. Say goodbye."
+  },
+  "005": {
+    "title": "Burner Account Blows Up",
+    "type": "Bad",
+    "effectType": "CHOICE",
+    "effect": "Lose 1 Glock OR lose 10 BTC",
+    "flavor": "Firewall failed. Your rival\u2019s chewing through your server like rats in the walls."
+  },
+  "006": {
+    "title": "Street Raid",
+    "type": "Bad",
+    "effectType": "FORCED",
+    "effect": "Lose half your inventory (top-down)",
+    "flavor": "The street lit up red and blue. Half your stash vanished. You barely know what hit you."
+  },
+  "007": {
+    "title": "Crypto Crash",
+    "type": "Bad",
+    "effectType": "MARKET",
+    "effect": "All prices halved this round",
+    "flavor": "Paper-handed punks wrecked the market. Your profits folded fast."
+  },
+  "008": {
+    "title": "Compromised Drop Point",
+    "type": "Bad",
+    "effectType": "FORCED",
+    "effect": "Cannot sell this round",
+    "flavor": "You spot a \u2018repair van\u2019 parked too close. That glow inside? Too familiar. It\u2019s a stakeout. No drops today."
+  },
+  "009": {
+    "title": "Shipping Intercepted",
+    "type": "Bad",
+    "effectType": "ROLL",
+    "effect": "Roll 1d6:\n1\u20133: Lose 3 items\n4\u20136: Lose 25 BTC",
+    "flavor": "They held your shipment. You\u2019re either losing goods\u2026 or buying silence."
+  },
+  "010": {
+    "title": "Seized Server",
+    "type": "Bad",
+    "effectType": "FORCED",
+    "effect": "Cannot buy this round",
+    "flavor": "The server\u2019s gone. Black-bagged and boxed. You're offline."
+  },
+  "011": {
+    "title": "Found a Stash",
+    "type": "Good",
+    "effectType": "CHOICE",
+    "effect": "Choose 1 product type: Gain 5 units\nIf full: Gain 25 BTC",
+    "flavor": "Under a floorboard. Wrapped in duct tape. Still fresh."
+  },
+  "012": {
+    "title": "Crypto Pump",
+    "type": "Good",
+    "effectType": "MARKET",
+    "effect": "All prices doubled this round",
+    "flavor": "One tweet from a billionaire. Now everyone\u2019s buying. Hope your bags are packed \u2014 you\u2019re going to the moon."
+  },
+  "013": {
+    "title": "Inside Connection",
+    "type": "Good",
+    "effectType": "FORCED",
+    "effect": "Gain 40 BTC",
+    "flavor": "You\u2019ve got a guy on the inside. You leaned. He listened. Now you\u2019re 40 BTC richer."
+  },
+  "014": {
+    "title": "Deadman\u2019s Switch",
+    "type": "Good",
+    "effectType": "FORCED",
+    "effect": "Gain 50 BTC",
+    "flavor": "When he disappeared, the wallet unlocked. He always said you'd be next in line."
+  },
+  "015": {
+    "title": "Whale Buyout",
+    "type": "Good",
+    "effectType": "MARKET",
+    "effect": "Choose 1 product type \u2014 sell price is tripled this round",
+    "flavor": "A whale just swept the streets. You\u2019re holding the one thing they missed."
+  },
+  "016": {
+    "title": "Deep Web Payday",
+    "type": "Good",
+    "effectType": "LUCKY",
+    "effect": "Gain 30 BTC and 1 Glock\n(If you already own a Glock, gain 10 bonus BTC instead)",
+    "flavor": "The hit paid out. No trace, no noise \u2014 just coin."
+  },
+  "017": {
+    "title": "Community Boost",
+    "type": "Good",
+    "effectType": "ROLL",
+    "effect": "Roll 1d6:\n1\u20133: Gain 50 BTC\n4\u20136: Choose 1 product type and gain 10 units\n(If full: Gain 25 BTC)",
+    "flavor": "For once, the chain giveth."
+  },
+  "018": {
+    "title": "Black Market Flash Sale",
+    "type": "Good",
+    "effectType": "MARKET",
+    "effect": "All items cost 1 BTC this round (replaces market roll)",
+    "flavor": "The black market coughed up a clearance sale. You\u2019re cleaning up for satoshis on the coin."
+  },
+  "019": {
+    "title": "Bribe Your Way Out",
+    "type": "Mixed",
+    "effectType": "ROLL",
+    "effect": "Roll 1d6:\n1\u20133: Lose half inventory (top-down) + 20 BTC\n4\u20136: No effect",
+    "flavor": "Greased palms save time \u2014 and inventory. If they work."
+  },
+  "020": {
+    "title": "Government Deal",
+    "type": "Mixed",
+    "effectType": "ROLL",
+    "effect": "Roll 1d6:\n1\u20132: Lose 25 BTC\n3\u20136: Gain 50 BTC",
+    "flavor": "He offered coin. You took it. Everyone is for sale \u2014 even you."
+  },
+  "021": {
+    "title": "Emergency Sale",
+    "type": "Mixed",
+    "effectType": "CHOICE",
+    "effect": "Sell all inventory at half value OR keep inventory but cannot buy this round",
+    "flavor": "Sell it all for scraps\u2026 or sit on your stash and sweat."
+  },
+  "022": {
+    "title": "Cut and Run",
+    "type": "Mixed",
+    "effectType": "CHOICE",
+    "effect": "Lose all inventory, gain 40 BTC OR keep inventory and gain nothing",
+    "flavor": "You escaped with only your crypto keys. All product left behind."
+  },
+  "023": {
+    "title": "Blackmail",
+    "type": "Mixed",
+    "effectType": "ROLL",
+    "effect": "Roll 1d6:\n1\u20132: Lose 40 BTC\n3\u20136: No effect",
+    "flavor": "Someone knows something. And now they want coin."
+  },
+  "024": {
+    "title": "Rival\u2019s Request",
+    "type": "Mixed",
+    "effectType": "ROLL",
+    "effect": "Send 20 BTC. Roll 1d6:\n1\u20132: You\u2019re ghosted \u2014 lose 20 BTC\n3\u20136: Gain 20 BTC + 1 Glock (or +10 BTC if you already have one)",
+    "flavor": "He said it was a bridge loan. Could be a setup. Could be a score."
+  },
+  "025": {
+    "title": "Supply Chain Collapse",
+    "type": "Market",
+    "effectType": "MARKET",
+    "effect": "All product prices are doubled this round (replaces market roll)",
+    "flavor": "Something snapped. Now everyone\u2019s charging double \u2014 or not selling at all."
+  },
+  "026": {
+    "title": "Product Ban",
+    "type": "Market",
+    "effectType": "MARKET",
+    "effect": "One product type is banned this round \u2014 you may not buy or sell it",
+    "flavor": "Raids hit two suppliers overnight. That product\u2019s radioactive now."
+  },
+  "027": {
+    "title": "Domestic Disruption",
+    "type": "Life",
+    "effectType": "FORCED",
+    "effect": "You may not buy or sell this round",
+    "flavor": "Your kid found your burner phone and prank-called the pizza place\u2026 and the cops. Now the cops are on your tail."
+  },
+  "028": {
+    "title": "Family Emergency",
+    "type": "Life",
+    "effectType": "CHOICE",
+    "effect": "Lose 30 BTC OR skip this turn (no buying or selling)",
+    "flavor": "You had to pack up everything and move the family. Safety first. Profit second."
+  }
+}
