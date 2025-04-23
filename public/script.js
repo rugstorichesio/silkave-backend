@@ -1,5 +1,5 @@
 
-// ========== GAME STATE ==========
+// ==================== GLOBAL GAME STATE ====================
 let btc = 100;
 let glock = false;
 let cycle = 1;
@@ -22,7 +22,7 @@ const priceMatrix = {
   ccs: [2, 3, 5, 6, 7, 9], files: [4, 5, 6, 7, 8, 10]
 };
 
-// ========== CORE LOGIC ==========
+// ==================== GAME FUNCTIONALITY ====================
 function applyEvent() {
   eventCode = document.getElementById("eventCode").value.trim();
   isRollCard = ["001", "009", "017", "019", "020", "021", "024", "030"].includes(eventCode);
@@ -112,6 +112,48 @@ function populateTransactionTable() {
   });
 }
 
+function executeTransactions() {
+  let output = "";
+  let totalInventory = Object.values(inventory).reduce((acc, val) => acc + val.length, 0);
+
+  items.forEach(item => {
+    const buyQty = parseInt(document.getElementById(`buy-${item}`).value) || 0;
+    const sellQty = parseInt(document.getElementById(`sell-${item}`).value) || 0;
+
+    if (buyQty > 0) {
+      let cost = currentPrices[item] * buyQty;
+      if (btc >= cost && totalInventory + buyQty <= inventoryLimit) {
+        btc -= cost;
+        inventory[item] = inventory[item] || [];
+        for (let i = 0; i < buyQty; i++) {
+          inventory[item].push(currentPrices[item]);
+        }
+        output += `>>> Bought ${buyQty} ${itemNames[item]} for ${cost} BTC (${currentPrices[item]} BTC each)\n`;
+        totalInventory += buyQty;
+      } else {
+        output += `⛔ Cannot buy ${buyQty} ${itemNames[item]} (Insufficient BTC or space)\n`;
+      }
+    }
+
+    if (sellQty > 0) {
+      if (inventory[item]?.length >= sellQty) {
+        let gain = currentPrices[item] * sellQty;
+        btc += gain;
+        inventory[item].splice(0, sellQty);
+        output += `>>> Sold ${sellQty} ${itemNames[item]} for ${gain} BTC\n`;
+        totalInventory -= sellQty;
+      } else {
+        output += `⛔ Cannot sell ${sellQty} ${itemNames[item]} (Not enough in inventory)\n`;
+      }
+    }
+  });
+
+  log(output.trim());
+  updateStatusBars();
+  updateInventoryDisplay();
+  populateTransactionTable();
+}
+
 function updateStatusBars() {
   document.getElementById("btc").textContent = btc;
   document.getElementById("btcBottom").textContent = btc;
@@ -137,12 +179,23 @@ function updateInventoryDisplay() {
   output.textContent = total === 0 ? "-- Inventory:\n- Empty" : summary.trim();
 }
 
+function buyGlock() {
+  if (!glock && btc >= 20) {
+    btc -= 20;
+    glock = true;
+    log(">>> Glock acquired (20 BTC deducted)");
+    updateStatusBars();
+  } else {
+    log("⛔ Cannot buy Glock (already owned or not enough BTC)");
+  }
+}
+
 function log(msg) {
   const logBox = document.getElementById("log");
   logBox.textContent += msg + "\n";
 }
 
-// EXPORTS
+// ==================== EXPORT FUNCTIONS ====================
 window.applyEvent = applyEvent;
 window.rollCardDice = rollCardDice;
 window.rollMarket = rollMarket;
@@ -150,4 +203,6 @@ window.applyBurnerDeal = applyBurnerDeal;
 window.populateTransactionTable = populateTransactionTable;
 window.updateStatusBars = updateStatusBars;
 window.updateInventoryDisplay = updateInventoryDisplay;
+window.executeTransactions = executeTransactions;
+window.buyGlock = buyGlock;
 window.log = log;
