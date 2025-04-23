@@ -134,3 +134,14 @@ function runCardEffect(code, roll) {
   updateInventoryDisplay();
   return message;
 }
+
+// Core logic functions already defined above...
+
+// Ensure UI functions are globally available for onclick handlers
+window.applyEvent = applyEvent;
+window.rollMarket = rollMarket;
+window.rollCardDice = rollCardDice;
+window.applyBurnerDeal = applyBurnerDeal;
+window.executeTransactions = executeTransactions;
+window.buyGlock = buyGlock;
+window.advanceCycle = advanceCycle;
