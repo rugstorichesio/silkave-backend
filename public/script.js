@@ -1,4 +1,4 @@
-// Silk Ave Companion – Full Functional Game Logic
+// Silk Ave Companion – Functional Script.js (Cleaned)
 
 let btc = 100;
 let glock = false;
@@ -9,7 +9,6 @@ let burnerItem = "";
 let eventCode = "";
 let isRollCard = false;
 
-// Config
 const inventoryLimit = 20;
 const maxCycles = 10;
 
@@ -37,7 +36,7 @@ const priceMatrix = {
 
 function applyEvent() {
   eventCode = document.getElementById("eventCode").value.trim();
-  isRollCard = ["001", "002", "009", "017", "019", "020", "021", "022", "023", "024"].includes(eventCode); // example ROLL-type list
+  isRollCard = ["001", "002", "009", "017", "019", "020", "021", "022", "023", "024"].includes(eventCode);
   log(`-- Event code ${eventCode} applied.`);
   if (isRollCard) {
     document.getElementById("cardDiceResult").textContent = "Awaiting roll...";
@@ -131,11 +130,9 @@ function executeTransactions() {
         inventory[item] = inventory[item] || [];
         for (let i = 0; i < buyQty; i++) inventory[item].push(currentPrices[item]);
         totalInv += buyQty;
-        out += `>>> Bought ${buyQty} ${itemNames[item]} @ ${currentPrices[item]} = ${cost} BTC
-`;
+        out += `>>> Bought ${buyQty} ${itemNames[item]} @ ${currentPrices[item]} = ${cost} BTC\n`;
       } else {
-        out += `⛔ Cannot buy ${itemNames[item]} (Limit/BTC)
-`;
+        out += `⛔ Cannot buy ${itemNames[item]} (Limit/BTC)\n`;
       }
     }
 
@@ -144,8 +141,7 @@ function executeTransactions() {
       btc += gain;
       inventory[item].splice(0, sellQty);
       totalInv -= sellQty;
-      out += `>>> Sold ${sellQty} ${itemNames[item]} @ ${currentPrices[item]} = ${gain} BTC
-`;
+      out += `>>> Sold ${sellQty} ${itemNames[item]} @ ${currentPrices[item]} = ${gain} BTC\n`;
     }
   });
 
@@ -207,8 +203,7 @@ function updateStatusBars() {
 }
 
 function updateInventoryDisplay() {
-  let out = "-- Inventory:
-";
+  let out = "-- Inventory:\n";
   let total = 0;
   items.forEach(item => {
     if (inventory[item]?.length) {
@@ -216,11 +211,9 @@ function updateInventoryDisplay() {
       total += count;
       const unique = [...new Set(inventory[item])];
       if (unique.length === 1) {
-        out += `- ${itemNames[item]}: ${count} @ ${unique[0]} BTC
-`;
+        out += `- ${itemNames[item]}: ${count} @ ${unique[0]} BTC\n`;
       } else {
-        out += `- ${itemNames[item]}: ${count} (${inventory[item].join(", ")} BTC)
-`;
+        out += `- ${itemNames[item]}: ${count} (${inventory[item].join(", ")} BTC)\n`;
       }
     }
   });
