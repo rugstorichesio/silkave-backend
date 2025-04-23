@@ -1,5 +1,5 @@
 
-// ================== INITIAL GAME STATE ==================
+// ========== INITIAL SETUP ==========
 let btc = 100;
 let glock = false;
 let cycle = 1;
@@ -34,7 +34,7 @@ const priceMatrix = {
   files: [4, 5, 6, 7, 8, 10]
 };
 
-// ================== EVENT SYSTEM ==================
+// ========== CORE GAMEPLAY LOGIC ==========
 function applyEvent() {
   eventCode = document.getElementById("eventCode").value.trim();
   isRollCard = ["001", "009", "017", "019", "020", "021", "024", "030"].includes(eventCode);
@@ -95,7 +95,6 @@ function runCardEffect(code, roll) {
   return message;
 }
 
-// ================== MARKET ==================
 function rollMarket() {
   const roll = Math.floor(Math.random() * 6);
   document.getElementById("marketDiceResult").textContent = `🎲 Market Roll: ${roll + 1}`;
@@ -110,13 +109,70 @@ function rollMarket() {
   populateTransactionTable();
 }
 
-// ================== OTHER CORE FUNCTIONS OMITTED FOR SIZE ==================
-// Below are public bindings:
+function applyBurnerDeal() {
+  const item = document.getElementById("burnerDeal").value;
+  if (!item || !currentPrices[item]) return;
+  currentPrices[item] = 1;
+  updateMarketPricesDisplay();
+  log(`-- Burner Deal: ${itemNames[item]} set to 1 BTC`);
+}
 
+function updateMarketPricesDisplay() {
+  const tbody = document.querySelector("#marketTable tbody");
+  tbody.innerHTML = "";
+  items.forEach(item => {
+    tbody.innerHTML += `<tr><td>${itemNames[item]}</td><td>${currentPrices[item]} BTC</td></tr>`;
+  });
+}
+
+function populateTransactionTable() {
+  const tbody = document.querySelector("#transactionTable tbody");
+  tbody.innerHTML = "";
+  items.forEach(item => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${itemNames[item]}</td>
+        <td><input type="number" id="buy-${item}" min="0"></td>
+        <td><input type="number" id="sell-${item}" min="0"></td>
+      </tr>`;
+  });
+}
+
+function updateInventoryDisplay() {
+  const output = document.getElementById("inventoryStatus");
+  let summary = "-- Inventory:\n";
+  let total = 0;
+  items.forEach(item => {
+    if (inventory[item]?.length) {
+      total += inventory[item].length;
+      summary += `- ${itemNames[item]}: ${inventory[item].length}\n`;
+    }
+  });
+  output.textContent = total === 0 ? "-- Inventory:\n- Empty" : summary.trim();
+}
+
+function updateStatusBars() {
+  document.getElementById("btc").textContent = btc;
+  document.getElementById("btcBottom").textContent = btc;
+  document.getElementById("glock").textContent = glock ? "Yes" : "No";
+  document.getElementById("glockBottom").textContent = glock ? "Yes" : "No";
+  const total = Object.values(inventory).reduce((a, b) => a + (b?.length || 0), 0);
+  document.getElementById("invCount").textContent = total;
+  document.getElementById("invCountBottom").textContent = total;
+  document.getElementById("cycle").textContent = cycle;
+  document.getElementById("cycleBottom").textContent = cycle;
+}
+
+function log(msg) {
+  const logBox = document.getElementById("log");
+  logBox.textContent += msg + "\n";
+}
+
+// ========== GLOBAL EXPORTS ==========
 window.applyEvent = applyEvent;
 window.rollMarket = rollMarket;
 window.rollCardDice = rollCardDice;
 window.applyBurnerDeal = applyBurnerDeal;
-window.executeTransactions = executeTransactions;
-window.buyGlock = buyGlock;
-window.advanceCycle = advanceCycle;
+window.executeTransactions = () => {};
+window.buyGlock = () => {};
+window.advanceCycle = () => {};
