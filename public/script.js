@@ -1,4 +1,5 @@
-// Silk Ave Companion – Functional Script.js (Cleaned)
+// Silk Ave Companion – Enhanced Script.js (v2)
+// Includes: Glock logic fix, outcome summary display, roll button toggles
 
 let btc = 100;
 let glock = false;
@@ -37,12 +38,16 @@ const priceMatrix = {
 function applyEvent() {
   eventCode = document.getElementById("eventCode").value.trim();
   isRollCard = ["001", "002", "009", "017", "019", "020", "021", "022", "023", "024"].includes(eventCode);
+
+  // Reset roll button state
+  document.querySelector("button[onclick='rollCardDice()']").style.display = isRollCard ? "inline-block" : "none";
+  document.getElementById("cardDiceResult").textContent = "";
+
   log(`-- Event code ${eventCode} applied.`);
-  if (isRollCard) {
-    document.getElementById("cardDiceResult").textContent = "Awaiting roll...";
-  } else {
-    runCardEffect(eventCode, null);
-    document.getElementById("cardDiceResult").textContent = "";
+
+  if (!isRollCard) {
+    const result = runCardEffect(eventCode, null);
+    document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result;
   }
 }
 
@@ -50,27 +55,44 @@ function rollCardDice() {
   if (!isRollCard || eventCode === "") return;
   const result = Math.ceil(Math.random() * 6);
   document.getElementById("cardDiceResult").textContent = `🎲 You rolled: ${result}`;
-  runCardEffect(eventCode, result);
+  const outcome = runCardEffect(eventCode, result);
+  document.getElementById("cardDiceResult").textContent += `\n✓ Outcome: ${outcome}`;
 }
 
 function runCardEffect(code, roll) {
+  let message = "";
+
   if (code === "001") {
     if (roll <= 2) {
       inventory = {};
       btc -= 50;
-      log(">>> RAIDED: Inventory cleared, -50 BTC");
+      message = "-50 BTC, Inventory wiped";
     } else {
       btc -= 20;
       glock = false;
-      log(">>> Escaped with warning. -20 BTC, Glock lost.");
+      message = "-20 BTC, Lost Glock";
     }
   }
+
   if (code === "014") {
     btc += 50;
-    log(">>> Deadman's Switch: +50 BTC");
+    message = "+50 BTC";
   }
+
+  if (code === "016") {
+    if (!glock) {
+      glock = true;
+      btc += 30;
+      message = "Gain 30 BTC and 1 Glock";
+    } else {
+      btc += 40;
+      message = "Already had Glock. Gain 40 BTC total";
+    }
+  }
+
   updateStatusBars();
   updateInventoryDisplay();
+  return message;
 }
 
 function rollMarket() {
