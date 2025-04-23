@@ -4,11 +4,13 @@ body {
   font-family: monospace;
   padding: 2rem;
 }
-
-input, button {
+input, button, select {
   background: #000;
   color: #0f0;
   border: 1px solid #0f0;
   padding: 0.5rem;
-  margin-right: 0.5rem;
+  margin: 0.3rem 0.5rem 0.3rem 0;
+}
+section {
+  margin-bottom: 2rem;
 }
