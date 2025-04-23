@@ -1,4 +1,3 @@
-
 // ==================== GLOBAL GAME STATE ====================
 let btc = 100;
 let glock = false;
@@ -131,7 +130,7 @@ function executeTransactions() {
         output += `>>> Bought ${buyQty} ${itemNames[item]} for ${cost} BTC (${currentPrices[item]} BTC each)\n`;
         totalInventory += buyQty;
       } else {
-        output += `⛔ Cannot buy ${buyQty} ${itemNames[item]} (Insufficient BTC or space)\n`;
+        output += `⛘ Cannot buy ${buyQty} ${itemNames[item]} (Insufficient BTC or space)\n`;
       }
     }
 
@@ -143,7 +142,7 @@ function executeTransactions() {
         output += `>>> Sold ${sellQty} ${itemNames[item]} for ${gain} BTC\n`;
         totalInventory -= sellQty;
       } else {
-        output += `⛔ Cannot sell ${sellQty} ${itemNames[item]} (Not enough in inventory)\n`;
+        output += `⛘ Cannot sell ${sellQty} ${itemNames[item]} (Not enough in inventory)\n`;
       }
     }
   });
@@ -152,6 +151,34 @@ function executeTransactions() {
   updateStatusBars();
   updateInventoryDisplay();
   populateTransactionTable();
+}
+
+function advanceCycle() {
+  if (cycle < 10) {
+    cycle++;
+    log(`=== Starting Cycle ${cycle} ===`);
+    updateStatusBars();
+  } else {
+    log("=== GAME OVER: Final Round ===");
+    finalizeScore();
+  }
+}
+
+function finalizeScore() {
+  let output = "";
+  items.forEach(item => {
+    if (inventory[item]?.length > 0) {
+      const qty = inventory[item].length;
+      const payout = qty * currentPrices[item];
+      btc += payout;
+      output += `>>> Auto-sold ${qty} ${itemNames[item]} @ ${currentPrices[item]} = ${payout} BTC\n`;
+      inventory[item] = [];
+    }
+  });
+  output += `\n=== FINAL BTC: ${btc} ===\n>>> Glock: ${glock ? "Yes" : "No"}`;
+  log(output.trim());
+  updateStatusBars();
+  updateInventoryDisplay();
 }
 
 function updateStatusBars() {
@@ -186,7 +213,7 @@ function buyGlock() {
     log(">>> Glock acquired (20 BTC deducted)");
     updateStatusBars();
   } else {
-    log("⛔ Cannot buy Glock (already owned or not enough BTC)");
+    log("⛘ Cannot buy Glock (already owned or not enough BTC)");
   }
 }
 
@@ -205,4 +232,5 @@ window.updateStatusBars = updateStatusBars;
 window.updateInventoryDisplay = updateInventoryDisplay;
 window.executeTransactions = executeTransactions;
 window.buyGlock = buyGlock;
+window.advanceCycle = advanceCycle;
 window.log = log;
