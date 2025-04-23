@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Silk Ave Companion</title>
   <style>
     body {
@@ -46,6 +46,16 @@
       font-size: 1rem;
       padding-top: 1rem;
       border-top: 1px solid #0f0;
+    }
+    @media (max-width: 600px) {
+      input, select, button {
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 1rem;
+      }
+      table {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
