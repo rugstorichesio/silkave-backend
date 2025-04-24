@@ -1,52 +1,90 @@
-// Leaderboard functionality for Silk Ave
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Silk Ave Leaderboard</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    .leaderboard {
+      max-width: 800px;
+      margin: 0 auto;
+      border: 1px solid #0f0;
+      padding: 1rem;
+    }
+    .score-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    .score-list li {
+      padding: 0.5rem;
+      border-bottom: 1px dotted #0f0;
+    }
+    .score-list li:last-child {
+      border-bottom: none;
+    }
+    .top-score {
+      color: #0f0;
+      font-weight: bold;
+    }
+    .loading {
+      text-align: center;
+      font-style: italic;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .error {
+      color: red;
+      text-align: center;
+    }
+    .nav-links {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .nav-links a {
+      color: #0f0;
+      text-decoration: underline;
+      margin: 0 1rem;
+    }
+    .timestamp {
+      font-size: 0.8rem;
+      color: #0a0;
+      margin-top: 1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div style="position: absolute; top: 1rem; right: 2rem;">
+    <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
+  </div>
 
-document.addEventListener("DOMContentLoaded", () => {
-  fetchScores()
-})
+  <h1>Silk Ave Leaderboard</h1>
+  <div class="leaderboard">
+    <h2>Top Dealers</h2>
+    <ul id="scoreList" class="score-list">
+      <li class="loading">Loading scores...</li>
+    </ul>
+    <div class="timestamp">Last updated: <span id="lastUpdated"></span></div>
+  </div>
 
-// Fetch scores from the backend
-function fetchScores() {
-  // Show loading state
-  const scoreList = document.getElementById("scoreList")
-  scoreList.innerHTML = "<li>Loading scores...</li>"
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="companion.html">Game Companion</a>
+    <a href="submit.html">Submit Score</a>
+  </div>
 
-  // Try to fetch from the backend
-  fetch("https://silkave-backend.onrender.com/scores")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok")
-      }
-      return response.json()
-    })
-    .then((data) => {
-      // Clear loading message
-      scoreList.innerHTML = ""
-
-      // Check if we have scores
-      if (data.length === 0) {
-        scoreList.innerHTML = "<li>No scores yet. Be the first.</li>"
-        return
-      }
-
-      // Sort scores by BTC (highest first)
-      data.sort((a, b) => b.btc - a.btc)
-
-      // Display scores
-      data.forEach((entry, index) => {
-        const item = document.createElement("li")
-        item.innerHTML = `<strong>${index + 1}.</strong> ${entry.alias} – ${entry.btc} BTC – Glock: ${entry.glock}`
-
-        // Highlight top 3
-        if (index < 3) {
-          item.style.color = "#0f0"
-          item.style.fontWeight = "bold"
-        }
-
-        scoreList.appendChild(item)
-      })
-    })
-    .catch((error) => {
-      console.error("Error fetching scores:", error)
-      scoreList.innerHTML = "<li>Failed to load scores. Please try again later.</li>"
-    })
-}
+  <script src="leaderboard.js"></script>
+</body>
+</html>

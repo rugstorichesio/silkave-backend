@@ -1,4 +1,4 @@
-// Silk Ave - Modified script.js that doesn't reveal card contents
+// Silk Ave - Modified script.js with guided tutorial flashing
 
 let btc = 100
 let glock = false
@@ -11,6 +11,10 @@ let blockBuying = false
 let blockSelling = false
 let bannedItem = null
 const inventoryLimit = 20
+
+// Game flow state tracking
+let gameFlowState = "enterEventCode"
+let tutorialActive = true
 
 const items = ["lsd", "weed", "cocaine", "mdma", "passports", "accounts", "ccs", "files"]
 const itemNames = {
@@ -41,7 +45,93 @@ document.addEventListener("DOMContentLoaded", () => {
   populateMarketTable()
   populateTransactionTable()
   log("Welcome to Silk Ave. You start with 100 BTC. Good luck.")
+
+  // Add event listener for event code input
+  document.getElementById("eventCode").addEventListener("input", function () {
+    if (this.value.length === 3 && gameFlowState === "enterEventCode") {
+      gameFlowState = "applyEvent"
+      updateGameFlowHighlight()
+    }
+  })
+
+  // Start the tutorial
+  if (tutorialActive) {
+    updateGameFlowHighlight()
+  }
 })
+
+// Update the highlighted element based on game flow state
+function updateGameFlowHighlight() {
+  // Remove highlight from all elements
+  const allElements = document.querySelectorAll(".highlight-pulse")
+  allElements.forEach((el) => {
+    el.classList.remove("highlight-pulse")
+  })
+
+  // Add highlight based on current state
+  switch (gameFlowState) {
+    case "enterEventCode":
+      highlightElement("eventCodeSection")
+      showHint("Enter a 3-digit event card code")
+      break
+    case "applyEvent":
+      highlightElement("applyEventBtn")
+      showHint("Apply the event card")
+      break
+    case "rollCard":
+      highlightElement("rollCardBtn")
+      showHint("Roll the dice for this card")
+      break
+    case "rollMarket":
+      highlightElement("rollMarketBtn")
+      showHint("Roll the market prices")
+      break
+    case "selectBurner":
+      highlightElement("burnerDealSection")
+      showHint("Select an item for burner deal (optional)")
+      break
+    case "applyBurner":
+      highlightElement("applyBurnerBtn")
+      showHint("Apply the burner deal")
+      break
+    case "executeTransactions":
+      highlightElement("executeTransactionsBtn")
+      showHint("Execute your buy/sell transactions")
+      break
+    case "advanceCycle":
+      highlightElement("advanceCycleBtn")
+      showHint("Advance to the next cycle")
+      break
+    default:
+      hideHint()
+      break
+  }
+}
+
+// Show a hint message
+function showHint(message) {
+  const hintElement = document.getElementById("gameHint")
+  if (hintElement) {
+    hintElement.textContent = message
+    hintElement.style.display = "block"
+  }
+}
+
+// Hide the hint message
+function hideHint() {
+  const hintElement = document.getElementById("gameHint")
+  if (hintElement) {
+    hintElement.style.display = "none"
+  }
+}
+
+// Highlight an element with a pulsing effect
+function highlightElement(elementId) {
+  const element = document.getElementById(elementId)
+  if (element) {
+    element.classList.add("highlight-pulse")
+  }
+}
 
 // Event card application
 function applyEvent() {
@@ -67,9 +157,20 @@ function applyEvent() {
   if (!isRollCard) {
     const result = runCardEffect(eventCode, null)
     document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+
+    // Update game flow state
+    gameFlowState = "rollMarket"
   } else {
     // For roll cards, just indicate that a roll is needed
     document.getElementById("cardDiceResult").textContent = "🎲 Roll required for this card"
+
+    // Update game flow state
+    gameFlowState = "rollCard"
+  }
+
+  // Update the highlighted element
+  if (tutorialActive) {
+    updateGameFlowHighlight()
   }
 }
 
@@ -82,6 +183,14 @@ function rollCardDice() {
 
   const outcome = runCardEffect(eventCode, result)
   document.getElementById("cardDiceResult").textContent += `\n✓ Outcome: ${outcome}`
+
+  // Update game flow state
+  gameFlowState = "rollMarket"
+
+  // Update the highlighted element
+  if (tutorialActive) {
+    updateGameFlowHighlight()
+  }
 }
 
 // Reset event effects
@@ -356,6 +465,14 @@ function rollMarket() {
   if (burnerItem) {
     applyBurnerDeal()
   }
+
+  // Update game flow state
+  gameFlowState = "selectBurner"
+
+  // Update the highlighted element
+  if (tutorialActive) {
+    updateGameFlowHighlight()
+  }
 }
 
 // Apply burner deal
@@ -382,6 +499,14 @@ function applyBurnerDeal() {
   updateMarketTable()
 
   log(`-- Burner deal applied: ${itemNames[burnerItem]} at ${currentPrices[burnerItem]} BTC (was ${originalPrice} BTC)`)
+
+  // Update game flow state
+  gameFlowState = "executeTransactions"
+
+  // Update the highlighted element
+  if (tutorialActive) {
+    updateGameFlowHighlight()
+  }
 }
 
 // Update market table with current prices
@@ -404,6 +529,16 @@ function updateMarketTable() {
     // Price cell
     const priceCell = document.createElement("td")
     priceCell.textContent = currentPrices[item] ? `${currentPrices[item]} BTC` : "—"
+
+    // Highlight profitable items
+    if (inventory[item] && inventory[item].length > 0) {
+      const avgCost = inventory[item].reduce((sum, price) => sum + price, 0) / inventory[item].length
+      if (currentPrices[item] > avgCost) {
+        priceCell.style.color = "#0f0" // Green for profit
+        priceCell.style.fontWeight = "bold"
+      }
+    }
+
     row.appendChild(priceCell)
 
     tableBody.appendChild(row)
@@ -551,6 +686,14 @@ function executeTransactions() {
 
   updateStatusBars()
   updateInventoryDisplay()
+
+  // Update game flow state
+  gameFlowState = "advanceCycle"
+
+  // Update the highlighted element
+  if (tutorialActive) {
+    updateGameFlowHighlight()
+  }
 }
 
 // Buy a Glock
@@ -608,6 +751,14 @@ function advanceCycle() {
 
   log(`-- Advanced to Cycle ${cycle}/10`)
   updateStatusBars()
+
+  // Reset game flow state
+  gameFlowState = "enterEventCode"
+
+  // Update the highlighted element
+  if (tutorialActive) {
+    updateGameFlowHighlight()
+  }
 }
 
 // Helper Functions
@@ -913,5 +1064,23 @@ function populateMarketTable() {
     row.appendChild(priceCell)
 
     tableBody.appendChild(row)
+  }
+}
+
+// Toggle tutorial mode
+function toggleTutorial() {
+  tutorialActive = !tutorialActive
+
+  if (tutorialActive) {
+    updateGameFlowHighlight()
+    log("-- Tutorial mode enabled.")
+  } else {
+    // Remove all highlights
+    const allElements = document.querySelectorAll(".highlight-pulse")
+    allElements.forEach((el) => {
+      el.classList.remove("highlight-pulse")
+    })
+    hideHint()
+    log("-- Tutorial mode disabled.")
   }
 }

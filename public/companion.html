@@ -68,9 +68,52 @@
       align-items: center;
       flex-wrap: wrap;
     }
+    .highlight-pulse {
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 0 10px #0f0;
+    }
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 5px #0f0;
+      }
+      50% {
+        box-shadow: 0 0 20px #0f0, 0 0 30px #0f0;
+      }
+      100% {
+        box-shadow: 0 0 5px #0f0;
+      }
+    }
+    .game-hint {
+      text-align: center;
+      padding: 0.5rem;
+      margin: 1rem 0;
+      background: #001100;
+      border: 1px dashed #0f0;
+      font-style: italic;
+    }
+    .nav-links {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .nav-links a {
+      color: #0f0;
+      text-decoration: underline;
+      margin: 0 1rem;
+    }
+    .tutorial-toggle {
+      position: absolute;
+      top: 1rem;
+      left: 2rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
+  <div class="tutorial-toggle" onclick="toggleTutorial()">
+    <span id="tutorialStatus">Disable Tutorial</span>
+  </div>
+
   <div style="position: absolute; top: 1rem; right: 2rem;">
     <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
   </div>
@@ -81,11 +124,13 @@
     <h3>BTC: <span id="btc">100</span> | Glock: <span id="glock">No</span> | Inventory: <span id="invCount">0</span>/20</h3>
   </div>
 
-  <div class="event-section">
+  <div id="gameHint" class="game-hint">Enter a 3-digit event card code</div>
+
+  <div id="eventCodeSection" class="event-section">
     <h3 class="event-title">Event Card</h3>
     <div class="event-input">
       <label>Event Card Code: <input type="text" id="eventCode" placeholder="Enter code"></label>
-      <button onclick="applyEvent()">Apply Event</button>
+      <button id="applyEventBtn" onclick="applyEvent()">Apply Event</button>
     </div>
     <div class="card-result">
       <button id="rollCardBtn" onclick="rollCardDice()" style="display: none;">🎲 Roll for Card</button>
@@ -95,23 +140,25 @@
 
   <div class="actions">
     <h3>Market Setup</h3>
-    <button onclick="rollMarket()">🎲 Roll Market Prices</button>
+    <button id="rollMarketBtn" onclick="rollMarket()">🎲 Roll Market Prices</button>
     <span id="marketDiceResult"></span>
     <br>
-    <label>Burner Deal Item:
-      <select id="burnerDeal">
-        <option value="">--Select--</option>
-        <option value="lsd">LSD</option>
-        <option value="weed">Weed</option>
-        <option value="cocaine">Cocaine</option>
-        <option value="mdma">MDMA</option>
-        <option value="passports">Fake Passports</option>
-        <option value="accounts">Hacked Accounts</option>
-        <option value="ccs">Credit Cards</option>
-        <option value="files">Stolen Files</option>
-      </select>
-    </label>
-    <button onclick="applyBurnerDeal()">Apply Burner Deal</button>
+    <div id="burnerDealSection">
+      <label>Burner Deal Item:
+        <select id="burnerDeal">
+          <option value="">--Select--</option>
+          <option value="lsd">LSD</option>
+          <option value="weed">Weed</option>
+          <option value="cocaine">Cocaine</option>
+          <option value="mdma">MDMA</option>
+          <option value="passports">Fake Passports</option>
+          <option value="accounts">Hacked Accounts</option>
+          <option value="ccs">Credit Cards</option>
+          <option value="files">Stolen Files</option>
+        </select>
+      </label>
+      <button id="applyBurnerBtn" onclick="applyBurnerDeal()">Apply Burner Deal</button>
+    </div>
   </div>
 
   <div class="market">
@@ -128,7 +175,7 @@
       <thead><tr><th>Item</th><th>Buy</th><th>Sell</th></tr></thead>
       <tbody></tbody>
     </table>
-    <button onclick="executeTransactions()">Execute Transactions</button>
+    <button id="executeTransactionsBtn" onclick="executeTransactions()">Execute Transactions</button>
     <button onclick="buyGlock()">Buy Glock (20 BTC)</button>
   </div>
 
@@ -136,7 +183,7 @@
   <div class="inventory-status" id="inventoryStatus"></div>
 
   <div style="text-align: center; margin-top: 2rem;">
-    <button onclick="advanceCycle()">Advance to Next Cycle</button>
+    <button id="advanceCycleBtn" onclick="advanceCycle()">Advance to Next Cycle</button>
   </div>
 
   <div class="bottom-bar">
@@ -146,6 +193,23 @@
     Inventory: <span id="invCountBottom">0</span>/20
   </div>
 
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="submit.html">Submit Score</a>
+  </div>
+
   <script src="script.js"></script>
+  <script>
+    // Update tutorial toggle text when clicked
+    document.querySelector('.tutorial-toggle').addEventListener('click', function() {
+      const status = document.getElementById('tutorialStatus');
+      if (status.textContent === 'Disable Tutorial') {
+        status.textContent = 'Enable Tutorial';
+      } else {
+        status.textContent = 'Disable Tutorial';
+      }
+    });
+  </script>
 </body>
 </html>

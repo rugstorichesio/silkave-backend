@@ -2,100 +2,114 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Silk Ave | Underground Game</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Silk Ave - Dark Web Trading Game</title>
   <style>
-    @keyframes flicker {
-      from { opacity: 1; }
-      to { opacity: 0.97; }
-    }
-
     body {
-      font-family: monospace;
-      background-color: #000;
+      background-color: #111;
       color: #0f0;
+      font-family: monospace;
       padding: 2rem;
       text-align: center;
-      animation: flicker 0.2s infinite alternate;
+      line-height: 1.6;
     }
-
     h1 {
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 10px #0f0;
     }
-
-    p {
-      margin-bottom: 1.5rem;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    a {
+    .ascii-art {
+      white-space: pre;
+      font-family: monospace;
+      margin: 2rem auto;
       display: inline-block;
-      margin: 0.75rem;
-      font-size: 1.1rem;
+      text-align: center;
+    }
+    .description {
+      max-width: 800px;
+      margin: 0 auto 2rem auto;
+    }
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .nav-link {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: #000;
       color: #0f0;
-      text-decoration: underline;
-      transition: color 0.2s ease;
+      text-decoration: none;
+      border: 1px solid #0f0;
+      transition: all 0.3s ease;
     }
-
-    a:hover {
-      color: #fff;
+    .nav-link:hover {
+      background: #0f0;
+      color: #000;
+      box-shadow: 0 0 10px #0f0;
     }
-
-    footer {
-      margin-top: 4rem;
-      font-size: 0.9rem;
-      opacity: 0.8;
+    .footer {
+      margin-top: 3rem;
+      font-size: 0.8rem;
+      opacity: 0.7;
     }
-
-    audio {
-      display: none;
+    .blink {
+      animation: blink-animation 1s steps(2, start) infinite;
+    }
+    @keyframes blink-animation {
+      to {
+        visibility: hidden;
+      }
     }
   </style>
 </head>
-<body onclick="activateSounds()">
-
-  <h1>▓▓▓ WELCOME TO SILK AVE ▓▓▓</h1>
-
-  <p>
-    The solo card-based crime economy sim.<br/>
-    Flip burner deals. Stack dirty crypto. Escape filthy rich.
-  </p>
-
-  <p>
-    Build your empire round by round: buy low, sell high, dodge FBI stings and bad karma.
-    All you start with is 100 BTC and a dream. Can you flip your way to legend, or will Silk Ave eat you alive?
-  </p>
-
-  <!-- ✅ Correct Menu Order with Companion Link Added -->
-  <a href="rules.html">📕 Rules</a>
-  <a href="companion.html">🧾 Companion</a>
-  <a href="https://chatgpt.com/g/g-67fe5d1afaa88191a2185a0d61e6958d-silk-ave-dealer" target="_blank">🤖 Play via GPT</a>
-  <a href="submit.html">📤 Submit Score</a>
-  <a href="leaderboard.html">📊 Leaderboard</a>
-
-  <footer>
-    🔒 All entries are final. Scores submitted to the chain cannot be altered.<br/>
-    &copy; 2025 Silk Ave. No affiliation with anything real. This is satire.
-  </footer>
-
-  <!-- Sound FX -->
-  <audio id="clink" src="sounds/bleep.wav" preload="auto"></audio>
-  <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
-
+<body>
+  <h1>WELCOME TO SILK AVE</h1>
+  
+  <div class="ascii-art">
+██████  ██████  ██████  ██████  ██████
+  </div>
+  
+  <div class="description">
+    <p>The solo card-based crime economy sim.</p>
+    <p>Flip burner deals. Stack dirty crypto. Escape filthy rich.</p>
+    <p>Build your empire round by round: buy low, sell high, dodge FBI stings and bad karma. All you start with is 100 BTC and a dream. Can you flip your way to legend, or will Silk Ave eat you alive?</p>
+  </div>
+  
+  <div class="nav-links">
+    <a href="rules.html" class="nav-link">📋 Rules</a>
+    <a href="companion.html" class="nav-link">🖥️ Companion</a>
+    <a href="https://chat.openai.com/g/g-GHYsQIXrA-silk-ave" class="nav-link">🤖 Play via GPT</a>
+    <a href="submit.html" class="nav-link">📤 Submit Score</a>
+    <a href="leaderboard.html" class="nav-link">🏆 Leaderboard</a>
+  </div>
+  
+  <div class="footer">
+    <p>🔒 All entries are final. Scores submitted to the chain cannot be altered.</p>
+    <p>© 2023 Silk Ave. No affiliation with anything real. This is satire.</p>
+  </div>
+  
   <script>
-    const clink = document.getElementById("clink");
-    const crackles = document.getElementById("crackles");
-
-    function activateSounds() {
-      clink.play();
-      crackles.play();
-      document.body.onclick = null;
-    }
+    // Add some terminal-like effects
+    document.addEventListener("DOMContentLoaded", function() {
+      // Simulate typing effect for the description
+      const description = document.querySelector('.description');
+      const originalHTML = description.innerHTML;
+      description.innerHTML = '';
+      
+      let i = 0;
+      const typeWriter = () => {
+        if (i < originalHTML.length) {
+          description.innerHTML += originalHTML.charAt(i);
+          i++;
+          setTimeout(typeWriter, 10);
+        }
+      };
+      
+      setTimeout(typeWriter, 500);
+    });
   </script>
-
 </body>
 </html>
