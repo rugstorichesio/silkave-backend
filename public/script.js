@@ -342,9 +342,6 @@ function rollMarket() {
     currentPrices[item] = priceMatrix[item][roll]
   }
 
-  // Apply burner deal if set
-  applyBurnerDeal()
-
   // Update market table
   updateMarketTable()
 
@@ -353,16 +350,38 @@ function rollMarket() {
   document.getElementById("marketDiceResult").textContent = `🎲 You rolled: ${diceResult}`
 
   log("-- Market prices updated.")
+
+  // Apply burner deal if one is selected
+  const burnerItem = document.getElementById("burnerDeal").value
+  if (burnerItem) {
+    applyBurnerDeal()
+  }
 }
 
 // Apply burner deal
 function applyBurnerDeal() {
   const burnerItem = document.getElementById("burnerDeal").value
-  if (burnerItem && currentPrices[burnerItem]) {
-    // Burner deals are half price
-    currentPrices[burnerItem] = Math.max(1, Math.floor(currentPrices[burnerItem] / 2))
-    log(`-- Burner deal applied: ${itemNames[burnerItem]} at ${currentPrices[burnerItem]} BTC`)
+
+  if (!burnerItem) {
+    log("-- Please select an item for the burner deal.")
+    return
   }
+
+  if (!currentPrices[burnerItem]) {
+    log("-- Cannot apply burner deal. Roll market prices first.")
+    return
+  }
+
+  // Store original price before discount
+  const originalPrice = currentPrices[burnerItem]
+
+  // Burner deals are half price
+  currentPrices[burnerItem] = Math.max(1, Math.floor(originalPrice / 2))
+
+  // Update the market table to reflect the new price
+  updateMarketTable()
+
+  log(`-- Burner deal applied: ${itemNames[burnerItem]} at ${currentPrices[burnerItem]} BTC (was ${originalPrice} BTC)`)
 }
 
 // Update market table with current prices
@@ -618,7 +637,19 @@ function updateInventoryDisplay() {
   for (const item of items) {
     const itemInventory = inventory[item] || []
     if (itemInventory.length > 0) {
-      inventoryText += `${itemNames[item]}: ${itemInventory.length}\n`
+      // Calculate average purchase price
+      const totalCost = itemInventory.reduce((sum, price) => sum + price, 0)
+      const avgPrice = (totalCost / itemInventory.length).toFixed(1)
+
+      // Show item count and purchase prices
+      inventoryText += `${itemNames[item]}: ${itemInventory.length} (bought @ ${avgPrice} BTC each)`
+
+      // Add individual prices if there are few items
+      if (itemInventory.length <= 5) {
+        inventoryText += ` [${itemInventory.join(", ")} BTC]`
+      }
+
+      inventoryText += "\n"
       totalItems += itemInventory.length
     }
   }
@@ -639,11 +670,11 @@ function countInventory() {
   return count
 }
 
-// Log message to the log area
+// Modify the log function to put timestamp at the end
 function log(message) {
   const logArea = document.getElementById("log")
   const timestamp = new Date().toLocaleTimeString()
-  logArea.textContent = `[${timestamp}] ${message}\n` + logArea.textContent
+  logArea.textContent = `${message} [${timestamp}]\n` + logArea.textContent
 }
 
 // Clear inventory
