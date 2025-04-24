@@ -199,16 +199,24 @@
     <a href="submit.html">Submit Score</a>
   </div>
 
+  <!-- Sound effects -->
+  <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
+
   <script src="script.js"></script>
   <script>
-    // Update tutorial toggle text when clicked
-    document.querySelector('.tutorial-toggle').addEventListener('click', function() {
-      const status = document.getElementById('tutorialStatus');
-      if (status.textContent === 'Disable Tutorial') {
-        status.textContent = 'Enable Tutorial';
-      } else {
-        status.textContent = 'Disable Tutorial';
-      }
+    // Play sound on button clicks
+    function playBleep() {
+      const sound = document.getElementById('bleep');
+      sound.currentTime = 0;
+      sound.play().catch(e => console.log("Audio play failed:", e));
+    }
+    
+    // Add sound to all buttons
+    document.addEventListener('DOMContentLoaded', function() {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('click', playBleep);
+      });
     });
   </script>
 </body>

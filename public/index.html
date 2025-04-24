@@ -81,7 +81,6 @@
   <div class="nav-links">
     <a href="rules.html" class="nav-link">📋 Rules</a>
     <a href="companion.html" class="nav-link">🖥️ Companion</a>
-    <a href="https://chat.openai.com/g/g-GHYsQIXrA-silk-ave" class="nav-link">🤖 Play via GPT</a>
     <a href="submit.html" class="nav-link">📤 Submit Score</a>
     <a href="leaderboard.html" class="nav-link">🏆 Leaderboard</a>
   </div>
@@ -92,24 +91,44 @@
   </div>
   
   <script>
-    // Add some terminal-like effects
-    document.addEventListener("DOMContentLoaded", function() {
-      // Simulate typing effect for the description
-      const description = document.querySelector('.description');
-      const originalHTML = description.innerHTML;
-      description.innerHTML = '';
+  // Add terminal-like boot sequence
+  document.addEventListener("DOMContentLoaded", function() {
+    // Simulate boot sequence for the description
+    const description = document.querySelector('.description');
+    const paragraphs = description.querySelectorAll('p');
+    
+    // Hide all paragraphs initially
+    paragraphs.forEach(p => {
+      p.style.opacity = '0';
+      p.style.display = 'block';
+    });
+    
+    // Show boot sequence text
+    const bootText = document.createElement('div');
+    bootText.className = 'boot-text';
+    bootText.innerHTML = '> INITIALIZING SILK AVE SYSTEM...<br>> LOADING MODULES...<br>> ESTABLISHING SECURE CONNECTION...';
+    bootText.style.color = '#0f0';
+    bootText.style.fontFamily = 'monospace';
+    bootText.style.marginBottom = '1rem';
+    description.prepend(bootText);
+    
+    // Reveal paragraphs in sequence
+    setTimeout(() => {
+      bootText.innerHTML += '<br>> SYSTEM READY';
       
       let i = 0;
-      const typeWriter = () => {
-        if (i < originalHTML.length) {
-          description.innerHTML += originalHTML.charAt(i);
+      const revealParagraph = () => {
+        if (i < paragraphs.length) {
+          paragraphs[i].style.opacity = '1';
+          paragraphs[i].style.transition = 'opacity 0.3s';
           i++;
-          setTimeout(typeWriter, 10);
+          setTimeout(revealParagraph, 400); // Faster reveal
         }
       };
       
-      setTimeout(typeWriter, 500);
-    });
-  </script>
+      setTimeout(revealParagraph, 300);
+    }, 800);
+  });
+</script>
 </body>
 </html>

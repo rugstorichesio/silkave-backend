@@ -2,132 +2,165 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Silk Ave Rules</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Silk Ave - Game Rules</title>
   <style>
     body {
-      background-color: #000;
+      background-color: #111;
       color: #0f0;
       font-family: monospace;
       padding: 2rem;
-      text-align: center;
-      animation: flicker 0.15s infinite alternate;
-    }
-
-    @keyframes flicker {
-      0% { opacity: 1; }
-      100% { opacity: 0.97; }
-    }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      text-shadow: 0 0 6px #0f0, 0 0 12px #0f0;
-    }
-
-    h2 {
-      font-size: 1.3rem;
-      margin-top: 2rem;
-      text-decoration: underline;
-      text-shadow: 0 0 4px #0f0;
-    }
-
-    p {
-      max-width: 700px;
-      margin: 0 auto 2rem;
       line-height: 1.6;
     }
-
-    ul {
-      list-style: disc;
-      padding-left: 1.5rem;
-      text-align: left;
-      display: inline-block;
-      max-width: 600px;
-      margin-bottom: 2rem;
-    }
-
-    li {
-      margin-bottom: 0.5rem;
-    }
-
-    a {
-      color: #0f0;
-      text-decoration: underline;
-      display: inline-block;
+    h1, h2, h3 {
+      text-align: center;
       margin-top: 2rem;
     }
-
-    footer {
-      margin-top: 4rem;
-      font-size: 0.9rem;
-      opacity: 0.7;
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      border: 1px solid #0f0;
+      padding: 2rem;
     }
-
-    audio {
-      display: none;
+    .section {
+      margin-bottom: 2rem;
+      border-bottom: 1px dotted #0f0;
+      padding-bottom: 1rem;
+    }
+    .section:last-child {
+      border-bottom: none;
+    }
+    .nav-links {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .nav-links a {
+      color: #0f0;
+      text-decoration: underline;
+      margin: 0 1rem;
+    }
+    .highlight {
+      color: #fff;
+      background-color: #0a0;
+      padding: 0 0.3rem;
+    }
+    ol, ul {
+      margin-left: 2rem;
+    }
+    .code {
+      background-color: #000;
+      border: 1px solid #0f0;
+      padding: 0.5rem;
+      margin: 1rem 0;
     }
   </style>
 </head>
-<body onclick="activateSounds()">
+<body>
+  <div style="position: absolute; top: 1rem; right: 2rem;">
+    <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
+  </div>
 
-  <h1>▓▓▓ RULES OF SILK AVE ▓▓▓</h1>
-
-  <p>This is a solo card-based dark web trading sim. Flip burner deals, navigate shady events, and escape filthy rich. You have 10 rounds to maximize your BTC haul.</p>
-
-  <h2>💀 STARTING LOADOUT</h2>
-  <ul>
-    <li>100 BTC</li>
-    <li>0 inventory (Max: 20 items)</li>
-    <li>No Glock (must be purchased)</li>
-  </ul>
-
-  <h2>📜 ROUND STRUCTURE</h2>
-  <ul>
-    <li>1. Flip an Event Card</li>
-    <li>2. Roll the Market Die (1–6)</li>
-    <li>3. Sell from Inventory</li>
-    <li>4. Buy New Items</li>
-    <li>5. Advance to Next Round</li>
-  </ul>
-
-  <h2>🛒 INVENTORY RULES</h2>
-  <ul>
-    <li>Max capacity: 20 units</li>
-    <li>Each item = 1 unit</li>
-    <li>Glock does NOT take up space</li>
-  </ul>
-
-  <h2>🔫 THE GLOCK</h2>
-  <ul>
-    <li>Costs 20 BTC</li>
-    <li>Protects against some events</li>
-    <li>Optional, but life-saving</li>
-  </ul>
-
-  <h2>💡 STRATEGY TIPS</h2>
-  <ul>
-    <li>Buy low, sell high — duh.</li>
-    <li>Glocks are insurance. Don’t ignore.</li>
-    <li>Event cards change everything. Adapt fast.</li>
-    <li>No loans. No refunds. Max profit or die trying.</li>
-  </ul>
-
-  <a href="index.html">🏠 Return to Access Point</a>
-
-  <footer>
-    &copy; 2025 Silk Ave. All gameplay is fictional. Play dirty, but smart.
-  </footer>
-
-  <!-- Audio FX -->
-  <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
+  <h1>SILK AVE - GAME RULES</h1>
+  
+  <div class="container">
+    <div class="section">
+      <h2>Game Overview</h2>
+      <p>Silk Ave is a solo card-based dark web trading simulation. You start with 100 BTC and must navigate 10 cycles of buying and selling illegal goods while dealing with random events.</p>
+      <p>Your goal is to accumulate as much BTC as possible by the end of the 10th cycle.</p>
+    </div>
+    
+    <div class="section">
+      <h2>Game Flow</h2>
+      <p>Each cycle consists of the following steps:</p>
+      <ol>
+        <li><span class="highlight">Apply Event Card</span> - Enter a 3-digit code from a physical event card</li>
+        <li><span class="highlight">Roll for Card Effect</span> - Some cards require a dice roll to determine the outcome</li>
+        <li><span class="highlight">Roll Market Prices</span> - Generate random prices for all items</li>
+        <li><span class="highlight">Apply Burner Deal</span> - Optionally select one item to get at half price</li>
+        <li><span class="highlight">Buy/Sell Items</span> - Execute transactions based on current prices</li>
+        <li><span class="highlight">Advance to Next Cycle</span> - Move to the next round</li>
+      </ol>
+    </div>
+    
+    <div class="section">
+      <h2>Using the Companion App</h2>
+      <p>The companion app guides you through each step of the game:</p>
+      <ul>
+        <li>The app will highlight the current action you should take</li>
+        <li>Follow the hints at the top of the screen</li>
+        <li>Enter event card codes in the Event Card section</li>
+        <li>Use the Roll Market Prices button to set prices for the round</li>
+        <li>Select an item for a burner deal (half price) if desired</li>
+        <li>Enter buy/sell quantities in the transaction table</li>
+        <li>Click Execute Transactions to complete your trades</li>
+        <li>Click Advance to Next Cycle when you're ready to move on</li>
+      </ul>
+    </div>
+    
+    <div class="section">
+      <h2>Items & Inventory</h2>
+      <p>You can trade 8 different items:</p>
+      <ul>
+        <li>LSD</li>
+        <li>Weed</li>
+        <li>Cocaine</li>
+        <li>MDMA</li>
+        <li>Fake Passports</li>
+        <li>Hacked Accounts</li>
+        <li>Credit Cards</li>
+        <li>Stolen Files</li>
+      </ul>
+      <p>Your inventory is limited to 20 items total. The app tracks purchase prices for each item.</p>
+    </div>
+    
+    <div class="section">
+      <h2>Special Items</h2>
+      <p><span class="highlight">Glock</span> - You can buy a Glock for 20 BTC. It protects you from certain negative events.</p>
+    </div>
+    
+    <div class="section">
+      <h2>Event Cards</h2>
+      <p>Event cards can have various effects:</p>
+      <ul>
+        <li>Gain or lose BTC</li>
+        <li>Gain or lose inventory items</li>
+        <li>Modify market prices</li>
+        <li>Restrict buying or selling</li>
+        <li>Ban specific products</li>
+      </ul>
+      <p>Some cards require a dice roll to determine the outcome.</p>
+    </div>
+    
+    <div class="section">
+      <h2>Game End</h2>
+      <p>After 10 cycles, your final score is your BTC total. You can submit your score to the leaderboard.</p>
+      <p>Having a Glock at the end gives you a special mention on the leaderboard.</p>
+    </div>
+  </div>
+  
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="companion.html">Game Companion</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="submit.html">Submit Score</a>
+  </div>
+  
+  <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
+  
   <script>
-    function activateSounds() {
-      document.getElementById("crackles").play();
-      document.body.onclick = null;
+    // Play sound on link clicks
+    function playBleep() {
+      const sound = document.getElementById('bleep');
+      sound.currentTime = 0;
+      sound.play().catch(e => console.log("Audio play failed:", e));
     }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      const links = document.querySelectorAll('a');
+      links.forEach(link => {
+        link.addEventListener('click', playBleep);
+      });
+    });
   </script>
-
 </body>
 </html>
