@@ -1,4 +1,4 @@
-// Silk Ave - Modified script.js with guided tutorial flashing
+// Silk Ave - Modified script.js with guided highlighting
 
 let btc = 100
 let glock = false
@@ -14,7 +14,6 @@ const inventoryLimit = 20
 
 // Game flow state tracking
 let gameFlowState = "enterEventCode"
-let tutorialActive = true
 
 const items = ["lsd", "weed", "cocaine", "mdma", "passports", "accounts", "ccs", "files"]
 const itemNames = {
@@ -54,11 +53,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
-  // Start the tutorial
-  if (tutorialActive) {
-    updateGameFlowHighlight()
+  // Start the guided highlighting
+  updateGameFlowHighlight()
+
+  // Play bleep sound when buttons are clicked
+  try {
+    const buttons = document.querySelectorAll("button")
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        playSound("bleep")
+      })
+    })
+  } catch (e) {
+    console.error("Error setting up sound:", e)
   }
 })
+
+// Play a sound
+function playSound(soundId) {
+  try {
+    const sound = document.getElementById(soundId)
+    if (sound) {
+      sound.currentTime = 0
+      sound.play().catch((e) => console.log("Audio play failed:", e))
+    }
+  } catch (e) {
+    console.error("Error playing sound:", e)
+  }
+}
 
 // Update the highlighted element based on game flow state
 function updateGameFlowHighlight() {
@@ -95,8 +117,10 @@ function updateGameFlowHighlight() {
       showHint("Apply the burner deal")
       break
     case "executeTransactions":
+      // Highlight both the transaction section and execute button
+      highlightElement("transactionSection")
       highlightElement("executeTransactionsBtn")
-      showHint("Execute your buy/sell transactions")
+      showHint("Enter buy/sell quantities and execute transactions")
       break
     case "advanceCycle":
       highlightElement("advanceCycleBtn")
@@ -135,6 +159,8 @@ function highlightElement(elementId) {
 
 // Event card application
 function applyEvent() {
+  playSound("bleep")
+
   eventCode = document.getElementById("eventCode").value.trim()
 
   // Validate event code
@@ -169,13 +195,13 @@ function applyEvent() {
   }
 
   // Update the highlighted element
-  if (tutorialActive) {
-    updateGameFlowHighlight()
-  }
+  updateGameFlowHighlight()
 }
 
 // Roll dice for card effect
 function rollCardDice() {
+  playSound("bleep")
+
   if (!isRollCard || eventCode === "") return
 
   const result = Math.ceil(Math.random() * 6)
@@ -188,9 +214,7 @@ function rollCardDice() {
   gameFlowState = "rollMarket"
 
   // Update the highlighted element
-  if (tutorialActive) {
-    updateGameFlowHighlight()
-  }
+  updateGameFlowHighlight()
 }
 
 // Reset event effects
@@ -442,6 +466,8 @@ function runCardEffect(code, roll) {
 
 // Roll market prices
 function rollMarket() {
+  playSound("bleep")
+
   // Reset prices from any previous effects
   currentPrices = {}
 
@@ -470,13 +496,13 @@ function rollMarket() {
   gameFlowState = "selectBurner"
 
   // Update the highlighted element
-  if (tutorialActive) {
-    updateGameFlowHighlight()
-  }
+  updateGameFlowHighlight()
 }
 
 // Apply burner deal
 function applyBurnerDeal() {
+  playSound("bleep")
+
   const burnerItem = document.getElementById("burnerDeal").value
 
   if (!burnerItem) {
@@ -504,9 +530,7 @@ function applyBurnerDeal() {
   gameFlowState = "executeTransactions"
 
   // Update the highlighted element
-  if (tutorialActive) {
-    updateGameFlowHighlight()
-  }
+  updateGameFlowHighlight()
 }
 
 // Update market table with current prices
@@ -586,6 +610,8 @@ function populateTransactionTable() {
 
 // Execute buy/sell transactions
 function executeTransactions() {
+  playSound("bleep")
+
   if (blockBuying && blockSelling) {
     log("-- Cannot buy or sell this round due to event effect.")
     return
@@ -691,13 +717,13 @@ function executeTransactions() {
   gameFlowState = "advanceCycle"
 
   // Update the highlighted element
-  if (tutorialActive) {
-    updateGameFlowHighlight()
-  }
+  updateGameFlowHighlight()
 }
 
 // Buy a Glock
 function buyGlock() {
+  playSound("bleep")
+
   if (glock) {
     log("-- You already have a Glock.")
     return
@@ -717,6 +743,8 @@ function buyGlock() {
 
 // Advance to next cycle
 function advanceCycle() {
+  playSound("bleep")
+
   if (cycle >= 10) {
     log("-- Game over! Final score: " + btc + " BTC")
 
@@ -756,9 +784,7 @@ function advanceCycle() {
   gameFlowState = "enterEventCode"
 
   // Update the highlighted element
-  if (tutorialActive) {
-    updateGameFlowHighlight()
-  }
+  updateGameFlowHighlight()
 }
 
 // Helper Functions
@@ -1064,23 +1090,5 @@ function populateMarketTable() {
     row.appendChild(priceCell)
 
     tableBody.appendChild(row)
-  }
-}
-
-// Toggle tutorial mode
-function toggleTutorial() {
-  tutorialActive = !tutorialActive
-
-  if (tutorialActive) {
-    updateGameFlowHighlight()
-    log("-- Tutorial mode enabled.")
-  } else {
-    // Remove all highlights
-    const allElements = document.querySelectorAll(".highlight-pulse")
-    allElements.forEach((el) => {
-      el.classList.remove("highlight-pulse")
-    })
-    hideHint()
-    log("-- Tutorial mode disabled.")
   }
 }

@@ -21,6 +21,7 @@
       border: 1px solid #0f0;
       padding: 0.3rem;
       font-family: monospace;
+      cursor: pointer;
     }
     table {
       width: 100%;
@@ -110,10 +111,6 @@
   </style>
 </head>
 <body>
-  <div class="tutorial-toggle" onclick="toggleTutorial()">
-    <span id="tutorialStatus">Disable Tutorial</span>
-  </div>
-
   <div style="position: absolute; top: 1rem; right: 2rem;">
     <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
   </div>
@@ -169,14 +166,14 @@
     </table>
   </div>
 
-  <div class="inventory">
+  <div id="transactionSection" class="inventory">
     <h3>Buy/Sell</h3>
     <table id="transactionTable">
       <thead><tr><th>Item</th><th>Buy</th><th>Sell</th></tr></thead>
       <tbody></tbody>
     </table>
     <button id="executeTransactionsBtn" onclick="executeTransactions()">Execute Transactions</button>
-    <button onclick="buyGlock()">Buy Glock (20 BTC)</button>
+    <button id="buyGlockBtn" onclick="buyGlock()">Buy Glock (20 BTC)</button>
   </div>
 
   <div class="log" id="log"></div>
@@ -200,22 +197,33 @@
   </div>
 
   <!-- Sound effects -->
-  <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
+  <audio id="bleep" src="sounds/bleep.wav" preload="auto"></audio>
+  <audio id="typing" src="sounds/typing.wav" preload="auto" loop></audio>
+  <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop volume="0.3"></audio>
 
   <script src="script.js"></script>
   <script>
     // Play sound on button clicks
     function playBleep() {
       const sound = document.getElementById('bleep');
-      sound.currentTime = 0;
-      sound.play().catch(e => console.log("Audio play failed:", e));
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Audio play failed:", e));
+      }
     }
     
     // Add sound to all buttons
     document.addEventListener('DOMContentLoaded', function() {
+      // Add click sound to all buttons
       const buttons = document.querySelectorAll('button');
       buttons.forEach(button => {
         button.addEventListener('click', playBleep);
+      });
+      
+      // Also add to select elements when they change
+      const selects = document.querySelectorAll('select');
+      selects.forEach(select => {
+        select.addEventListener('change', playBleep);
       });
     });
   </script>
