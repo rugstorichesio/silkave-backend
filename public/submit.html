@@ -1,59 +1,199 @@
-// Submit score functionality for Silk Ave
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Check for URL parameters (from game)
-  const urlParams = new URLSearchParams(window.location.search)
-  const btcParam = urlParams.get("btc")
-  const glockParam = urlParams.get("glock")
-
-  // If parameters exist, pre-fill the form
-  if (btcParam) {
-    document.getElementById("btc").value = btcParam
-  }
-
-  if (glockParam) {
-    const glockSelect = document.getElementById("glock")
-    for (let i = 0; i < glockSelect.options.length; i++) {
-      if (glockSelect.options[i].value === glockParam) {
-        glockSelect.selectedIndex = i
-        break
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Silk Ave - Submit Score</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 2rem;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    .submit-form {
+      max-width: 600px;
+      margin: 0 auto;
+      border: 1px solid #0f0;
+      padding: 2rem;
+    }
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.5rem;
+      background: #000;
+      color: #0f0;
+      border: 1px solid #0f0;
+      font-family: monospace;
+    }
+    button {
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: all 0.3s ease;
+    }
+    button:hover {
+      background: #0f0;
+      color: #000;
+    }
+    .nav-links {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .nav-links a {
+      color: #0f0;
+      text-decoration: underline;
+      margin: 0 1rem;
+    }
+    .hidden {
+      display: none;
+    }
+    .terminal-effect {
+      position: relative;
+      overflow: hidden;
+    }
+    .terminal-effect::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: #0f0;
+      animation: scan 2s linear infinite;
+    }
+    @keyframes scan {
+      0% {
+        top: 0;
+      }
+      100% {
+        top: 100%;
       }
     }
-  }
+    .success-message {
+      text-align: center;
+      padding: 1rem;
+      border: 1px dashed #0f0;
+      margin-top: 2rem;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <div style="position: absolute; top: 1rem; right: 2rem;">
+    <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
+  </div>
 
-  // Generate a unique game hash
-  document.getElementById("hash").value = generateGameHash()
-})
-
-// Generate a unique game hash
-function generateGameHash() {
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-  const hashLength = 16
-  let hash = ""
-
-  for (let i = 0; i < hashLength; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length)
-    hash += characters.charAt(randomIndex)
-  }
-
-  return hash
-}
-
-// Play sound effects
-function playBleep() {
-  const bleep = document.getElementById("bleep")
-  if (bleep) {
-    bleep.currentTime = 0
-    bleep.play()
-  }
-}
-
-function activateSounds() {
-  const typing = document.getElementById("typing")
-  const crackles = document.getElementById("crackles")
-
-  if (typing) typing.play()
-  if (crackles) crackles.play()
-
-  document.body.onclick = null
-}
+  <h1>Submit Your Score</h1>
+  
+  <div class="submit-form terminal-effect">
+    <form id="scoreForm">
+      <div class="form-group">
+        <label for="alias">Dealer Alias:</label>
+        <input type="text" id="alias" name="alias" required maxlength="20" placeholder="Your alias">
+      </div>
+      
+      <div class="form-group">
+        <label for="btc">Final BTC:</label>
+        <input type="number" id="btc" name="btc" required min="0" placeholder="Your final BTC">
+      </div>
+      
+      <div class="form-group">
+        <label for="glock">Glock Status:</label>
+        <select id="glock" name="glock" required>
+          <option value="No">No Glock</option>
+          <option value="Yes">Had Glock</option>
+        </select>
+      </div>
+      
+      <div class="form-group hidden">
+        <label for="hash">Game Hash:</label>
+        <input type="text" id="hash" name="hash" readonly>
+      </div>
+      
+      <button type="button" onclick="submitScore()">Submit Score</button>
+    </form>
+    
+    <div id="successMessage" class="success-message hidden">
+      Score submitted successfully! Check the leaderboard to see your ranking.
+    </div>
+  </div>
+  
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="companion.html">Game Companion</a>
+    <a href="leaderboard.html">Leaderboard</a>
+  </div>
+  
+  <!-- Sound effects -->
+  <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
+  <audio id="typing" src="https://assets.mixkit.co/sfx/preview/mixkit-keyboard-typing-1386.mp3" preload="auto" loop></audio>
+  <audio id="crackles" src="https://assets.mixkit.co/sfx/preview/mixkit-radio-static-noise-2556.mp3" preload="auto" loop volume="0.3"></audio>
+  
+  <script>
+    // All submission functionality is handled inline
+    // No external submit.js file is needed
+    
+    // Activate sound effects on first click
+    document.body.onclick = activateSounds;
+    
+    // Submit score function
+    function submitScore() {
+      playBleep();
+      
+      const form = document.getElementById('scoreForm');
+      const alias = document.getElementById('alias').value;
+      const btc = document.getElementById('btc').value;
+      const glock = document.getElementById('glock').value;
+      const hash = document.getElementById('hash').value;
+      
+      if (!alias || !btc) {
+        alert('Please fill in all required fields');
+        return;
+      }
+      
+      // Here you would normally send the data to your backend
+      // For demo purposes, we'll just show a success message
+      form.style.display = 'none';
+      document.getElementById('successMessage').classList.remove('hidden');
+      
+      // In a real implementation, you would use fetch to send data to your backend:
+      /*
+      fetch('https://silkave-backend.onrender.com/scores', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          alias: alias,
+          btc: parseInt(btc),
+          glock: glock,
+          hash: hash
+        }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        form.style.display = 'none';
+        document.getElementById('successMessage').classList.remove('hidden');
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        alert('Error submitting score. Please try again.');
+      });
+      */
+    }
+  </script>
+</body>
+</html>
