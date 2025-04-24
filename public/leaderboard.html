@@ -1,100 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Leaderboard | Silk Ave</title>
-  <link rel="stylesheet" href="styles.css" />
-  <style>
-    @keyframes flicker {
-      from { opacity: 1; }
-      to { opacity: 0.97; }
-    }
+// Leaderboard functionality for Silk Ave
 
-    body {
-      font-family: monospace;
-      background-color: #000;
-      color: #0f0;
-      padding: 2rem;
-      animation: flicker 0.2s infinite alternate;
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  fetchScores()
+})
 
-    h1 {
-      text-align: center;
-      font-size: 1.8rem;
-      margin-bottom: 2rem;
-    }
+// Fetch scores from the backend
+function fetchScores() {
+  // Show loading state
+  const scoreList = document.getElementById("scoreList")
+  scoreList.innerHTML = "<li>Loading scores...</li>"
 
-    ul {
-      list-style: none;
-      padding: 0;
-      max-width: 600px;
-      margin: 0 auto;
-      text-align: left;
-    }
+  // Try to fetch from the backend
+  fetch("https://silkave-backend.onrender.com/scores")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok")
+      }
+      return response.json()
+    })
+    .then((data) => {
+      // Clear loading message
+      scoreList.innerHTML = ""
 
-    li {
-      padding: 0.5rem;
-      border-bottom: 1px solid #0f0;
-    }
+      // Check if we have scores
+      if (data.length === 0) {
+        scoreList.innerHTML = "<li>No scores yet. Be the first.</li>"
+        return
+      }
 
-    .back-link {
-      display: block;
-      text-align: center;
-      margin-top: 2rem;
-      color: #0f0;
-      text-decoration: underline;
-    }
+      // Sort scores by BTC (highest first)
+      data.sort((a, b) => b.btc - a.btc)
 
-    .back-link:hover {
-      color: #fff;
-    }
+      // Display scores
+      data.forEach((entry, index) => {
+        const item = document.createElement("li")
+        item.innerHTML = `<strong>${index + 1}.</strong> ${entry.alias} – ${entry.btc} BTC – Glock: ${entry.glock}`
 
-    audio {
-      display: none;
-    }
-  </style>
-</head>
-<body onclick="activateSounds()">
-
-  <h1>▓▓▓ Silk Ave Leaderboard ▓▓▓</h1>
-
-  <ul id="scoreList">
-    <li>Loading scores...</li>
-  </ul>
-
-  <a href="index.html" class="back-link">← Back to Home</a>
-
-  <audio id="crackles" src="sounds/crackles.wav" preload="auto" loop></audio>
-  <script>
-    const crackles = document.getElementById("crackles");
-    function activateSounds() {
-      crackles.play();
-      document.body.onclick = null;
-    }
-
-    fetch('/scores')
-      .then(res => res.json())
-      .then(data => {
-        const list = document.getElementById('scoreList');
-        list.innerHTML = '';
-
-        if (data.length === 0) {
-          list.innerHTML = '<li>No scores yet. Be the first.</li>';
-          return;
+        // Highlight top 3
+        if (index < 3) {
+          item.style.color = "#0f0"
+          item.style.fontWeight = "bold"
         }
 
-        data.reverse().forEach(entry => {
-          const item = document.createElement('li');
-          item.textContent = `${entry.alias} – ${entry.btc} BTC – Glock: ${entry.glock}`;
-          list.appendChild(item);
-        });
+        scoreList.appendChild(item)
       })
-      .catch(err => {
-        console.error('Failed to fetch scores:', err);
-        document.getElementById('scoreList').innerHTML = '<li>Failed to load scores.</li>';
-      });
-  </script>
-
-</body>
-</html>
+    })
+    .catch((error) => {
+      console.error("Error fetching scores:", error)
+      scoreList.innerHTML = "<li>Failed to load scores. Please try again later.</li>"
+    })
+}
