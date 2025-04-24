@@ -1,151 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Silk Ave Companion</title>
-  <style>
-    body {
-      background-color: #111;
-      color: #0f0;
-      font-family: monospace;
-      padding: 2rem;
-    }
-    h1, h2, h3 {
-      text-align: center;
-    }
-    input, select, button {
-      margin: 0.3rem;
-      background: #000;
-      color: #0f0;
-      border: 1px solid #0f0;
-      padding: 0.3rem;
-      font-family: monospace;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-    th, td {
-      border: 1px solid #0f0;
-      padding: 0.5rem;
-      text-align: center;
-    }
-    .log, .inventory-status {
-      white-space: pre-line;
-      background: #000;
-      border: 1px solid #0f0;
-      padding: 1rem;
-      margin-top: 2rem;
-    }
-    .bottom-bar {
-      text-align: center;
-      margin-top: 2rem;
-      font-weight: bold;
-      font-size: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid #0f0;
-    }
-    .card-result {
-      margin-top: 0.5rem;
-      font-weight: bold;
-    }
-    .event-section {
-      border: 1px solid #0f0;
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
-    .event-title {
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 1rem;
-      font-size: 1.2rem;
-    }
-    .event-input {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-  </style>
-</head>
-<body>
-  <div style="position: absolute; top: 1rem; right: 2rem;">
-    <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
-  </div>
+// Submit score functionality for Silk Ave
 
-  <h1>Silk Ave Game Companion</h1>
-  <div>
-    <h2>Cycle: <span id="cycle">1</span> / 10</h2>
-    <h3>BTC: <span id="btc">100</span> | Glock: <span id="glock">No</span> | Inventory: <span id="invCount">0</span>/20</h3>
-  </div>
+document.addEventListener("DOMContentLoaded", () => {
+  // Check for URL parameters (from game)
+  const urlParams = new URLSearchParams(window.location.search)
+  const btcParam = urlParams.get("btc")
+  const glockParam = urlParams.get("glock")
 
-  <div class="event-section">
-    <h3 class="event-title">Event Card</h3>
-    <div class="event-input">
-      <label>Event Card Code: <input type="text" id="eventCode" placeholder="Enter code"></label>
-      <button onclick="applyEvent()">Apply Event</button>
-    </div>
-    <div class="card-result">
-      <button id="rollCardBtn" onclick="rollCardDice()" style="display: none;">🎲 Roll for Card</button>
-      <div id="cardDiceResult"></div>
-    </div>
-  </div>
+  // If parameters exist, pre-fill the form
+  if (btcParam) {
+    document.getElementById("btc").value = btcParam
+  }
 
-  <div class="actions">
-    <h3>Market Setup</h3>
-    <button onclick="rollMarket()">🎲 Roll Market Prices</button>
-    <span id="marketDiceResult"></span>
-    <br>
-    <label>Burner Deal Item:
-      <select id="burnerDeal">
-        <option value="">--Select--</option>
-        <option value="lsd">LSD</option>
-        <option value="weed">Weed</option>
-        <option value="cocaine">Cocaine</option>
-        <option value="mdma">MDMA</option>
-        <option value="passports">Fake Passports</option>
-        <option value="accounts">Hacked Accounts</option>
-        <option value="ccs">Credit Cards</option>
-        <option value="files">Stolen Files</option>
-      </select>
-    </label>
-    <button onclick="applyBurnerDeal()">Apply Burner Deal</button>
-  </div>
+  if (glockParam) {
+    const glockSelect = document.getElementById("glock")
+    for (let i = 0; i < glockSelect.options.length; i++) {
+      if (glockSelect.options[i].value === glockParam) {
+        glockSelect.selectedIndex = i
+        break
+      }
+    }
+  }
 
-  <div class="market">
-    <h3>Market Prices</h3>
-    <table id="marketTable">
-      <thead><tr><th>Item</th><th>Price</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  // Generate a unique game hash
+  document.getElementById("hash").value = generateGameHash()
+})
 
-  <div class="inventory">
-    <h3>Buy/Sell</h3>
-    <table id="transactionTable">
-      <thead><tr><th>Item</th><th>Buy</th><th>Sell</th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <button onclick="executeTransactions()">Execute Transactions</button>
-    <button onclick="buyGlock()">Buy Glock (20 BTC)</button>
-  </div>
+// Generate a unique game hash
+function generateGameHash() {
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  const hashLength = 16
+  let hash = ""
 
-  <div class="log" id="log"></div>
-  <div class="inventory-status" id="inventoryStatus"></div>
+  for (let i = 0; i < hashLength; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length)
+    hash += characters.charAt(randomIndex)
+  }
 
-  <div style="text-align: center; margin-top: 2rem;">
-    <button onclick="advanceCycle()">Advance to Next Cycle</button>
-  </div>
+  return hash
+}
 
-  <div class="bottom-bar">
-    Cycle: <span id="cycleBottom">1</span> / 10 |
-    BTC: <span id="btcBottom">100</span> |
-    Glock: <span id="glockBottom">No</span> |
-    Inventory: <span id="invCountBottom">0</span>/20
-  </div>
+// Play sound effects
+function playBleep() {
+  const bleep = document.getElementById("bleep")
+  if (bleep) {
+    bleep.currentTime = 0
+    bleep.play()
+  }
+}
 
-  <script src="script.js"></script>
-</body>
-</html>
+function activateSounds() {
+  const typing = document.getElementById("typing")
+  const crackles = document.getElementById("crackles")
+
+  if (typing) typing.play()
+  if (crackles) crackles.play()
+
+  document.body.onclick = null
+}
