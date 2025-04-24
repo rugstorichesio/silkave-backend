@@ -63,6 +63,18 @@
         visibility: hidden;
       }
     }
+    .active-glow {
+      animation: glow-animation 2s ease-in-out infinite;
+      display: inline-block;
+    }
+    @keyframes glow-animation {
+      0%, 100% {
+        text-shadow: 0 0 2px #0f0;
+      }
+      50% {
+        text-shadow: 0 0 8px #0f0, 0 0 15px #0f0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -118,7 +130,7 @@
       const lines = [
         '> SYSTEM READY',
         '> DARK WEB ACCESS GRANTED',
-        '> NODE: SILK AVE [ACTIVE]',
+        '> NODE: SILK AVE <span class="active-glow">[ACTIVE]</span>',
         '> IP MASKED | ENCRYPTION LOCKED',
         '> BEGIN OPERATION'
       ];
