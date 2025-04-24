@@ -101,12 +101,24 @@
       text-decoration: underline;
       margin: 0 1rem;
     }
-    .tutorial-toggle {
-      position: absolute;
-      top: 1rem;
-      left: 2rem;
-      cursor: pointer;
-      text-decoration: underline;
+    .active-glow {
+      animation: activeGlow 1.5s infinite;
+      font-weight: bold;
+      text-shadow: 0 0 5px #0f0;
+    }
+    @keyframes activeGlow {
+      0% {
+        text-shadow: 0 0 5px #0f0;
+        color: #0f0;
+      }
+      50% {
+        text-shadow: 0 0 10px #0f0, 0 0 15px #0f0, 0 0 20px #0f0;
+        color: #fff;
+      }
+      100% {
+        text-shadow: 0 0 5px #0f0;
+        color: #0f0;
+      }
     }
   </style>
 </head>

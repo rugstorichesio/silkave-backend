@@ -1,4 +1,4 @@
-// Silk Ave - Modified script.js with guided highlighting
+// Silk Ave - Companion.js with guided highlighting
 
 let btc = 100
 let glock = false
@@ -41,9 +41,11 @@ const priceMatrix = {
 
 // Initialize the game when the page loads
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("Game initializing...")
   updateStatusBars()
   updateInventoryDisplay()
   populateMarketTable()
+  populateTransactionTable()
   log("Welcome to Silk Ave. You start with 100 BTC. Good luck.")
 
   // Add event listener for event code input
@@ -96,6 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error parsing game data:", e)
     }
   }
+
+  console.log("Game initialization complete")
 })
 
 // Play a sound
@@ -113,6 +117,8 @@ function playSound(soundId) {
 
 // Update the highlighted element based on game flow state
 function updateGameFlowHighlight() {
+  console.log("Updating highlight for state:", gameFlowState)
+
   // Remove highlight from all elements
   const allElements = document.querySelectorAll(".highlight-pulse")
   allElements.forEach((el) => {
@@ -180,14 +186,19 @@ function hideHint() {
 
 // Highlight an element with a pulsing effect
 function highlightElement(elementId) {
+  console.log("Highlighting element:", elementId)
   const element = document.getElementById(elementId)
   if (element) {
     element.classList.add("highlight-pulse")
+    console.log("Added highlight-pulse class to", elementId)
+  } else {
+    console.error("Element not found:", elementId)
   }
 }
 
 // Event card application
 function applyEvent() {
+  console.log("applyEvent function called")
   playSound("bleep")
 
   // Check if an event card has already been applied this cycle
@@ -247,6 +258,7 @@ function applyEvent() {
 
 // Roll dice for card effect
 function rollCardDice() {
+  console.log("rollCardDice function called")
   playSound("bleep")
 
   if (!isRollCard || eventCode === "") return
@@ -524,6 +536,7 @@ function runCardEffect(code, roll) {
 
 // Roll market prices
 function rollMarket() {
+  console.log("rollMarket function called")
   playSound("bleep")
 
   // Reset prices from any previous effects
@@ -567,6 +580,7 @@ function rollMarket() {
 
 // Apply burner deal
 function applyBurnerDeal() {
+  console.log("applyBurnerDeal function called")
   playSound("bleep")
 
   const burnerItem = document.getElementById("burnerDeal").value
@@ -685,6 +699,7 @@ function populateTransactionTable() {
 
 // Execute buy/sell transactions
 function executeTransactions() {
+  console.log("executeTransactions function called")
   playSound("bleep")
 
   if (blockBuying && blockSelling) {
@@ -698,8 +713,8 @@ function executeTransactions() {
   let btcEarned = 0
   const transactionDetails = {
     bought: {},
-    sold: {}
-  };
+    sold: {},
+  }
 
   // Process sells first (to free up inventory space)
   if (!blockSelling) {
@@ -720,8 +735,8 @@ function executeTransactions() {
         transactionDetails.sold[item] = {
           amount: sellAmount,
           price: currentPrices[item],
-          total: sellAmount * currentPrices[item]
-        };
+          total: sellAmount * currentPrices[item],
+        }
 
         // Remove items from inventory and add BTC
         for (let i = 0; i < sellAmount; i++) {
@@ -755,11 +770,6 @@ function executeTransactions() {
       if (buyAmount > 0) {
         const cost = buyAmount * currentPrices[item]
 
-          || 0
-
-      if (buyAmount > 0) {
-        const cost = buyAmount * currentPrices[item]
-
         // Check if player has enough BTC
         if (cost > btc) {
           log(`-- Error: Cannot afford ${buyAmount} ${itemNames[item]}. Need ${cost} BTC, have ${btc} BTC.`)
@@ -779,8 +789,8 @@ function executeTransactions() {
         transactionDetails.bought[item] = {
           amount: buyAmount,
           price: currentPrices[item],
-          total: cost
-        };
+          total: cost,
+        }
 
         // Add items to inventory and subtract BTC
         if (!inventory[item]) inventory[item] = []
@@ -804,7 +814,7 @@ function executeTransactions() {
   // Log summary
   if (totalBought > 0 || totalSold > 0) {
     log(`-- Transaction complete: Bought ${totalBought}, Sold ${totalSold}, Net BTC change: ${btcEarned - btcSpent}`)
-    
+
     // Record this action in game history
     gameHistory.push({
       action: "transactions",
@@ -814,8 +824,8 @@ function executeTransactions() {
       btcSpent: btcSpent,
       btcEarned: btcEarned,
       netChange: btcEarned - btcSpent,
-      newBtcTotal: btc
-    });
+      newBtcTotal: btc,
+    })
   } else {
     log("-- No transactions executed.")
   }
@@ -832,6 +842,7 @@ function executeTransactions() {
 
 // Buy a Glock
 function buyGlock() {
+  console.log("buyGlock function called")
   playSound("bleep")
 
   if (glock) {
@@ -847,46 +858,47 @@ function buyGlock() {
   btc -= 20
   glock = true
   log("-- Purchased a Glock for 20 BTC.")
-  
+
   // Record this action in game history
   gameHistory.push({
     action: "buyGlock",
     cycle: cycle,
     cost: 20,
-    newBtcTotal: btc
-  });
+    newBtcTotal: btc,
+  })
 
   updateStatusBars()
 }
 
 // Advance to next cycle
 function advanceCycle() {
+  console.log("advanceCycle function called")
   playSound("bleep")
 
   if (cycle >= 10) {
     log("-- Game over! Final score: " + btc + " BTC")
-    
+
     // Record final game state
     gameHistory.push({
       action: "gameComplete",
       finalBtc: btc,
       hasGlock: glock,
-      totalCycles: cycle
-    });
+      totalCycles: cycle,
+    })
 
     // Generate a game verification hash
-    const gameHash = generateGameHash();
-    
+    const gameHash = generateGameHash()
+
     // Create game data for submission
     const gameData = {
       btc: btc,
       glock: glock,
       gameHistory: gameHistory,
-      gameHash: gameHash
-    };
-    
+      gameHash: gameHash,
+    }
+
     // Encode game data for URL
-    const encodedGameData = btoa(JSON.stringify(gameData));
+    const encodedGameData = btoa(JSON.stringify(gameData))
 
     // Show game over message
     const gameOver = confirm(
@@ -902,15 +914,15 @@ function advanceCycle() {
   }
 
   cycle++
-  
+
   // Record this action in game history
   gameHistory.push({
     action: "advanceCycle",
     fromCycle: cycle - 1,
     toCycle: cycle,
     btc: btc,
-    inventory: JSON.parse(JSON.stringify(inventory))
-  });
+    inventory: JSON.parse(JSON.stringify(inventory)),
+  })
 
   // Reset event card applied flag
   eventCardApplied = false
@@ -942,15 +954,15 @@ function advanceCycle() {
 // Generate a game verification hash
 function generateGameHash() {
   // Create a simple hash from game history
-  const hashInput = JSON.stringify(gameHistory) + btc + (glock ? "1" : "0") + cycle;
-  let hash = 0;
+  const hashInput = JSON.stringify(gameHistory) + btc + (glock ? "1" : "0") + cycle
+  let hash = 0
   for (let i = 0; i < hashInput.length; i++) {
-    const char = hashInput.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+    const char = hashInput.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32bit integer
   }
   // Convert to hex string and ensure it's positive
-  return Math.abs(hash).toString(16);
+  return Math.abs(hash).toString(16)
 }
 
 // Helper Functions
