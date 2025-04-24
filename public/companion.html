@@ -203,10 +203,11 @@
 
   <script src="script.js"></script>
   <script>
-    // Play sound on button clicks
+    // Play sound on button clicks with reduced volume
     function playBleep() {
       const sound = document.getElementById('bleep');
       if (sound) {
+        sound.volume = 0.5; // Set volume to 50%
         sound.currentTime = 0;
         sound.play().catch(e => console.log("Audio play failed:", e));
       }

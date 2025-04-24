@@ -112,22 +112,41 @@
     bootText.style.marginBottom = '1rem';
     description.prepend(bootText);
 
-    // Reveal paragraphs in sequence
+    // Reveal paragraphs in sequence with slower timing
     setTimeout(() => {
-      bootText.innerHTML += '<br>> SYSTEM READY<br>> DARK WEB ACCESS GRANTED<br>> NODE: SILK AVE [ACTIVE]<br>> IP MASKED | ENCRYPTION LOCKED<br>> BEGIN OPERATION';
+      // Add each line with a delay to simulate loading
+      const lines = [
+        '> SYSTEM READY',
+        '> DARK WEB ACCESS GRANTED',
+        '> NODE: SILK AVE [ACTIVE]',
+        '> IP MASKED | ENCRYPTION LOCKED',
+        '> BEGIN OPERATION'
+      ];
       
-      let i = 0;
-      const revealParagraph = () => {
-        if (i < paragraphs.length) {
-          paragraphs[i].style.opacity = '1';
-          paragraphs[i].style.transition = 'opacity 0.3s';
-          i++;
-          setTimeout(revealParagraph, 400); // Faster reveal
+      let lineIndex = 0;
+      const addLine = () => {
+        if (lineIndex < lines.length) {
+          bootText.innerHTML += '<br>' + lines[lineIndex];
+          lineIndex++;
+          setTimeout(addLine, 400); // Slower line-by-line reveal
+        } else {
+          // After all lines are added, reveal paragraphs
+          let i = 0;
+          const revealParagraph = () => {
+            if (i < paragraphs.length) {
+              paragraphs[i].style.opacity = '1';
+              paragraphs[i].style.transition = 'opacity 0.5s';
+              i++;
+              setTimeout(revealParagraph, 500); // Slower paragraph reveal
+            }
+          };
+          
+          setTimeout(revealParagraph, 600);
         }
       };
       
-      setTimeout(revealParagraph, 300);
-    }, 800);
+      setTimeout(addLine, 600);
+    }, 1200); // Longer initial delay
   });
 </script>
 </body>

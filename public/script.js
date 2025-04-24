@@ -11,6 +11,7 @@ let blockBuying = false
 let blockSelling = false
 let bannedItem = null
 const inventoryLimit = 20
+let eventCardApplied = false
 
 // Game flow state tracking
 let gameFlowState = "enterEventCode"
@@ -161,6 +162,12 @@ function highlightElement(elementId) {
 function applyEvent() {
   playSound("bleep")
 
+  // Check if an event card has already been applied this cycle
+  if (eventCardApplied) {
+    log("-- You've already applied an event card this cycle. Advance to the next cycle to apply another.")
+    return
+  }
+
   eventCode = document.getElementById("eventCode").value.trim()
 
   // Validate event code
@@ -178,6 +185,9 @@ function applyEvent() {
   document.getElementById("cardDiceResult").textContent = ""
 
   log(`-- Event code ${eventCode} applied.`)
+
+  // Mark that an event card has been applied this cycle
+  eventCardApplied = true
 
   // If not a roll card, apply effect immediately
   if (!isRollCard) {
@@ -762,6 +772,9 @@ function advanceCycle() {
   }
 
   cycle++
+
+  // Reset event card applied flag
+  eventCardApplied = false
 
   // Reset event effects
   resetEventEffects()
