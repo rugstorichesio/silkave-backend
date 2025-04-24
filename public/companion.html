@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,16 +49,6 @@
       padding-top: 1rem;
       border-top: 1px solid #0f0;
     }
-    @media (max-width: 600px) {
-      input, select, button {
-        width: 100%;
-        box-sizing: border-box;
-        font-size: 1rem;
-      }
-      table {
-        font-size: 0.9rem;
-      }
-    }
   </style>
 </head>
 <body>
@@ -76,7 +67,7 @@
     <label>Event Card Code: <input type="text" id="eventCode"></label>
     <button onclick="applyEvent()">Apply Event</button>
     <br>
-    <button onclick="rollCardDice()">🎲 Roll for Card</button>
+    <button id="rollCardBtn" onclick="rollCardDice()" style="display: none;">🎲 Roll for Card</button>
     <span id="cardDiceResult"></span>
     <br>
     <button onclick="rollMarket()">🎲 Roll Market Prices</button>
@@ -101,9 +92,7 @@
   <div class="market">
     <h3>Market Prices</h3>
     <table id="marketTable">
-      <thead>
-        <tr><th>Item</th><th>Price</th></tr>
-      </thead>
+      <thead><tr><th>Item</th><th>Price</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -111,11 +100,7 @@
   <div class="inventory">
     <h3>Buy/Sell</h3>
     <table id="transactionTable">
-      <thead>
-        <tr>
-          <th>Item</th><th>Buy</th><th>Sell</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Item</th><th>Buy</th><th>Sell</th></tr></thead>
       <tbody></tbody>
     </table>
     <button onclick="executeTransactions()">Execute Transactions</button>
