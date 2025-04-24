@@ -12,6 +12,7 @@ let blockSelling = false
 let bannedItem = null
 const inventoryLimit = 20
 let eventCardApplied = false
+const gameHistory = [] // Track game actions for verification
 
 // Game flow state tracking
 let gameFlowState = "enterEventCode"
@@ -43,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
   updateStatusBars()
   updateInventoryDisplay()
   populateMarketTable()
-  populateTransactionTable()
   log("Welcome to Silk Ave. You start with 100 BTC. Good luck.")
 
   // Add event listener for event code input
@@ -67,6 +67,34 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   } catch (e) {
     console.error("Error setting up sound:", e)
+  }
+
+  // Check if we're coming from a game completion with score data
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.has("gameData")) {
+    try {
+      const gameData = JSON.parse(atob(urlParams.get("gameData")))
+      if (gameData && gameData.btc && gameData.gameHistory) {
+        // We have verified game data, auto-fill the form
+        document.getElementById("btc").value = gameData.btc
+        document.getElementById("glock").value = gameData.glock ? "Yes" : "No"
+        document.getElementById("gameHistory").value = JSON.stringify(gameData.gameHistory)
+
+        // Show a message about verified score
+        const form = document.getElementById("scoreForm")
+        if (form) {
+          const verifiedMsg = document.createElement("div")
+          verifiedMsg.className = "verified-score"
+          verifiedMsg.innerHTML = "✓ Verified score from completed game"
+          verifiedMsg.style.color = "#0f0"
+          verifiedMsg.style.marginBottom = "1rem"
+          verifiedMsg.style.textAlign = "center"
+          form.prepend(verifiedMsg)
+        }
+      }
+    } catch (e) {
+      console.error("Error parsing game data:", e)
+    }
   }
 })
 
@@ -186,6 +214,15 @@ function applyEvent() {
 
   log(`-- Event code ${eventCode} applied.`)
 
+  // Record this action in game history
+  gameHistory.push({
+    action: "applyEvent",
+    cycle: cycle,
+    eventCode: eventCode,
+    btc: btc,
+    inventory: JSON.parse(JSON.stringify(inventory)),
+  })
+
   // Mark that an event card has been applied this cycle
   eventCardApplied = true
 
@@ -219,6 +256,17 @@ function rollCardDice() {
 
   const outcome = runCardEffect(eventCode, result)
   document.getElementById("cardDiceResult").textContent += `\n✓ Outcome: ${outcome}`
+
+  // Record this action in game history
+  gameHistory.push({
+    action: "rollCard",
+    cycle: cycle,
+    eventCode: eventCode,
+    roll: result,
+    outcome: outcome,
+    btc: btc,
+    inventory: JSON.parse(JSON.stringify(inventory)),
+  })
 
   // Update game flow state
   gameFlowState = "rollMarket"
@@ -496,6 +544,14 @@ function rollMarket() {
 
   log("-- Market prices updated.")
 
+  // Record this action in game history
+  gameHistory.push({
+    action: "rollMarket",
+    cycle: cycle,
+    prices: JSON.parse(JSON.stringify(currentPrices)),
+    btc: btc,
+  })
+
   // Apply burner deal if one is selected
   const burnerItem = document.getElementById("burnerDeal").value
   if (burnerItem) {
@@ -535,6 +591,15 @@ function applyBurnerDeal() {
   updateMarketTable()
 
   log(`-- Burner deal applied: ${itemNames[burnerItem]} at ${currentPrices[burnerItem]} BTC (was ${originalPrice} BTC)`)
+
+  // Record this action in game history
+  gameHistory.push({
+    action: "burnerDeal",
+    cycle: cycle,
+    item: burnerItem,
+    originalPrice: originalPrice,
+    newPrice: currentPrices[burnerItem],
+  })
 
   // Update game flow state
   gameFlowState = "executeTransactions"
@@ -631,6 +696,10 @@ function executeTransactions() {
   let totalSold = 0
   let btcSpent = 0
   let btcEarned = 0
+  const transactionDetails = {
+    bought: {},
+    sold: {}
+  };
 
   // Process sells first (to free up inventory space)
   if (!blockSelling) {
@@ -646,6 +715,13 @@ function executeTransactions() {
           log(`-- Error: Cannot sell ${sellAmount} ${itemNames[item]}. You only have ${itemInventory.length}.`)
           continue
         }
+
+        // Track what was sold
+        transactionDetails.sold[item] = {
+          amount: sellAmount,
+          price: currentPrices[item],
+          total: sellAmount * currentPrices[item]
+        };
 
         // Remove items from inventory and add BTC
         for (let i = 0; i < sellAmount; i++) {
@@ -679,6 +755,11 @@ function executeTransactions() {
       if (buyAmount > 0) {
         const cost = buyAmount * currentPrices[item]
 
+          || 0
+
+      if (buyAmount > 0) {
+        const cost = buyAmount * currentPrices[item]
+
         // Check if player has enough BTC
         if (cost > btc) {
           log(`-- Error: Cannot afford ${buyAmount} ${itemNames[item]}. Need ${cost} BTC, have ${btc} BTC.`)
@@ -693,6 +774,13 @@ function executeTransactions() {
           )
           continue
         }
+
+        // Track what was bought
+        transactionDetails.bought[item] = {
+          amount: buyAmount,
+          price: currentPrices[item],
+          total: cost
+        };
 
         // Add items to inventory and subtract BTC
         if (!inventory[item]) inventory[item] = []
@@ -716,6 +804,18 @@ function executeTransactions() {
   // Log summary
   if (totalBought > 0 || totalSold > 0) {
     log(`-- Transaction complete: Bought ${totalBought}, Sold ${totalSold}, Net BTC change: ${btcEarned - btcSpent}`)
+    
+    // Record this action in game history
+    gameHistory.push({
+      action: "transactions",
+      cycle: cycle,
+      bought: transactionDetails.bought,
+      sold: transactionDetails.sold,
+      btcSpent: btcSpent,
+      btcEarned: btcEarned,
+      netChange: btcEarned - btcSpent,
+      newBtcTotal: btc
+    });
   } else {
     log("-- No transactions executed.")
   }
@@ -747,6 +847,14 @@ function buyGlock() {
   btc -= 20
   glock = true
   log("-- Purchased a Glock for 20 BTC.")
+  
+  // Record this action in game history
+  gameHistory.push({
+    action: "buyGlock",
+    cycle: cycle,
+    cost: 20,
+    newBtcTotal: btc
+  });
 
   updateStatusBars()
 }
@@ -757,6 +865,28 @@ function advanceCycle() {
 
   if (cycle >= 10) {
     log("-- Game over! Final score: " + btc + " BTC")
+    
+    // Record final game state
+    gameHistory.push({
+      action: "gameComplete",
+      finalBtc: btc,
+      hasGlock: glock,
+      totalCycles: cycle
+    });
+
+    // Generate a game verification hash
+    const gameHash = generateGameHash();
+    
+    // Create game data for submission
+    const gameData = {
+      btc: btc,
+      glock: glock,
+      gameHistory: gameHistory,
+      gameHash: gameHash
+    };
+    
+    // Encode game data for URL
+    const encodedGameData = btoa(JSON.stringify(gameData));
 
     // Show game over message
     const gameOver = confirm(
@@ -764,14 +894,23 @@ function advanceCycle() {
     )
 
     if (gameOver) {
-      // Redirect to submit page with score
-      window.location.href = `submit.html?btc=${btc}&glock=${glock ? "Yes" : "No"}`
+      // Redirect to submit page with verified game data
+      window.location.href = `submit.html?gameData=${encodedGameData}`
     }
 
     return
   }
 
   cycle++
+  
+  // Record this action in game history
+  gameHistory.push({
+    action: "advanceCycle",
+    fromCycle: cycle - 1,
+    toCycle: cycle,
+    btc: btc,
+    inventory: JSON.parse(JSON.stringify(inventory))
+  });
 
   // Reset event card applied flag
   eventCardApplied = false
@@ -798,6 +937,20 @@ function advanceCycle() {
 
   // Update the highlighted element
   updateGameFlowHighlight()
+}
+
+// Generate a game verification hash
+function generateGameHash() {
+  // Create a simple hash from game history
+  const hashInput = JSON.stringify(gameHistory) + btc + (glock ? "1" : "0") + cycle;
+  let hash = 0;
+  for (let i = 0; i < hashInput.length; i++) {
+    const char = hashInput.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  // Convert to hex string and ensure it's positive
+  return Math.abs(hash).toString(16);
 }
 
 // Helper Functions

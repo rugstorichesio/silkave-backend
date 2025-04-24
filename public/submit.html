@@ -89,6 +89,15 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
+    .verified-badge {
+      display: inline-block;
+      background-color: #0f0;
+      color: #000;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-weight: bold;
+      margin-left: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -107,20 +116,20 @@
       
       <div class="form-group">
         <label for="btc">Final BTC:</label>
-        <input type="number" id="btc" name="btc" required min="0" placeholder="Your final BTC">
+        <input type="number" id="btc" name="btc" required min="0" placeholder="Your final BTC" readonly>
       </div>
       
       <div class="form-group">
         <label for="glock">Glock Status:</label>
-        <select id="glock" name="glock" required>
+        <select id="glock" name="glock" required readonly>
           <option value="No">No Glock</option>
           <option value="Yes">Had Glock</option>
         </select>
       </div>
       
       <div class="form-group hidden">
-        <label for="hash">Game Hash:</label>
-        <input type="text" id="hash" name="hash" readonly>
+        <label for="gameHistory">Game History:</label>
+        <input type="hidden" id="gameHistory" name="gameHistory" readonly>
       </div>
       
       <button type="button" onclick="submitScore()">Submit Score</button>
@@ -138,16 +147,65 @@
   </div>
   
   <!-- Sound effects -->
-  <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
-  <audio id="typing" src="https://assets.mixkit.co/sfx/preview/mixkit-keyboard-typing-1386.mp3" preload="auto" loop></audio>
-  <audio id="crackles" src="https://assets.mixkit.co/sfx/preview/mixkit-radio-static-noise-2556.mp3" preload="auto" loop volume="0.3"></audio>
+  <audio id="bleep" src="sounds/bleep.wav" preload="auto"></audio>
   
   <script>
-    // All submission functionality is handled inline
-    // No external submit.js file is needed
+    // Play sound on button clicks with reduced volume
+    function playBleep() {
+      const sound = document.getElementById('bleep');
+      if (sound) {
+        sound.volume = 0.5; // Set volume to 50%
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Audio play failed:", e));
+      }
+    }
     
-    // Activate sound effects on first click
-    document.body.onclick = activateSounds;
+    // Check for game data in URL
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add click sound to all buttons
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('click', playBleep);
+      });
+      
+      // Parse URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // Check if we have game data
+      if (urlParams.has('gameData')) {
+        try {
+          const gameData = JSON.parse(atob(urlParams.get('gameData')));
+          if (gameData && gameData.btc !== undefined) {
+            // We have verified game data
+            document.getElementById('btc').value = gameData.btc;
+            document.getElementById('glock').value = gameData.glock ? "Yes" : "No";
+            document.getElementById('gameHistory').value = JSON.stringify(gameData.gameHistory);
+            
+            // Add verified badge
+            const btcLabel = document.querySelector('label[for="btc"]');
+            const verifiedBadge = document.createElement('span');
+            verifiedBadge.className = 'verified-badge';
+            verifiedBadge.textContent = '✓ VERIFIED';
+            btcLabel.appendChild(verifiedBadge);
+            
+            // Show a message about verified score
+            const form = document.getElementById('scoreForm');
+            const verifiedMsg = document.createElement('div');
+            verifiedMsg.style.color = '#0f0';
+            verifiedMsg.style.marginBottom = '1rem';
+            verifiedMsg.style.textAlign = 'center';
+            verifiedMsg.innerHTML = '✓ This score has been verified from a completed game';
+            form.prepend(verifiedMsg);
+          }
+        } catch (e) {
+          console.error("Error parsing game data:", e);
+        }
+      } else if (urlParams.has('btc') && urlParams.has('glock')) {
+        // Legacy support for old URL format
+        document.getElementById('btc').value = urlParams.get('btc');
+        document.getElementById('glock').value = urlParams.get('glock');
+      }
+    });
     
     // Submit score function
     function submitScore() {
@@ -157,11 +215,26 @@
       const alias = document.getElementById('alias').value;
       const btc = document.getElementById('btc').value;
       const glock = document.getElementById('glock').value;
-      const hash = document.getElementById('hash').value;
+      const gameHistory = document.getElementById('gameHistory').value;
       
       if (!alias || !btc) {
         alert('Please fill in all required fields');
         return;
+      }
+      
+      // Generate a hash for verification
+      let hash = '';
+      if (gameHistory) {
+        // Use the game history to generate a hash
+        try {
+          const history = JSON.parse(gameHistory);
+          const lastEvent = history[history.length - 1];
+          if (lastEvent && lastEvent.action === 'gameComplete') {
+            hash = generateSimpleHash(btc + glock + JSON.stringify(history));
+          }
+        } catch (e) {
+          console.error("Error generating hash:", e);
+        }
       }
       
       // Here you would normally send the data to your backend
@@ -180,7 +253,8 @@
           alias: alias,
           btc: parseInt(btc),
           glock: glock,
-          hash: hash
+          hash: hash,
+          verified: gameHistory ? true : false
         }),
       })
       .then(response => response.json())
@@ -193,6 +267,17 @@
         alert('Error submitting score. Please try again.');
       });
       */
+    }
+    
+    // Generate a simple hash for verification
+    function generateSimpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+      }
+      return Math.abs(hash).toString(16);
     }
   </script>
 </body>

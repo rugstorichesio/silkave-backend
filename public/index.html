@@ -66,13 +66,16 @@
     .active-glow {
       animation: glow-animation 2s ease-in-out infinite;
       display: inline-block;
+      font-weight: bold;
     }
     @keyframes glow-animation {
       0%, 100% {
-        text-shadow: 0 0 2px #0f0;
+        text-shadow: 0 0 4px #0f0, 0 0 8px #0f0;
+        color: #0f0;
       }
       50% {
-        text-shadow: 0 0 8px #0f0, 0 0 15px #0f0;
+        text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
+        color: #fff;
       }
     }
   </style>
