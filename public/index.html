@@ -96,11 +96,17 @@
       padding: 5px 0;
       position: relative;
       animation: scroll-text 60s linear infinite;
-      animation-delay: 0s; /* Start immediately */
+      animation-delay: 0s;
+    }
+    /* Duplicate the text to create a seamless loop */
+    .scrolling-text:after {
+      content: "[SYS:ACTIVE] :: MINING NODES: 42 :: PROXIES: ENABLED :: TOR CIRCUITS: 7 :: ENCRYPTION: AES-256 :: MONITORING DARK NET MARKETS :: SCRAPING VENDOR DATA :: ANALYZING PRICE FLUCTUATIONS :: TRACKING FBI HONEYPOTS :: SCANNING FOR VULNERABILITIES :: ROUTING THROUGH EXIT NODES :: BLOCKCHAIN VERIFICATION IN PROGRESS :: CRYPTO WALLETS SECURED :: VPN TUNNELS ESTABLISHED :: FIREWALL BYPASSED :: SILK AVE PROTOCOL INITIALIZED :: DARKNET CRAWLERS DEPLOYED :: MARKET ANALYSIS RUNNING :: STEALTH MODE ENGAGED :: ANONYMIZING TRAFFIC :: OBFUSCATING METADATA :: ZERO-DAY EXPLOITS LOADED :: DEAD DROPS MAPPED :: BURNER DEALS IDENTIFIED :: SECURE COMMS ESTABLISHED :: ONION ROUTING ACTIVE";
+      display: inline-block;
+      padding-left: 50px;
     }
     @keyframes scroll-text {
       0% {
-        transform: translateX(100%);
+        transform: translateX(0);
       }
       100% {
         transform: translateX(-100%);
@@ -146,9 +152,9 @@
   </div>
   
   <script>
-  // Add terminal-like boot sequence
+  // Remove any delay in starting the animation
   document.addEventListener("DOMContentLoaded", function() {
-    // Create and start the scrolling text immediately
+    // Force the animation to start immediately
     const scrollingText = document.querySelector('.scrolling-text');
     if (scrollingText) {
       // Force a reflow to ensure animation starts immediately
@@ -210,6 +216,6 @@
       setTimeout(addLine, 600);
     }, 1200); // Longer initial delay
   });
-</script>
+  </script>
 </body>
 </html>
