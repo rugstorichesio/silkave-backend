@@ -40,9 +40,21 @@
       margin: 0 1rem;
     }
     .highlight {
-      color: #fff;
-      background-color: #0a0;
+      color: #0f0;
+      background-color: transparent;
+      border: 1px solid #0f0;
       padding: 0 0.3rem;
+      text-shadow: 0 0 5px #0f0;
+      font-weight: bold;
+      position: relative;
+    }
+    .highlight::before {
+      content: ">";
+      margin-right: 0.3rem;
+    }
+    .highlight::after {
+      content: "<";
+      margin-left: 0.3rem;
     }
     ol, ul {
       margin-left: 2rem;
