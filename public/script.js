@@ -39,6 +39,174 @@ const priceMatrix = {
   files: [4, 5, 6, 7, 8, 10],
 }
 
+// Declare the variables
+let updateStatusBars
+let updateInventoryDisplay
+let populateMarketTable
+let log
+let clearInventory
+
+// Helper functions (declare before use)
+function findMostExpensiveItem() {
+  let mostExpensive = null
+  let highestPrice = 0
+
+  for (const item in inventory) {
+    if (inventory[item] && inventory[item].length > 0) {
+      // Assuming the price of the item is the average of its purchase prices
+      const avgPrice = inventory[item].reduce((a, b) => a + b, 0) / inventory[item].length
+      if (avgPrice > highestPrice) {
+        highestPrice = avgPrice
+        mostExpensive = item
+      }
+    }
+  }
+
+  return mostExpensive
+}
+
+function removeItem(item) {
+  if (inventory[item] && inventory[item].length > 0) {
+    inventory[item].shift() // Remove the first item
+  }
+}
+
+function wipeHalfInventory() {
+  for (const item in inventory) {
+    if (inventory[item] && inventory[item].length > 0) {
+      const halfLength = Math.floor(inventory[item].length / 2)
+      inventory[item].splice(0, halfLength) // Remove the first half
+    }
+  }
+}
+
+function halvePrices() {
+  const newPrices = {}
+  for (const item in currentPrices) {
+    newPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2)) // Ensure price is at least 1
+  }
+  return newPrices
+}
+
+function removeItems(count) {
+  let removed = 0
+  let message = ""
+
+  for (const item of items) {
+    if (removed >= count) break // Stop if we've removed enough items
+
+    if (inventory[item] && inventory[item].length > 0) {
+      const toRemove = Math.min(count - removed, inventory[item].length) // Remove up to the count or the item's quantity
+      inventory[item].splice(0, toRemove)
+      removed += toRemove
+      message += `Lost ${toRemove} ${itemNames[item]}, `
+    }
+  }
+
+  if (message === "") {
+    message = "No items to lose"
+  } else {
+    message = message.slice(0, -2) // Remove trailing comma and space
+  }
+
+  return message
+}
+
+// Function to grant items (either random or chosen)
+function grantItems(type, count) {
+  if (type === "choose") {
+    const itemType = prompt(
+      `COMMUNITY BOOST\n\nChoose an item to receive ${count} units of:\n\n${items.map((i) => itemNames[i]).join(", ")}\n\nOK = Get Selected Item\nCancel = Get Random Items`,
+    )
+
+    if (itemType && items.includes(itemType)) {
+      if (!inventory[itemType]) inventory[itemType] = []
+      for (let i = 0; i < count; i++) {
+        inventory[itemType].push(currentPrices[itemType] || 1) // Use current price or default to 1
+      }
+      updateInventoryDisplay()
+      return `Gained ${count} ${itemNames[itemType]}`
+    } else {
+      return grantItems("random", count) // Fallback to random if invalid input
+    }
+  } else {
+    // Grant random items
+    let message = ""
+    for (let i = 0; i < count; i++) {
+      const randomItem = items[Math.floor(Math.random() * items.length)]
+      if (!inventory[randomItem]) inventory[randomItem] = []
+      inventory[randomItem].push(currentPrices[randomItem] || 1) // Use current price or default to 1
+      message += `Gained 1 ${itemNames[randomItem]}, `
+    }
+    updateInventoryDisplay()
+    return message.slice(0, -2) // Remove trailing comma and space
+  }
+}
+
+function setAllToOne() {
+  for (const item of items) {
+    currentPrices[item] = 1
+  }
+}
+
+function doublePrices() {
+  const newPrices = {}
+  for (const item in currentPrices) {
+    newPrices[item] = currentPrices[item] * 2
+  }
+  return newPrices
+}
+
+function sellAllAtHalf() {
+  let totalEarned = 0
+  let itemsSold = 0
+
+  for (const item of items) {
+    if (inventory[item] && inventory[item].length > 0) {
+      const count = inventory[item].length
+      const price = Math.max(1, Math.floor((currentPrices[item] || 1) / 2)) // Half price, min 1
+      const earned = count * price
+
+      totalEarned += earned
+      itemsSold += count
+
+      log(`-- Emergency sale: ${count} ${itemNames[item]} for ${earned} BTC.`)
+    }
+  }
+
+  inventory = {} // Clear inventory
+  btc += totalEarned // Add earnings
+  updateStatusBars()
+  updateInventoryDisplay()
+
+  return `Sold all for ${totalEarned} BTC`
+}
+
+function countInventory() {
+  let count = 0
+  for (const item in inventory) {
+    if (inventory[item]) {
+      count += inventory[item].length
+    }
+  }
+  return count
+}
+
+function generateGameHash() {
+  const dataString = JSON.stringify({
+    btc: btc,
+    glock: glock,
+    gameHistory: gameHistory,
+  })
+  let hash = 0
+  for (let i = 0; i < dataString.length; i++) {
+    const char = dataString.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString(16)
+}
+
 // Initialize the game when the page loads
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Game initializing...")
@@ -388,7 +556,11 @@ function runCardEffect(code, roll) {
       break
 
     case "011": // Found a Stash
-      message = grantItems("choose", 5)
+      // Declare actualCount here
+      const actualCount = Math.ceil(Math.random() * 10) // Example: 1-10 units
+      const itemType011 = prompt(
+        `FOUND A STASH\n\nYou discovered ${actualCount} units of product!\nType the exact name of the item you want:\n\n${items.map((i) => itemNames[i]).join(", ")}\n\nOK = Get Selected Item\nCancel = Get Random Items`,
+      )
       break
 
     case "012": // Crypto Pump
@@ -407,7 +579,9 @@ function runCardEffect(code, roll) {
       break
 
     case "015": // Whale Buyout
-      message = applyWhaleBuyout()
+      const itemType015 = prompt(
+        `WHALE BUYOUT\n\nA big player wants to buy in bulk!\nType the exact name of the item to sell at TRIPLE price:\n\n${items.map((i) => itemNames[i]).join(", ")}\n\nOK = Apply Triple Price to Selected Item\nCancel = No Effect`,
+      )
       break
 
     case "016": // Deep Web Payday
@@ -456,7 +630,11 @@ function runCardEffect(code, roll) {
       break
 
     case "021": // Emergency Sale
-      if (confirm("Sell all at half value?")) {
+      if (
+        confirm(
+          "EMERGENCY SALE\n\nThe network's volatile. You can liquidate now at a loss...\nor hold and forfeit all buys this cycle.\n\nOK = Sell all Inventory (Half Value)\nCancel = Hold Inventory (No Buying)",
+        )
+      ) {
         message = sellAllAtHalf()
       } else {
         blockBuying = true
@@ -465,7 +643,11 @@ function runCardEffect(code, roll) {
       break
 
     case "022": // Cut and Run
-      if (confirm("Lose inventory for 40 BTC?")) {
+      if (
+        confirm(
+          "CUT AND RUN\n\nYou've got seconds. Ditch the stash and bolt… or stay and hope they don't breach your door.\n\nOK = Lose all inventory, gain 40 BTC\nCancel = Keep your inventory and gain nothing",
+        )
+      ) {
         clearInventory()
         btc += 40
         message = "Gain 40 BTC, lose inventory"
@@ -515,16 +697,24 @@ function runCardEffect(code, roll) {
       blockBuying = true
       blockSelling = true
       message = "Cannot buy or sell this round"
+      // Since no buying or selling is possible, highlight the advance button
+      gameFlowState = "advanceCycle"
+      updateGameFlowHighlight()
       break
 
     case "028": // Family Emergency
-      if (confirm("Lose 30 BTC or skip turn?")) {
+      if (confirm("FAMILY EMERGENCY\n\nPress OK to lose 30 BTC.\nPress Cancel to skip this entire round.")) {
         btc = Math.max(0, btc - 30)
         message = "Lose 30 BTC"
       } else {
         blockBuying = true
         blockSelling = true
         message = "Skip turn"
+        // Since the player chose to skip the round, highlight the advance button
+        gameFlowState = "advanceCycle"
+        updateGameFlowHighlight()
+        // Show a hint to advance to the next cycle
+        showHint("You've skipped this round. Click 'Advance to Next Cycle' to continue.")
       }
       break
 
@@ -537,7 +727,9 @@ function runCardEffect(code, roll) {
   return message
 }
 
-// Roll market prices
+// Also update the rollMarket function to ensure the market table is updated with burner indicators
+
+// Find the rollMarket function and make sure it calls updateMarketTable after setting prices:
 function rollMarket() {
   console.log("rollMarket function called")
   playSound("bleep")
@@ -630,12 +822,22 @@ function updateMarketTable() {
   const tableBody = document.querySelector("#marketTable tbody")
   tableBody.innerHTML = ""
 
+  // Get the current burner deal item
+  const burnerItem = document.getElementById("burnerDeal").value
+
   for (const item of items) {
     const row = document.createElement("tr")
 
     // Item name cell
     const nameCell = document.createElement("td")
-    nameCell.textContent = itemNames[item]
+
+    // Add burner deal indicators if this is the burner item
+    if (item === burnerItem && burnerItem !== "") {
+      nameCell.innerHTML = `>> <span class="active-glow">${itemNames[item]}</span> <<`
+    } else {
+      nameCell.textContent = itemNames[item]
+    }
+
     if (item === bannedItem) {
       nameCell.style.textDecoration = "line-through"
       nameCell.style.color = "red"
@@ -653,6 +855,13 @@ function updateMarketTable() {
         priceCell.style.color = "#0f0" // Green for profit
         priceCell.style.fontWeight = "bold"
       }
+    }
+
+    // If this is the burner item, highlight the price cell too
+    if (item === burnerItem && burnerItem !== "") {
+      priceCell.style.backgroundColor = "#001100"
+      priceCell.style.border = "1px solid #0f0"
+      priceCell.style.boxShadow = "0 0 5px #0f0"
     }
 
     row.appendChild(priceCell)
@@ -902,7 +1111,7 @@ function cashOutInventory() {
   // Only proceed if selling is allowed
   if (blockSelling) {
     log("-- Cannot sell due to event effect. Cashing out with current BTC only.")
-    return 0
+    return { totalEarned: 0, itemsSold: 0, soldItems: [] }
   }
 
   // Sell all inventory at current prices
@@ -1042,345 +1251,4 @@ Would you like to submit your score to the leaderboard?`,
 
   // Update the highlighted element
   updateGameFlowHighlight()
-}
-
-// Generate a game verification hash
-function generateGameHash() {
-  // Create a simple hash from game history
-  const hashInput = JSON.stringify(gameHistory) + btc + (glock ? "1" : "0") + cycle
-  let hash = 0
-  for (let i = 0; i < hashInput.length; i++) {
-    const char = hashInput.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash = hash & hash // Convert to 32bit integer
-  }
-  // Convert to hex string and ensure it's positive
-  return Math.abs(hash).toString(16)
-}
-
-// Helper Functions
-
-// Update status bars
-function updateStatusBars() {
-  // Update main status
-  document.getElementById("cycle").textContent = cycle
-  document.getElementById("btc").textContent = btc
-  document.getElementById("glock").textContent = glock ? "Yes" : "No"
-  document.getElementById("invCount").textContent = countInventory()
-
-  // Update bottom bar
-  document.getElementById("cycleBottom").textContent = cycle
-  document.getElementById("btcBottom").textContent = btc
-  document.getElementById("glockBottom").textContent = glock ? "Yes" : "No"
-  document.getElementById("invCountBottom").textContent = countInventory()
-}
-
-// Update inventory display
-function updateInventoryDisplay() {
-  const inventoryStatus = document.getElementById("inventoryStatus")
-  let inventoryText = "Current Inventory:\n"
-
-  let totalItems = 0
-
-  for (const item of items) {
-    const itemInventory = inventory[item] || []
-    if (itemInventory.length > 0) {
-      // Calculate average purchase price
-      const totalCost = itemInventory.reduce((sum, price) => sum + price, 0)
-      const avgPrice = (totalCost / itemInventory.length).toFixed(1)
-
-      // Show item count and purchase prices
-      inventoryText += `${itemNames[item]}: ${itemInventory.length} (bought @ ${avgPrice} BTC each)`
-
-      // Add individual prices if there are few items
-      if (itemInventory.length <= 5) {
-        inventoryText += ` [${itemInventory.join(", ")} BTC]`
-      }
-
-      inventoryText += "\n"
-      totalItems += itemInventory.length
-    }
-  }
-
-  if (totalItems === 0) {
-    inventoryText += "Empty"
-  }
-
-  inventoryStatus.textContent = inventoryText
-}
-
-// Count total inventory
-function countInventory() {
-  let count = 0
-  for (const item of items) {
-    count += (inventory[item] || []).length
-  }
-  return count
-}
-
-// Modify the log function to put timestamp at the end
-function log(message) {
-  const logArea = document.getElementById("log")
-  const timestamp = new Date().toLocaleTimeString()
-
-  // Add new message at the top
-  logArea.textContent = `${message} [${timestamp}]\n` + logArea.textContent
-
-  // Limit visible entries (but keep all in the DOM for scrolling)
-  const entries = logArea.textContent.split("\n").filter((entry) => entry.trim() !== "")
-
-  // If we have more than 6 entries, add a visual separator
-  if (entries.length > 6) {
-    // We don't need to truncate the actual content since we're using scrolling
-    // Just add a visual indicator after the 6th entry
-    const firstSixEntries = entries.slice(0, 6).join("\n")
-    const remainingEntries = entries.slice(6).join("\n")
-
-    // Only add the separator if we haven't already
-    if (!logArea.textContent.includes("------- Previous Events -------")) {
-      logArea.textContent = firstSixEntries + "\n------- Previous Events -------\n" + remainingEntries
-    }
-  }
-
-  // Scroll to top to show newest entries
-  logArea.scrollTop = 0
-}
-
-// Clear inventory
-function clearInventory() {
-  inventory = {}
-  log("-- All inventory cleared.")
-}
-
-// Remove a specific item
-function removeItem(itemType) {
-  if (inventory[itemType] && inventory[itemType].length > 0) {
-    inventory[itemType].pop()
-    return true
-  }
-  return false
-}
-
-// Find most expensive item
-function findMostExpensiveItem() {
-  let mostExpensive = null
-  let highestPrice = 0
-
-  for (const item of items) {
-    const itemInventory = inventory[item] || []
-    if (itemInventory.length > 0) {
-      // Find highest price in this item category
-      const maxPrice = Math.max(...itemInventory)
-      if (maxPrice > highestPrice) {
-        highestPrice = maxPrice
-        mostExpensive = item
-      }
-    }
-  }
-
-  return mostExpensive
-}
-
-// Remove multiple items
-function removeItems(count) {
-  let removed = 0
-  const itemsRemoved = []
-
-  // Flatten inventory into a single array of [item, price] pairs
-  const allItems = []
-  for (const item of items) {
-    const itemInventory = inventory[item] || []
-    for (let i = 0; i < itemInventory.length; i++) {
-      allItems.push([item, itemInventory[i]])
-    }
-  }
-
-  // Sort by price (highest first)
-  allItems.sort((a, b) => b[1] - a[1])
-
-  // Remove the specified number of items
-  for (let i = 0; i < Math.min(count, allItems.length); i++) {
-    const [item, price] = allItems[i]
-    removeItem(item)
-    itemsRemoved.push(itemNames[item])
-    removed++
-  }
-
-  if (removed === 0) {
-    return "No items to remove"
-  } else {
-    return `Removed ${removed} items: ${itemsRemoved.join(", ")}`
-  }
-}
-
-// Wipe half of inventory
-function wipeHalfInventory() {
-  const totalItems = countInventory()
-  const toRemove = Math.ceil(totalItems / 2)
-
-  if (totalItems === 0) {
-    return
-  }
-
-  removeItems(toRemove)
-  log(`-- Lost ${toRemove} items from inventory.`)
-}
-
-// Grant items (random or chosen)
-function grantItems(method, count) {
-  const currentCount = countInventory()
-  const spaceLeft = inventoryLimit - currentCount
-
-  if (spaceLeft <= 0) {
-    btc += 25 // Bonus if inventory is full
-    return `Inventory full - gained 25 BTC instead`
-  }
-
-  const actualCount = Math.min(count, spaceLeft)
-
-  if (method === "random") {
-    // Add random items
-    let added = 0
-    const itemsAdded = []
-
-    for (let i = 0; i < actualCount; i++) {
-      const randomItem = items[Math.floor(Math.random() * items.length)]
-      if (!inventory[randomItem]) inventory[randomItem] = []
-      inventory[randomItem].push(5) // Default value
-      itemsAdded.push(itemNames[randomItem])
-      added++
-    }
-
-    return `Gained ${added} random items: ${itemsAdded.join(", ")}`
-  } else if (method === "choose") {
-    // Let player choose item type
-    const itemType = prompt(
-      `Choose item type to receive ${actualCount} units:\n${items.map((i) => itemNames[i]).join(", ")}`,
-    )
-
-    // Find matching item
-    const matchedItem = items.find((i) => itemNames[i].toLowerCase() === itemType.toLowerCase())
-
-    if (matchedItem) {
-      if (!inventory[matchedItem]) inventory[matchedItem] = []
-      for (let i = 0; i < actualCount; i++) {
-        inventory[matchedItem].push(5) // Default value
-      }
-      return `Gained ${actualCount} ${itemNames[matchedItem]}`
-    } else {
-      // If invalid choice, give random items
-      return grantItems("random", actualCount)
-    }
-  }
-
-  return "No items added"
-}
-
-// Halve all prices
-function halvePrices() {
-  const newPrices = {}
-
-  for (const item of items) {
-    if (currentPrices[item]) {
-      newPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
-    }
-  }
-
-  updateMarketTable()
-  return newPrices
-}
-
-// Double all prices
-function doublePrices() {
-  const newPrices = {}
-
-  for (const item of items) {
-    if (currentPrices[item]) {
-      newPrices[item] = currentPrices[item] * 2
-    }
-  }
-
-  updateMarketTable()
-  return newPrices
-}
-
-// Set all prices to 1
-function setAllToOne() {
-  const newPrices = {}
-
-  for (const item of items) {
-    newPrices[item] = 1
-  }
-
-  currentPrices = newPrices
-  updateMarketTable()
-}
-
-// Apply whale buyout (triple sell price for one item)
-function applyWhaleBuyout() {
-  const itemType = prompt(
-    `Choose item type for whale buyout (triple sell price):\n${items.map((i) => itemNames[i]).join(", ")}`,
-  )
-
-  // Find matching item
-  const matchedItem = items.find((i) => itemNames[i].toLowerCase() === itemType.toLowerCase())
-
-  if (matchedItem && currentPrices[matchedItem]) {
-    const originalPrice = currentPrices[matchedItem]
-    currentPrices[matchedItem] = originalPrice * 3
-    updateMarketTable()
-    return `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
-  } else {
-    return "Invalid item choice - no effect"
-  }
-}
-
-// Sell all inventory at half value
-function sellAllAtHalf() {
-  let totalEarned = 0
-  let itemsSold = 0
-
-  for (const item of items) {
-    const itemInventory = inventory[item] || []
-    const count = itemInventory.length
-
-    if (count > 0) {
-      const price = currentPrices[item] || 1
-      const halfPrice = Math.max(1, Math.floor(price / 2))
-      const earned = count * halfPrice
-
-      totalEarned += earned
-      itemsSold += count
-
-      log(`-- Emergency sold ${count} ${itemNames[item]} at half price (${halfPrice} BTC each) for ${earned} BTC.`)
-    }
-  }
-
-  // Clear inventory and add BTC
-  inventory = {}
-  btc += totalEarned
-
-  return `Emergency sale: Sold ${itemsSold} items for ${totalEarned} BTC`
-}
-
-// Populate market table initially
-function populateMarketTable() {
-  const tableBody = document.querySelector("#marketTable tbody")
-  tableBody.innerHTML = ""
-
-  for (const item of items) {
-    const row = document.createElement("tr")
-
-    // Item name cell
-    const nameCell = document.createElement("td")
-    nameCell.textContent = itemNames[item]
-    row.appendChild(nameCell)
-
-    // Price cell
-    const priceCell = document.createElement("td")
-    priceCell.textContent = "—"
-    row.appendChild(priceCell)
-
-    tableBody.appendChild(row)
-  }
 }

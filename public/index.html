@@ -78,13 +78,93 @@
         color: #fff;
       }
     }
+    .glitch-text {
+      font-family: monospace;
+      font-weight: bold;
+      animation: glitch 2s infinite alternate;
+      position: relative;
+      letter-spacing: 2px;
+    }
+
+    .glitch-text-alt {
+      font-family: monospace;
+      font-weight: bold;
+      animation: glitch-alt 3s infinite alternate;
+      position: relative;
+      letter-spacing: 2px;
+    }
+
+    .glitch-line {
+      display: block;
+      margin-top: 5px;
+      animation: steam 4s infinite;
+      letter-spacing: -1px;
+    }
+
+    @keyframes glitch {
+      0%, 100% {
+        color: #0f0;
+        text-shadow: 0 0 2px #0f0;
+      }
+      33% {
+        color: #0f0;
+        text-shadow: 0 0 5px #0f0;
+        transform: translateX(-1px);
+      }
+      66% {
+        color: #fff;
+        text-shadow: 0 0 10px #0f0, 0 0 15px #0f0;
+        transform: translateX(1px);
+      }
+    }
+
+    @keyframes glitch-alt {
+      0%, 100% {
+        color: #0f0;
+        text-shadow: 0 0 2px #0f0;
+      }
+      33% {
+        color: #fff;
+        text-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
+        transform: translateX(1px);
+      }
+      66% {
+        color: #0f0;
+        text-shadow: 0 0 3px #0f0;
+        transform: translateX(-1px);
+      }
+    }
+
+    @keyframes steam {
+      0% {
+        color: #0f0;
+        text-shadow: 0 0 2px #0f0;
+      }
+      25% {
+        color: #fff;
+        text-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
+      }
+      50% {
+        color: #0f0;
+        text-shadow: 0 0 3px #0f0;
+      }
+      75% {
+        color: #fff;
+        text-shadow: 0 0 5px #0f0, 0 0 10px #0f0;
+      }
+      100% {
+        color: #0f0;
+        text-shadow: 0 0 2px #0f0;
+      }
+    }
   </style>
 </head>
 <body>
   <h1>WELCOME TO SILK AVE</h1>
   
   <div class="ascii-art">
-██████  ██████  ██████  ██████  ██████
+    <span class="glitch-text">[</span><span class="glitch-text-alt">$</span><span class="glitch-text">]</span> <span class="glitch-text-alt">//</span> <span class="glitch-text">SILK_AVE</span> <span class="glitch-text-alt">::</span> <span class="glitch-text">INIT_SEQUENCE</span> <span class="glitch-text-alt">//</span> <span class="glitch-text">[</span><span class="glitch-text-alt">$</span><span class="glitch-text">]</span>
+    <span class="glitch-line">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
   </div>
   
   <div class="description">
