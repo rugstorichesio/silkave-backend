@@ -95,7 +95,8 @@
       text-shadow: 0 0 5px #0f0;
       padding: 5px 0;
       position: relative;
-      animation: scroll-text 30s linear infinite;
+      animation: scroll-text 60s linear infinite;
+      animation-delay: 0s; /* Start immediately */
     }
     @keyframes scroll-text {
       0% {
@@ -147,6 +148,13 @@
   <script>
   // Add terminal-like boot sequence
   document.addEventListener("DOMContentLoaded", function() {
+    // Create and start the scrolling text immediately
+    const scrollingText = document.querySelector('.scrolling-text');
+    if (scrollingText) {
+      // Force a reflow to ensure animation starts immediately
+      void scrollingText.offsetWidth;
+    }
+    
     // Simulate boot sequence for the description
     const description = document.querySelector('.description');
     const paragraphs = description.querySelectorAll('p');
