@@ -71,6 +71,9 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("Error setting up sound:", e)
   }
 
+  // Update the advance button text if we're on cycle 10
+  updateAdvanceButtonForFinalRound()
+
   // Check if we're coming from a game completion with score data
   const urlParams = new URLSearchParams(window.location.search)
   if (urlParams.has("gameData")) {
@@ -159,7 +162,7 @@ function updateGameFlowHighlight() {
       break
     case "advanceCycle":
       highlightElement("advanceCycleBtn")
-      showHint("Advance to the next cycle")
+      showHint(cycle === 10 ? "Cash out and complete the game" : "Advance to the next cycle")
       break
     default:
       hideHint()
@@ -870,13 +873,89 @@ function buyGlock() {
   updateStatusBars()
 }
 
-// Advance to next cycle
+// Update the advance button text based on the current cycle
+function updateAdvanceButtonForFinalRound() {
+  const advanceButton = document.getElementById("advanceCycleBtn")
+  if (advanceButton) {
+    if (cycle === 10) {
+      advanceButton.textContent = "Cash Out and Go Dark"
+      advanceButton.style.backgroundColor = "#006600"
+      advanceButton.style.color = "#ffffff"
+      advanceButton.style.fontWeight = "bold"
+      advanceButton.style.border = "2px solid #00ff00"
+    } else {
+      advanceButton.textContent = "Advance to Next Cycle"
+      advanceButton.style.backgroundColor = ""
+      advanceButton.style.color = ""
+      advanceButton.style.fontWeight = ""
+      advanceButton.style.border = ""
+    }
+  }
+}
+
+// Cash out all inventory at current market prices
+function cashOutInventory() {
+  let totalEarned = 0
+  let itemsSold = 0
+  const soldItems = []
+
+  // Only proceed if selling is allowed
+  if (blockSelling) {
+    log("-- Cannot sell due to event effect. Cashing out with current BTC only.")
+    return 0
+  }
+
+  // Sell all inventory at current prices
+  for (const item of items) {
+    if (item === bannedItem) continue
+
+    const itemInventory = inventory[item] || []
+    const count = itemInventory.length
+
+    if (count > 0) {
+      const price = currentPrices[item] || 1
+      const earned = count * price
+
+      totalEarned += earned
+      itemsSold += count
+
+      soldItems.push(`${count} ${itemNames[item]} for ${earned} BTC`)
+      log(`-- Cashed out ${count} ${itemNames[item]} for ${earned} BTC.`)
+    }
+  }
+
+  // Clear inventory and add BTC
+  inventory = {}
+  btc += totalEarned
+
+  if (itemsSold > 0) {
+    log(`-- Final cash out: Sold ${itemsSold} items for ${totalEarned} BTC.`)
+  }
+
+  return { totalEarned, itemsSold, soldItems }
+}
+
+// Advance to next cycle or cash out if on final round
 function advanceCycle() {
   console.log("advanceCycle function called")
   playSound("bleep")
 
-  if (cycle >= 10) {
-    log("-- Game over! Final score: " + btc + " BTC")
+  if (cycle === 10) {
+    // This is the final round - cash out and end game
+    const cashOutResult = cashOutInventory()
+
+    log("-- GAME OVER! You've gone dark with your earnings.")
+
+    // Record cash out in game history
+    if (cashOutResult.itemsSold > 0) {
+      gameHistory.push({
+        action: "cashOut",
+        cycle: cycle,
+        itemsSold: cashOutResult.itemsSold,
+        btcEarned: cashOutResult.totalEarned,
+        finalBtc: btc,
+      })
+    }
 
     // Record final game state
     gameHistory.push({
@@ -900,9 +979,19 @@ function advanceCycle() {
     // Encode game data for URL
     const encodedGameData = btoa(JSON.stringify(gameData))
 
+    // Show game over message with final results
+    let cashOutDetails = ""
+    if (cashOutResult.itemsSold > 0) {
+      cashOutDetails = `\nCashed out: ${cashOutResult.soldItems.join(", ")}`
+    }
+
     // Show game over message
     const gameOver = confirm(
-      `Game Over! Final score: ${btc} BTC with${glock ? "" : "out"} a Glock.\n\nWould you like to submit your score?`,
+      `GAME OVER! You've gone dark with your earnings.
+
+Final score: ${btc} BTC with${glock ? "" : "out"} a Glock.${cashOutDetails}
+
+Would you like to submit your score to the leaderboard?`,
     )
 
     if (gameOver) {
@@ -913,6 +1002,7 @@ function advanceCycle() {
     return
   }
 
+  // Normal cycle advancement
   cycle++
 
   // Record this action in game history
@@ -943,6 +1033,9 @@ function advanceCycle() {
 
   log(`-- Advanced to Cycle ${cycle}/10`)
   updateStatusBars()
+
+  // Update the advance button text for the final round
+  updateAdvanceButtonForFinalRound()
 
   // Reset game flow state
   gameFlowState = "enterEventCode"
@@ -1029,7 +1122,28 @@ function countInventory() {
 function log(message) {
   const logArea = document.getElementById("log")
   const timestamp = new Date().toLocaleTimeString()
+
+  // Add new message at the top
   logArea.textContent = `${message} [${timestamp}]\n` + logArea.textContent
+
+  // Limit visible entries (but keep all in the DOM for scrolling)
+  const entries = logArea.textContent.split("\n").filter((entry) => entry.trim() !== "")
+
+  // If we have more than 6 entries, add a visual separator
+  if (entries.length > 6) {
+    // We don't need to truncate the actual content since we're using scrolling
+    // Just add a visual indicator after the 6th entry
+    const firstSixEntries = entries.slice(0, 6).join("\n")
+    const remainingEntries = entries.slice(6).join("\n")
+
+    // Only add the separator if we haven't already
+    if (!logArea.textContent.includes("------- Previous Events -------")) {
+      logArea.textContent = firstSixEntries + "\n------- Previous Events -------\n" + remainingEntries
+    }
+  }
+
+  // Scroll to top to show newest entries
+  logArea.scrollTop = 0
 }
 
 // Clear inventory
