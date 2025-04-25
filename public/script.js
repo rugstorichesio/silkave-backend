@@ -46,6 +46,91 @@ let populateMarketTable
 let log
 let clearInventory
 
+// Fix the missing function implementations for updateStatusBars, updateInventoryDisplay, populateMarketTable, log, and clearInventory
+
+// Add the updateStatusBars function implementation
+function updateStatusBars() {
+  // Update main status
+  document.getElementById("cycle").textContent = cycle
+  document.getElementById("btc").textContent = btc
+  document.getElementById("glock").textContent = glock ? "Yes" : "No"
+  document.getElementById("invCount").textContent = countInventory()
+
+  // Update bottom bar
+  document.getElementById("cycleBottom").textContent = cycle
+  document.getElementById("btcBottom").textContent = btc
+  document.getElementById("glockBottom").textContent = glock ? "Yes" : "No"
+  document.getElementById("invCountBottom").textContent = countInventory()
+}
+
+// Add the updateInventoryDisplay function implementation
+function updateInventoryDisplay() {
+  const inventoryStatus = document.getElementById("inventoryStatus")
+  let inventoryText = "Current Inventory:\n"
+
+  let totalItems = 0
+
+  for (const item of items) {
+    const itemInventory = inventory[item] || []
+    if (itemInventory.length > 0) {
+      // Calculate average purchase price
+      const totalCost = itemInventory.reduce((sum, price) => sum + price, 0)
+      const avgPrice = (totalCost / itemInventory.length).toFixed(1)
+
+      // Show item count and purchase prices
+      inventoryText += `${itemNames[item]}: ${itemInventory.length} (bought @ ${avgPrice} BTC each)`
+
+      // Add individual prices if there are few items
+      if (itemInventory.length <= 5) {
+        inventoryText += ` [${itemInventory.join(", ")} BTC]`
+      }
+
+      inventoryText += "\n"
+      totalItems += itemInventory.length
+    }
+  }
+
+  if (totalItems === 0) {
+    inventoryText += "Empty"
+  }
+
+  inventoryStatus.textContent = inventoryText
+}
+
+// Add the log function implementation
+function log(message) {
+  const logArea = document.getElementById("log")
+  const timestamp = new Date().toLocaleTimeString()
+
+  // Add new message at the top
+  logArea.textContent = `${message} [${timestamp}]\n` + logArea.textContent
+
+  // Limit visible entries (but keep all in the DOM for scrolling)
+  const entries = logArea.textContent.split("\n").filter((entry) => entry.trim() !== "")
+
+  // If we have more than 6 entries, add a visual separator
+  if (entries.length > 6) {
+    // We don't need to truncate the actual content since we're using scrolling
+    // Just add a visual indicator after the 6th entry
+    const firstSixEntries = entries.slice(0, 6).join("\n")
+    const remainingEntries = entries.slice(6).join("\n")
+
+    // Only add the separator if we haven't already
+    if (!logArea.textContent.includes("------- Previous Events -------")) {
+      logArea.textContent = firstSixEntries + "\n------- Previous Events -------\n" + remainingEntries
+    }
+  }
+
+  // Scroll to top to show newest entries
+  logArea.scrollTop = 0
+}
+
+// Add the clearInventory function implementation
+function clearInventory() {
+  inventory = {}
+  log("-- All inventory cleared.")
+}
+
 // Helper functions (declare before use)
 function findMostExpensiveItem() {
   let mostExpensive = null
