@@ -2,7 +2,7 @@
 
 let btc = 100
 let glock = false
-const cycle = 1
+let cycle = 1 // Initialize cycle to 1
 let inventory = {}
 let currentPrices = {}
 let eventCode = ""
@@ -283,11 +283,96 @@ function clearInventory() {
   log("-- All inventory cleared.")
 }
 
-// Dummy function for populateMarketTable
+// Populate market table with current prices
 function populateMarketTable() {
-  // This function is intentionally left blank.
-  // It's here to prevent errors when the game tries to call it.
-  // The actual market table is populated dynamically.
+  const tableBody = document.querySelector("#marketTable tbody")
+  tableBody.innerHTML = ""
+
+  // Get the current burner deal item
+  const burnerItem = document.getElementById("burnerDeal").value
+
+  for (const item of items) {
+    const row = document.createElement("tr")
+
+    // Item name cell
+    const nameCell = document.createElement("td")
+
+    // Add burner deal indicators if this is the burner item
+    if (item === burnerItem && burnerItem !== "") {
+      nameCell.innerHTML = `>> <span class="active-glow">${itemNames[item]}</span> <<`
+    } else {
+      nameCell.textContent = itemNames[item]
+    }
+
+    if (item === bannedItem) {
+      nameCell.style.textDecoration = "line-through"
+      nameCell.style.color = "red"
+    }
+    row.appendChild(nameCell)
+
+    // Price cell
+    const priceCell = document.createElement("td")
+    priceCell.textContent = currentPrices[item] ? `${currentPrices[item]} BTC` : "—"
+
+    // Highlight profitable items
+    if (inventory[item] && inventory[item].length > 0) {
+      const avgCost = inventory[item].reduce((sum, price) => sum + price, 0) / inventory[item].length
+      if (currentPrices[item] > avgCost) {
+        priceCell.style.color = "#0f0" // Green for profit
+        priceCell.style.fontWeight = "bold"
+      }
+    }
+
+    // If this is the burner item, highlight the price cell too
+    if (item === burnerItem && burnerItem !== "") {
+      priceCell.style.backgroundColor = "#001100"
+      priceCell.style.border = "1px solid #0f0"
+      priceCell.style.boxShadow = "0 0 5px #0f0"
+    }
+
+    row.appendChild(priceCell)
+
+    tableBody.appendChild(row)
+  }
+}
+
+// Populate transaction table
+function populateTransactionTable() {
+  const tableBody = document.querySelector("#transactionTable tbody")
+  tableBody.innerHTML = ""
+
+  for (const item of items) {
+    const row = document.createElement("tr")
+
+    // Item name cell
+    const nameCell = document.createElement("td")
+    nameCell.textContent = itemNames[item]
+    row.appendChild(nameCell)
+
+    // Buy cell
+    const buyCell = document.createElement("td")
+    const buyInput = document.createElement("input")
+    buyInput.type = "number"
+    buyInput.min = "0"
+    buyInput.id = `buy-${item}`
+    buyInput.className = "buy-input"
+    buyInput.style.width = "50px"
+    buyCell.appendChild(buyInput)
+    row.appendChild(buyCell)
+
+    // Sell cell
+    const sellCell = document.createElement("td")
+    const sellInput = document.createElement("input")
+    sellInput.type = "number"
+    sellInput.min = "0"
+    sellInput.id = `sell-${item}`
+    sellInput.className = "sell-input"
+    sellInput.style.width = "50px"
+    sellCell.appendChild(sellInput)
+    row.appendChild(sellCell)
+
+    tableBody.appendChild(row)
+  }
 }
 
 // Initialize the game when the page loads
@@ -933,98 +1018,6 @@ function applyBurnerDeal() {
   updateGameFlowHighlight()
 }
 
-// Update market table with current prices
-function updateMarketTable() {
-  const tableBody = document.querySelector("#marketTable tbody")
-  tableBody.innerHTML = ""
-
-  // Get the current burner deal item
-  const burnerItem = document.getElementById("burnerDeal").value
-
-  for (const item of items) {
-    const row = document.createElement("tr")
-
-    // Item name cell
-    const nameCell = document.createElement("td")
-
-    // Add burner deal indicators if this is the burner item
-    if (item === burnerItem && burnerItem !== "") {
-      nameCell.innerHTML = `>> <span class="active-glow">${itemNames[item]}</span> <<`
-    } else {
-      nameCell.textContent = itemNames[item]
-    }
-
-    if (item === bannedItem) {
-      nameCell.style.textDecoration = "line-through"
-      nameCell.style.color = "red"
-    }
-    row.appendChild(nameCell)
-
-    // Price cell
-    const priceCell = document.createElement("td")
-    priceCell.textContent = currentPrices[item] ? `${currentPrices[item]} BTC` : "—"
-
-    // Highlight profitable items
-    if (inventory[item] && inventory[item].length > 0) {
-      const avgCost = inventory[item].reduce((sum, price) => sum + price, 0) / inventory[item].length
-      if (currentPrices[item] > avgCost) {
-        priceCell.style.color = "#0f0" // Green for profit
-        priceCell.style.fontWeight = "bold"
-      }
-    }
-
-    // If this is the burner item, highlight the price cell too
-    if (item === burnerItem && burnerItem !== "") {
-      priceCell.style.backgroundColor = "#001100"
-      priceCell.style.border = "1px solid #0f0"
-      priceCell.style.boxShadow = "0 0 5px #0f0"
-    }
-
-    row.appendChild(priceCell)
-
-    tableBody.appendChild(row)
-  }
-}
-
-// Populate transaction table
-function populateTransactionTable() {
-  const tableBody = document.querySelector("#transactionTable tbody")
-  tableBody.innerHTML = ""
-
-  for (const item of items) {
-    const row = document.createElement("tr")
-
-    // Item name cell
-    const nameCell = document.createElement("td")
-    nameCell.textContent = itemNames[item]
-    row.appendChild(nameCell)
-
-    // Buy cell
-    const buyCell = document.createElement("td")
-    const buyInput = document.createElement("input")
-    buyInput.type = "number"
-    buyInput.min = "0"
-    buyInput.id = `buy-${item}`
-    buyInput.className = "buy-input"
-    buyInput.style.width = "50px"
-    buyCell.appendChild(buyInput)
-    row.appendChild(buyCell)
-
-    // Sell cell
-    const sellCell = document.createElement("td")
-    const sellInput = document.createElement("input")
-    sellInput.type = "number"
-    sellInput.min = "0"
-    sellInput.id = `sell-${item}`
-    sellInput.className = "sell-input"
-    sellInput.style.width = "50px"
-    sellCell.appendChild(sellInput)
-    row.appendChild(sellCell)
-
-    tableBody.appendChild(row)
-  }
-}
-
 // Execute buy/sell transactions
 function executeTransactions() {
   console.log("executeTransactions function called")
@@ -1388,11 +1381,14 @@ Click OK to go to the leaderboard submission page.
   // Record this action in game history
   gameHistory.push({
     action: "advanceCycle",
-    fromCycle: cycle - 1,
-    toCycle: cycle,
+    fromCycle: cycle,
+    toCycle: cycle + 1, // Fixed: Use cycle + 1 for the next cycle
     btc: btc,
     inventory: JSON.parse(JSON.stringify(inventory)),
   })
+
+  // Increment the cycle counter
+  cycle += 1 // Fixed: Actually increment the cycle counter
 
   // Reset event card applied flag
   eventCardApplied = false
@@ -1422,4 +1418,9 @@ Click OK to go to the leaderboard submission page.
 
   // Update the highlighted element
   updateGameFlowHighlight()
+}
+
+// Declare updateMarketTable function
+function updateMarketTable() {
+  populateMarketTable()
 }
