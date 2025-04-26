@@ -14,7 +14,7 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   margin: 0;
-  height: 100vh; /* Force full height */
+  min-height: 100vh; /* Changed from height to min-height for better mobile support */
   display: flex;
   flex-direction: column;
 }
@@ -126,6 +126,74 @@ html, body {
 p {
   margin: 1rem 0; /* More space between paragraphs */
 }
+
+/* Media Queries for Responsive Design */
+/* Mobile Devices (portrait) */
+@media only screen and (max-width: 600px) {
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .ascii-art {
+    height: 8rem;
+  }
+  
+  .scrolling-container {
+    margin-bottom: 2rem;
+  }
+  
+  .description {
+    margin: 1.5rem auto 1rem auto;
+  }
+  
+  .nav-links {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .nav-link {
+    width: 80%;
+    margin: 0 auto;
+  }
+  
+  p {
+    margin: 0.7rem 0;
+    font-size: 0.9rem;
+  }
+  
+  .boot-text {
+    font-size: 0.9rem;
+  }
+}
+
+/* Tablets and small screens */
+@media only screen and (min-width: 601px) and (max-width: 1024px) {
+  h1 {
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .ascii-art {
+    height: 10rem;
+  }
+  
+  .scrolling-container {
+    margin-bottom: 3rem;
+  }
+  
+  .description {
+    margin: 2rem auto 1.5rem auto;
+  }
+}
+
+/* Detect if device supports hover - typically indicates a non-touch device */
+@media (hover: none) {
+  .nav-link {
+    /* Make buttons bigger for touch devices */
+    padding: 0.8rem 1.8rem;
+  }
+}
 </style>
 </head>
 <body>
@@ -160,6 +228,9 @@ p {
   <script>
 // Restore full boot sequence but keep it reasonably fast
 document.addEventListener("DOMContentLoaded", function() {
+  // Check if we're on a mobile device
+  const isMobile = window.matchMedia("(max-width: 600px)").matches;
+  
   // Simulate boot sequence for the description
   const description = document.querySelector('.description');
   const paragraphs = description.querySelectorAll('p');
@@ -179,6 +250,10 @@ document.addEventListener("DOMContentLoaded", function() {
   bootText.style.marginBottom = '1rem';
   description.prepend(bootText);
 
+  // Adjust timing for mobile devices
+  const lineDelay = isMobile ? 250 : 350;
+  const initialDelay = isMobile ? 600 : 800;
+  
   // Reveal paragraphs in sequence with moderate timing
   setTimeout(() => {
     // Add each line with a delay to simulate loading
@@ -195,7 +270,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (lineIndex < lines.length) {
         bootText.innerHTML += '<br>' + lines[lineIndex];
         lineIndex++;
-        setTimeout(addLine, 350); // Moderate line-by-line reveal
+        setTimeout(addLine, lineDelay);
       } else {
         // After all lines are added, reveal paragraphs
         let i = 0;
@@ -204,16 +279,16 @@ document.addEventListener("DOMContentLoaded", function() {
             paragraphs[i].style.opacity = '1';
             paragraphs[i].style.transition = 'opacity 0.3s';
             i++;
-            setTimeout(revealParagraph, 350); // Moderate paragraph reveal
+            setTimeout(revealParagraph, lineDelay);
           }
         };
         
-        setTimeout(revealParagraph, 350);
+        setTimeout(revealParagraph, lineDelay);
       }
     };
     
-    setTimeout(addLine, 400); // Moderate initial delay
-  }, 800); // Moderate initial delay
+    setTimeout(addLine, lineDelay);
+  }, initialDelay);
 });
 </script>
 </body>
