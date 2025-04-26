@@ -11,6 +11,7 @@ let blockBuying = false
 let blockSelling = false
 let bannedItem = null
 const inventoryLimit = 20
+const gameHistory = []
 
 // Game flow state tracking
 let gameFlowState = "enterEventCode"
@@ -124,7 +125,7 @@ function updateGameFlowHighlight() {
       break
     case "advanceCycle":
       highlightElement("advanceCycleBtn")
-      showHint("Advance to the next cycle")
+      showHint(cycle === 10 ? "Cash out and complete the game" : "Advance to the next cycle")
       break
     default:
       hideHint()
@@ -315,31 +316,39 @@ function runCardEffect(code, roll) {
       break
 
     case "011": // Found a Stash
-      const itemType = prompt(
-        `Found a Stash: Choose an item to receive 5 units of:\n${items.map((i) => itemNames[i]).join(", ")}`,
-      )
+      showPrompt(
+        "FOUND A STASH",
+        `You discovered a stash of product!
+Choose an item to receive 5 units of:
 
-      if (itemType) {
-        // Find matching item (case insensitive)
-        const matchedItem = items.find(
-          (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
-        )
+${items.map((i) => itemNames[i]).join(", ")}`,
+      ).then((itemType) => {
+        let result = ""
+        if (itemType) {
+          // Find matching item (case insensitive)
+          const matchedItem = items.find(
+            (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
+          )
 
-        if (matchedItem) {
-          if (!inventory[matchedItem]) inventory[matchedItem] = []
-          for (let i = 0; i < 5; i++) {
-            inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+          if (matchedItem) {
+            if (!inventory[matchedItem]) inventory[matchedItem] = []
+            for (let i = 0; i < 5; i++) {
+              inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+            }
+            result = `Gained 5 ${itemNames[matchedItem]}`
+          } else {
+            // If invalid choice, give random items
+            result = grantRandomItems(5)
           }
-          message = `Gained 5 ${itemNames[matchedItem]}`
         } else {
-          // If invalid choice, give random items
-          message = grantRandomItems(5)
+          // If canceled, give random items
+          result = grantRandomItems(5)
         }
-      } else {
-        // If canceled, give random items
-        message = grantRandomItems(5)
-      }
-      break
+        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+        updateInventoryDisplay()
+        updateStatusBars()
+      })
+      return "Waiting for your item selection..." // Temporary message until user decides
 
     case "012": // Crypto Pump
       currentPrices = doublePrices()
@@ -357,28 +366,37 @@ function runCardEffect(code, roll) {
       break
 
     case "015": // Whale Buyout
-      const whaleItem = prompt(
-        `Whale Buyout: Choose an item to sell at TRIPLE price:\n${items.map((i) => itemNames[i]).join(", ")}`,
-      )
+      showPrompt(
+        "WHALE BUYOUT",
+        `A big player wants to buy in bulk!
+Choose an item to sell at TRIPLE price:
 
-      if (whaleItem) {
-        // Find matching item (case insensitive)
-        const matchedItem = items.find(
-          (i) => itemNames[i].toLowerCase() === whaleItem.toLowerCase() || i.toLowerCase() === whaleItem.toLowerCase(),
-        )
+${items.map((i) => itemNames[i]).join(", ")}`,
+      ).then((itemType) => {
+        let result = ""
 
-        if (matchedItem && currentPrices[matchedItem]) {
-          const originalPrice = currentPrices[matchedItem]
-          currentPrices[matchedItem] = originalPrice * 3
-          updateMarketTable()
-          message = `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
+        if (itemType) {
+          // Find matching item (case insensitive)
+          const matchedItem = items.find(
+            (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
+          )
+
+          if (matchedItem && currentPrices[matchedItem]) {
+            const originalPrice = currentPrices[matchedItem]
+            currentPrices[matchedItem] = originalPrice * 3
+            updateMarketTable()
+            result = `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
+          } else {
+            result = "Invalid item choice - no effect"
+          }
         } else {
-          message = "Invalid item choice - no effect"
+          result = "No item selected - no effect"
         }
-      } else {
-        message = "No item selected - no effect"
-      }
-      break
+
+        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+      })
+
+      return "Waiting for your item selection..." // Temporary message until user decides
 
     case "016": // Deep Web Payday
       if (!glock) {
@@ -396,31 +414,39 @@ function runCardEffect(code, roll) {
         btc += 50
         message = "Gain 50 BTC"
       } else {
-        const boostItem = prompt(
-          `Community Boost: Choose an item to receive 10 units of:\n${items.map((i) => itemNames[i]).join(", ")}`,
-        )
+        showPrompt(
+          "COMMUNITY BOOST",
+          `Choose an item to receive 10 units of:
 
-        if (boostItem) {
-          // Find matching item (case insensitive)
-          const matchedItem = items.find(
-            (i) =>
-              itemNames[i].toLowerCase() === boostItem.toLowerCase() || i.toLowerCase() === boostItem.toLowerCase(),
-          )
+${items.map((i) => itemNames[i]).join(", ")}`,
+        ).then((itemType) => {
+          let result = ""
+          if (itemType) {
+            // Find matching item (case insensitive)
+            const matchedItem = items.find(
+              (i) =>
+                itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
+            )
 
-          if (matchedItem) {
-            if (!inventory[matchedItem]) inventory[matchedItem] = []
-            for (let i = 0; i < 10; i++) {
-              inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+            if (matchedItem) {
+              if (!inventory[matchedItem]) inventory[matchedItem] = []
+              for (let i = 0; i < 10; i++) {
+                inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+              }
+              result = `Gained 10 ${itemNames[matchedItem]}`
+            } else {
+              // If invalid choice, give random items
+              result = grantRandomItems(10)
             }
-            message = `Gained 10 ${itemNames[matchedItem]}`
           } else {
-            // If invalid choice, give random items
-            message = grantRandomItems(10)
+            // If canceled, give random items
+            result = grantRandomItems(10)
           }
-        } else {
-          // If canceled, give random items
-          message = grantRandomItems(10)
-        }
+          document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+          updateInventoryDisplay()
+          updateStatusBars()
+        })
+        return "Waiting for your item selection..." // Temporary message until user decides
       }
       break
 
@@ -450,23 +476,45 @@ function runCardEffect(code, roll) {
       break
 
     case "021": // Emergency Sale
-      if (confirm("Emergency Sale: Sell all at half value? If not, you cannot buy this round.")) {
-        message = sellAllAtHalf()
-      } else {
-        blockBuying = true
-        message = "Cannot buy this round"
-      }
-      break
+      showConfirm(
+        "EMERGENCY SALE",
+        "The network's volatile. You can liquidate now at a loss...\nor hold and forfeit all buys this cycle.",
+        "Sell All (Half Value)",
+        "Hold (No Buying)",
+      ).then((result) => {
+        let outcome = ""
+        if (result) {
+          outcome = sellAllAtHalf()
+        } else {
+          blockBuying = true
+          outcome = "Cannot buy this round"
+        }
+        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
+        updateGameFlowHighlight()
+      })
+      return "Waiting for your decision..." // Temporary message until user decides
 
     case "022": // Cut and Run
-      if (confirm("Cut and Run: Lose inventory for 40 BTC?")) {
-        clearInventory()
-        btc += 40
-        message = "Gain 40 BTC, lose inventory"
-      } else {
-        message = "Kept inventory"
-      }
-      break
+      showConfirm(
+        "CUT AND RUN",
+        "You've got seconds. Ditch the stash and bolt… or stay and hope they don't breach your door.",
+        "Lose Inventory (+40 BTC)",
+        "Keep Inventory",
+      ).then((result) => {
+        let outcome = ""
+        if (result) {
+          clearInventory()
+          btc += 40
+          outcome = "Gain 40 BTC, lose inventory"
+        } else {
+          outcome = "Kept inventory"
+        }
+        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
+        updateStatusBars()
+        updateInventoryDisplay()
+        updateGameFlowHighlight()
+      })
+      return "Waiting for your decision..." // Temporary message until user decides
 
     case "023": // Blackmail
       if (roll <= 2) {
@@ -509,18 +557,37 @@ function runCardEffect(code, roll) {
       blockBuying = true
       blockSelling = true
       message = "Cannot buy or sell this round"
+      // Since no buying or selling is possible, highlight the advance button
+      gameFlowState = "advanceCycle"
+      updateGameFlowHighlight()
       break
 
     case "028": // Family Emergency
-      if (confirm("Family Emergency: Lose 30 BTC or skip turn?")) {
-        btc = Math.max(0, btc - 30)
-        message = "Lose 30 BTC"
-      } else {
-        blockBuying = true
-        blockSelling = true
-        message = "Skip turn"
-      }
-      break
+      showConfirm(
+        "FAMILY EMERGENCY",
+        "Your sister's in trouble. Pay off her debt or skip this cycle to help her.",
+        "Lose 30 BTC",
+        "Skip Turn",
+      ).then((result) => {
+        let outcome = ""
+        if (result) {
+          btc = Math.max(0, btc - 30)
+          outcome = "Lose 30 BTC"
+        } else {
+          blockBuying = true
+          blockSelling = true
+          outcome = "Skip turn"
+          // Since the player chose to skip the round, highlight the advance button
+          gameFlowState = "advanceCycle"
+          updateGameFlowHighlight()
+          // Show a hint to advance to the next cycle
+          showHint("You've skipped this round. Click 'Advance to Next Cycle' to continue.")
+        }
+        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
+        updateStatusBars()
+        updateInventoryDisplay()
+      })
+      return "Waiting for your decision..." // Temporary message until user decides
 
     default:
       message = "Invalid card code"
@@ -826,24 +893,90 @@ function buyGlock() {
   updateStatusBars()
 }
 
+// Cash out all inventory at current market prices
+function cashOutInventory() {
+  let totalEarned = 0
+  let itemsSold = 0
+  const soldItems = []
+
+  // Only proceed if selling is allowed
+  if (blockSelling) {
+    log("-- Cannot sell due to event effect. Cashing out with current BTC only.")
+    return { totalEarned: 0, itemsSold: 0, soldItems: [] }
+  }
+
+  // Sell all inventory at current prices
+  for (const item of items) {
+    if (item === bannedItem) continue
+
+    const itemInventory = inventory[item] || []
+    const count = itemInventory.length
+
+    if (count > 0) {
+      const price = currentPrices[item] || 1
+      const earned = count * price
+
+      totalEarned += earned
+      itemsSold += count
+
+      soldItems.push(`${count} ${itemNames[item]} for ${earned} BTC`)
+      log(`-- Cashed out ${count} ${itemNames[item]} for ${earned} BTC.`)
+    }
+  }
+
+  // Clear inventory and add BTC
+  inventory = {}
+  btc += totalEarned
+
+  if (itemsSold > 0) {
+    log(`-- Final cash out: Sold ${itemsSold} items for ${totalEarned} BTC.`)
+  }
+
+  return { totalEarned, itemsSold, soldItems }
+}
+
 // Advance to next cycle
 function advanceCycle() {
   playSound("bleep")
 
   if (cycle >= 10) {
-    log("-- Game over! Final score: " + btc + " BTC")
+    // This is the final round - cash out and end game
+    const cashOutResult = cashOutInventory()
 
-    // Show game over message
-    const gameOver = confirm(
-      `Game Over! Final score: ${btc} BTC with${glock ? "" : "out"} a Glock.
+    log("-- GAME OVER! You've gone dark with your earnings.")
 
-Would you like to submit your score?`,
-    )
+    // Generate a game verification hash
+    const gameHash = generateGameHash()
 
-    if (gameOver) {
-      // Redirect to submit page with score
-      window.location.href = `submit.html?btc=${btc}&glock=${glock ? "Yes" : "No"}`
+    // Create game data for submission
+    const gameData = {
+      btc: btc,
+      glock: glock,
+      gameHistory: gameHistory,
+      hash: gameHash,
     }
+
+    // Encode game data for URL
+    const encodedGameData = btoa(JSON.stringify(gameData))
+
+    // Show game over message with final results
+    let cashOutDetails = ""
+    if (cashOutResult.itemsSold > 0) {
+      cashOutDetails = `\nCashed out: ${cashOutResult.soldItems.join(", ")}`
+    }
+
+    // Use custom confirm instead of browser confirm
+    showConfirm(
+      "GAME OVER",
+      `You've gone dark with your earnings.\n\nFinal score: ${btc} BTC with${glock ? "" : "out"} a Glock.${cashOutDetails}\n\nSubmit your score to the leaderboard?`,
+      "Submit Score",
+      "Stay Here",
+    ).then((result) => {
+      if (result) {
+        // Redirect to submit page with verified game data
+        window.location.href = `submit.html?gameData=${encodedGameData}`
+      }
+    })
 
     return
   }
@@ -873,11 +1006,26 @@ Would you like to submit your score?`,
   // Update the highlighted element
   updateGameFlowHighlight()
 
-  // Scroll to the top of the page
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth", // This makes the scrolling smooth instead of instant
-  })
+  // Robust scroll to top implementation
+  scrollToTop()
+}
+
+// Add this new function for scrolling to top
+function scrollToTop() {
+  try {
+    // Try modern smooth scrolling first
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    })
+
+    // Also apply these for older browsers
+    document.body.scrollTop = 0 // For Safari
+    document.documentElement.scrollTop = 0 // For Chrome, Firefox, IE and Opera
+  } catch (e) {
+    // Fallback for very old browsers
+    window.scrollTo(0, 0)
+  }
 }
 
 // Helper Functions
@@ -1115,4 +1263,205 @@ function populateMarketTable() {
 
     tableBody.appendChild(row)
   }
+}
+
+// Generate a game hash for verification
+function generateGameHash() {
+  const dataString = JSON.stringify({
+    btc: btc,
+    glock: glock,
+    cycle: cycle,
+  })
+
+  let hash = 0
+  for (let i = 0; i < dataString.length; i++) {
+    const char = dataString.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+
+  return Math.abs(hash).toString(16).substring(0, 8)
+}
+
+// Custom prompt function
+function showPrompt(title, message) {
+  return new Promise((resolve) => {
+    // Create modal container
+    const modal = document.createElement("div")
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    `
+
+    // Create modal content
+    const modalContent = document.createElement("div")
+    modalContent.style.cssText = `
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+    `
+
+    // Title
+    const titleElement = document.createElement("h2")
+    titleElement.textContent = title
+    modalContent.appendChild(titleElement)
+
+    // Message
+    const messageElement = document.createElement("p")
+    messageElement.textContent = message
+    modalContent.appendChild(messageElement)
+
+    // Input
+    const inputElement = document.createElement("input")
+    inputElement.type = "text"
+    inputElement.style.cssText = `
+      margin: 10px 0;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 200px;
+    `
+    modalContent.appendChild(inputElement)
+
+    // Buttons container
+    const buttonsContainer = document.createElement("div")
+    buttonsContainer.style.cssText = `
+      margin-top: 10px;
+    `
+
+    // OK button
+    const okButton = document.createElement("button")
+    okButton.textContent = "OK"
+    okButton.style.cssText = `
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    `
+    okButton.addEventListener("click", () => {
+      resolve(inputElement.value)
+      document.body.removeChild(modal)
+    })
+    buttonsContainer.appendChild(okButton)
+
+    // Cancel button
+    const cancelButton = document.createElement("button")
+    cancelButton.textContent = "Cancel"
+    cancelButton.style.cssText = `
+      background-color: #f44336;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    `
+    cancelButton.addEventListener("click", () => {
+      resolve(null)
+      document.body.removeChild(modal)
+    })
+    buttonsContainer.appendChild(cancelButton)
+
+    modalContent.appendChild(buttonsContainer)
+    modal.appendChild(modalContent)
+
+    document.body.appendChild(modal)
+    inputElement.focus()
+  })
+}
+
+// Custom confirm function
+function showConfirm(title, message, okText = "OK", cancelText = "Cancel") {
+  return new Promise((resolve) => {
+    // Create modal container
+    const modal = document.createElement("div")
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    `
+
+    // Create modal content
+    const modalContent = document.createElement("div")
+    modalContent.style.cssText = `
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+    `
+
+    // Title
+    const titleElement = document.createElement("h2")
+    titleElement.textContent = title
+    modalContent.appendChild(titleElement)
+
+    // Message
+    const messageElement = document.createElement("p")
+    messageElement.textContent = message
+    modalContent.appendChild(messageElement)
+
+    // Buttons container
+    const buttonsContainer = document.createElement("div")
+    buttonsContainer.style.cssText = `
+      margin-top: 20px;
+    `
+
+    // OK button
+    const okButton = document.createElement("button")
+    okButton.textContent = okText
+    okButton.style.cssText = `
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    `
+    okButton.addEventListener("click", () => {
+      resolve(true)
+      document.body.removeChild(modal)
+    })
+    buttonsContainer.appendChild(okButton)
+
+    // Cancel button
+    const cancelButton = document.createElement("button")
+    cancelButton.textContent = cancelText
+    cancelButton.style.cssText = `
+      background-color: #f44336;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    `
+    cancelButton.addEventListener("click", () => {
+      resolve(false)
+      document.body.removeChild(modal)
+    })
+    buttonsContainer.appendChild(cancelButton)
+
+    modalContent.appendChild(buttonsContainer)
+    modal.appendChild(modalContent)
+
+    document.body.appendChild(modal)
+  })
 }

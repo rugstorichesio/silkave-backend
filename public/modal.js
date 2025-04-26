@@ -5,14 +5,10 @@ let modalActive = false
 let modalCallback = null
 let modalInputValue = ""
 
-// Declare playSound function if not already defined
-let playSound
-
-// Mock playSound function if not already defined
-if (typeof playSound !== "function") {
-  playSound = (sound) => {
-    console.warn(`playSound function not defined. Playing mock sound: ${sound}`)
-  }
+// Mock playSound function (replace with actual implementation if available)
+function playSound(soundName) {
+  console.log(`Playing sound: ${soundName}`)
+  // In a real application, you would use an audio API here
 }
 
 // Create modal elements
