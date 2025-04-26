@@ -9,10 +9,12 @@
       background-color: #111;
       color: #0f0;
       font-family: monospace;
-      padding: 2rem;
+      padding: 1rem; /* Reduced padding */
       text-align: center;
       line-height: 1.6;
-      overflow-x: hidden; /* Prevent horizontal scrollbar */
+      overflow-x: hidden;
+      min-height: 100vh;
+      margin: 0; /* Remove default margin */
     }
     h1 {
       font-size: 2.5rem;
@@ -22,7 +24,7 @@
     .ascii-art {
       white-space: pre;
       font-family: monospace;
-      margin: 2rem auto;
+      margin: 1rem auto; /* Reduced margin */
       display: block;
       text-align: center;
       width: 100%;
@@ -31,14 +33,14 @@
     }
     .description {
       max-width: 800px;
-      margin: 0 auto 2rem auto;
+      margin: 0 auto 1rem auto; /* Reduced bottom margin */
     }
     .nav-links {
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
       gap: 1rem;
-      margin: 2rem 0;
+      margin: 1rem 0; /* Reduced margin */
     }
     .nav-link {
       display: inline-block;
@@ -55,7 +57,7 @@
       box-shadow: 0 0 10px #0f0;
     }
     .footer {
-      margin-top: 3rem;
+      margin-top: 1rem; /* Reduced margin */
       font-size: 0.8rem;
       opacity: 0.7;
     }
@@ -86,8 +88,8 @@
       width: 100%;
       overflow: hidden;
       position: relative;
-      opacity: 0; /* Start hidden */
-      transition: opacity 0.5s ease;
+      opacity: 1; /* Start visible immediately */
+      height: 1.5rem; /* Fixed height to prevent layout shifts */
     }
     .scrolling-text {
       display: inline-block;
@@ -118,7 +120,10 @@
     }
     html, body {
       max-width: 100%;
-      overflow-x: hidden; /* Prevent horizontal scrollbar at all levels */
+      overflow-x: hidden;
+    }
+    .boot-text {
+      margin-bottom: 0.5rem; /* Reduced margin */
     }
   </style>
 </head>
@@ -152,7 +157,7 @@
   </div>
   
   <script>
-  // Start scrolling text after boot sequence
+  // Start scrolling text immediately
   document.addEventListener("DOMContentLoaded", function() {
     // Simulate boot sequence for the description
     const description = document.querySelector('.description');
@@ -170,10 +175,10 @@
     bootText.innerHTML = '> INITIALIZING SILK AVE SYSTEM...<br>> LOADING MODULES...<br>> ESTABLISHING SECURE CONNECTION...';
     bootText.style.color = '#0f0';
     bootText.style.fontFamily = 'monospace';
-    bootText.style.marginBottom = '1rem';
+    bootText.style.marginBottom = '0.5rem';
     description.prepend(bootText);
 
-    // Reveal paragraphs in sequence with slower timing
+    // Reveal paragraphs in sequence with faster timing
     setTimeout(() => {
       // Add each line with a delay to simulate loading
       const lines = [
@@ -189,38 +194,25 @@
         if (lineIndex < lines.length) {
           bootText.innerHTML += '<br>' + lines[lineIndex];
           lineIndex++;
-          setTimeout(addLine, 400); // Slower line-by-line reveal
-          
-          // When we reach "BEGIN OPERATION", start the scrolling text
-          if (lineIndex === lines.length) {
-            setTimeout(() => {
-              const scrollingContainer = document.getElementById('scrollingContainer');
-              if (scrollingContainer) {
-                scrollingContainer.style.opacity = '1';
-                
-                // Force a reflow to ensure animation starts properly
-                void scrollingContainer.offsetWidth;
-              }
-            }, 600); // Short delay after "BEGIN OPERATION" appears
-          }
+          setTimeout(addLine, 300); // Faster line-by-line reveal
         } else {
           // After all lines are added, reveal paragraphs
           let i = 0;
           const revealParagraph = () => {
             if (i < paragraphs.length) {
               paragraphs[i].style.opacity = '1';
-              paragraphs[i].style.transition = 'opacity 0.5s';
+              paragraphs[i].style.transition = 'opacity 0.3s';
               i++;
-              setTimeout(revealParagraph, 500); // Slower paragraph reveal
+              setTimeout(revealParagraph, 300); // Faster paragraph reveal
             }
           };
           
-          setTimeout(revealParagraph, 600);
+          setTimeout(revealParagraph, 300);
         }
       };
       
-      setTimeout(addLine, 600);
-    }, 1200); // Longer initial delay
+      setTimeout(addLine, 300); // Faster initial delay
+    }, 600); // Shorter initial delay
   });
   </script>
 </body>
