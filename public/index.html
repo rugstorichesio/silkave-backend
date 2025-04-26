@@ -95,7 +95,7 @@ h1 {
   padding: 5px 0;
   position: absolute;
   left: 0;
-  animation: scroll-text 30s linear infinite; /* Faster speed */
+  animation: scroll-text 36s linear infinite; /* 20% slower */
 }
 @keyframes scroll-text {
   0% {
@@ -154,7 +154,7 @@ p {
   </div>
   
   <script>
-// Simplified script that doesn't delay the scrolling text
+// Restore full boot sequence but keep it reasonably fast
 document.addEventListener("DOMContentLoaded", function() {
   // Simulate boot sequence for the description
   const description = document.querySelector('.description');
@@ -169,24 +169,47 @@ document.addEventListener("DOMContentLoaded", function() {
   // Show boot sequence text
   const bootText = document.createElement('div');
   bootText.className = 'boot-text';
-  bootText.innerHTML = '> INITIALIZING SILK AVE SYSTEM...';
+  bootText.innerHTML = '> INITIALIZING SILK AVE SYSTEM...<br>> LOADING MODULES...<br>> ESTABLISHING SECURE CONNECTION...';
   bootText.style.color = '#0f0';
   bootText.style.fontFamily = 'monospace';
   bootText.style.marginBottom = '0.5rem';
   description.prepend(bootText);
 
-  // Immediately start revealing paragraphs
+  // Reveal paragraphs in sequence with moderate timing
   setTimeout(() => {
-    bootText.innerHTML += '<br>> SYSTEM READY';
+    // Add each line with a delay to simulate loading
+    const lines = [
+      '> SYSTEM READY',
+      '> DARK WEB ACCESS GRANTED',
+      '> NODE: SILK AVE <span class="active-glow">[ACTIVE]</span>',
+      '> IP MASKED | ENCRYPTION LOCKED',
+      '> BEGIN OPERATION'
+    ];
     
-    // Reveal paragraphs quickly
-    paragraphs.forEach((p, index) => {
-      setTimeout(() => {
-        p.style.opacity = '1';
-        p.style.transition = 'opacity 0.3s';
-      }, index * 200);
-    });
-  }, 300);
+    let lineIndex = 0;
+    const addLine = () => {
+      if (lineIndex < lines.length) {
+        bootText.innerHTML += '<br>' + lines[lineIndex];
+        lineIndex++;
+        setTimeout(addLine, 350); // Moderate line-by-line reveal
+      } else {
+        // After all lines are added, reveal paragraphs
+        let i = 0;
+        const revealParagraph = () => {
+          if (i < paragraphs.length) {
+            paragraphs[i].style.opacity = '1';
+            paragraphs[i].style.transition = 'opacity 0.3s';
+            i++;
+            setTimeout(revealParagraph, 350); // Moderate paragraph reveal
+          }
+        };
+        
+        setTimeout(revealParagraph, 350);
+      }
+    };
+    
+    setTimeout(addLine, 400); // Moderate initial delay
+  }, 800); // Moderate initial delay
 });
 </script>
 </body>
