@@ -5,19 +5,16 @@ let modalActive = false
 let modalCallback = null
 let modalInputValue = ""
 
-// Mock playSound function (replace with actual implementation if available)
-// Use the existing playSound function if available
-if (typeof window.playSound !== "function") {
-  window.playSound = (soundId) => {
-    try {
-      const sound = document.getElementById(soundId)
-      if (sound) {
-        sound.currentTime = 0
-        sound.play().catch((e) => console.log("Audio play failed:", e))
-      }
-    } catch (e) {
-      console.error("Error playing sound:", e)
+// Play sound function
+function playModalSound(soundId) {
+  try {
+    const sound = document.getElementById(soundId)
+    if (sound) {
+      sound.currentTime = 0
+      sound.play().catch((e) => console.log("Audio play failed:", e))
     }
+  } catch (e) {
+    console.error("Error playing sound:", e)
   }
 }
 
@@ -127,7 +124,7 @@ function createModal(title, message, type, options = []) {
 
   // Play sound
   try {
-    window.playSound("bleep")
+    playModalSound("bleep")
   } catch (e) {
     console.log("Sound play failed:", e)
   }
@@ -188,3 +185,8 @@ document.addEventListener("keydown", (e) => {
     }
   }
 })
+
+// Expose functions to window object
+window.showAlert = showAlert
+window.showConfirm = showConfirm
+window.showPrompt = showPrompt

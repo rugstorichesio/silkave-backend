@@ -316,38 +316,41 @@ function runCardEffect(code, roll) {
       break
 
     case "011": // Found a Stash
-      showPrompt(
-        "FOUND A STASH",
-        `You discovered a stash of product!
+      window
+        .showPrompt(
+          "FOUND A STASH",
+          `You discovered a stash of product!
 Choose an item to receive 5 units of:
 
 ${items.map((i) => itemNames[i]).join(", ")}`,
-      ).then((itemType) => {
-        let result = ""
-        if (itemType) {
-          // Find matching item (case insensitive)
-          const matchedItem = items.find(
-            (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
-          )
+        )
+        .then((itemType) => {
+          let result = ""
+          if (itemType) {
+            // Find matching item (case insensitive)
+            const matchedItem = items.find(
+              (i) =>
+                itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
+            )
 
-          if (matchedItem) {
-            if (!inventory[matchedItem]) inventory[matchedItem] = []
-            for (let i = 0; i < 5; i++) {
-              inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+            if (matchedItem) {
+              if (!inventory[matchedItem]) inventory[matchedItem] = []
+              for (let i = 0; i < 5; i++) {
+                inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+              }
+              result = `Gained 5 ${itemNames[matchedItem]}`
+            } else {
+              // If invalid choice, give random items
+              result = grantRandomItems(5)
             }
-            result = `Gained 5 ${itemNames[matchedItem]}`
           } else {
-            // If invalid choice, give random items
+            // If canceled, give random items
             result = grantRandomItems(5)
           }
-        } else {
-          // If canceled, give random items
-          result = grantRandomItems(5)
-        }
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
-        updateInventoryDisplay()
-        updateStatusBars()
-      })
+          document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+          updateInventoryDisplay()
+          updateStatusBars()
+        })
       return "Waiting for your item selection..." // Temporary message until user decides
 
     case "012": // Crypto Pump
@@ -366,35 +369,38 @@ ${items.map((i) => itemNames[i]).join(", ")}`,
       break
 
     case "015": // Whale Buyout
-      showPrompt(
-        "WHALE BUYOUT",
-        `A big player wants to buy in bulk!
+      window
+        .showPrompt(
+          "WHALE BUYOUT",
+          `A big player wants to buy in bulk!
 Choose an item to sell at TRIPLE price:
 
 ${items.map((i) => itemNames[i]).join(", ")}`,
-      ).then((itemType) => {
-        let result = ""
+        )
+        .then((itemType) => {
+          let result = ""
 
-        if (itemType) {
-          // Find matching item (case insensitive)
-          const matchedItem = items.find(
-            (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
-          )
+          if (itemType) {
+            // Find matching item (case insensitive)
+            const matchedItem = items.find(
+              (i) =>
+                itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
+            )
 
-          if (matchedItem && currentPrices[matchedItem]) {
-            const originalPrice = currentPrices[matchedItem]
-            currentPrices[matchedItem] = originalPrice * 3
-            updateMarketTable()
-            result = `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
+            if (matchedItem && currentPrices[matchedItem]) {
+              const originalPrice = currentPrices[matchedItem]
+              currentPrices[matchedItem] = originalPrice * 3
+              updateMarketTable()
+              result = `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
+            } else {
+              result = "Invalid item choice - no effect"
+            }
           } else {
-            result = "Invalid item choice - no effect"
+            result = "No item selected - no effect"
           }
-        } else {
-          result = "No item selected - no effect"
-        }
 
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
-      })
+          document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+        })
 
       return "Waiting for your item selection..." // Temporary message until user decides
 
@@ -414,38 +420,40 @@ ${items.map((i) => itemNames[i]).join(", ")}`,
         btc += 50
         message = "Gain 50 BTC"
       } else {
-        showPrompt(
-          "COMMUNITY BOOST",
-          `Choose an item to receive 10 units of:
+        window
+          .showPrompt(
+            "COMMUNITY BOOST",
+            `Choose an item to receive 10 units of:
 
 ${items.map((i) => itemNames[i]).join(", ")}`,
-        ).then((itemType) => {
-          let result = ""
-          if (itemType) {
-            // Find matching item (case insensitive)
-            const matchedItem = items.find(
-              (i) =>
-                itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
-            )
+          )
+          .then((itemType) => {
+            let result = ""
+            if (itemType) {
+              // Find matching item (case insensitive)
+              const matchedItem = items.find(
+                (i) =>
+                  itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
+              )
 
-            if (matchedItem) {
-              if (!inventory[matchedItem]) inventory[matchedItem] = []
-              for (let i = 0; i < 10; i++) {
-                inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+              if (matchedItem) {
+                if (!inventory[matchedItem]) inventory[matchedItem] = []
+                for (let i = 0; i < 10; i++) {
+                  inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+                }
+                result = `Gained 10 ${itemNames[matchedItem]}`
+              } else {
+                // If invalid choice, give random items
+                result = grantRandomItems(10)
               }
-              result = `Gained 10 ${itemNames[matchedItem]}`
             } else {
-              // If invalid choice, give random items
+              // If canceled, give random items
               result = grantRandomItems(10)
             }
-          } else {
-            // If canceled, give random items
-            result = grantRandomItems(10)
-          }
-          document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
-          updateInventoryDisplay()
-          updateStatusBars()
-        })
+            document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+            updateInventoryDisplay()
+            updateStatusBars()
+          })
         return "Waiting for your item selection..." // Temporary message until user decides
       }
       break
@@ -476,44 +484,48 @@ ${items.map((i) => itemNames[i]).join(", ")}`,
       break
 
     case "021": // Emergency Sale
-      showConfirm(
-        "EMERGENCY SALE",
-        "The network's volatile. You can liquidate now at a loss...\nor hold and forfeit all buys this cycle.",
-        "Sell All (Half Value)",
-        "Hold (No Buying)",
-      ).then((result) => {
-        let outcome = ""
-        if (result) {
-          outcome = sellAllAtHalf()
-        } else {
-          blockBuying = true
-          outcome = "Cannot buy this round"
-        }
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
-        updateGameFlowHighlight()
-      })
+      window
+        .showConfirm(
+          "EMERGENCY SALE",
+          "The network's volatile. You can liquidate now at a loss...\nor hold and forfeit all buys this cycle.",
+          "Sell All (Half Value)",
+          "Hold (No Buying)",
+        )
+        .then((result) => {
+          let outcome = ""
+          if (result) {
+            outcome = sellAllAtHalf()
+          } else {
+            blockBuying = true
+            outcome = "Cannot buy this round"
+          }
+          document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
+          updateGameFlowHighlight()
+        })
       return "Waiting for your decision..." // Temporary message until user decides
 
     case "022": // Cut and Run
-      showConfirm(
-        "CUT AND RUN",
-        "You've got seconds. Ditch the stash and bolt… or stay and hope they don't breach your door.",
-        "Lose Inventory (+40 BTC)",
-        "Keep Inventory",
-      ).then((result) => {
-        let outcome = ""
-        if (result) {
-          clearInventory()
-          btc += 40
-          outcome = "Gain 40 BTC, lose inventory"
-        } else {
-          outcome = "Kept inventory"
-        }
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
-        updateStatusBars()
-        updateInventoryDisplay()
-        updateGameFlowHighlight()
-      })
+      window
+        .showConfirm(
+          "CUT AND RUN",
+          "You've got seconds. Ditch the stash and bolt… or stay and hope they don't breach your door.",
+          "Lose Inventory (+40 BTC)",
+          "Keep Inventory",
+        )
+        .then((result) => {
+          let outcome = ""
+          if (result) {
+            clearInventory()
+            btc += 40
+            outcome = "Gain 40 BTC, lose inventory"
+          } else {
+            outcome = "Kept inventory"
+          }
+          document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
+          updateStatusBars()
+          updateInventoryDisplay()
+          updateGameFlowHighlight()
+        })
       return "Waiting for your decision..." // Temporary message until user decides
 
     case "023": // Blackmail
@@ -563,30 +575,32 @@ ${items.map((i) => itemNames[i]).join(", ")}`,
       break
 
     case "028": // Family Emergency
-      showConfirm(
-        "FAMILY EMERGENCY",
-        "Your sister's in trouble. Pay off her debt or skip this cycle to help her.",
-        "Lose 30 BTC",
-        "Skip Turn",
-      ).then((result) => {
-        let outcome = ""
-        if (result) {
-          btc = Math.max(0, btc - 30)
-          outcome = "Lose 30 BTC"
-        } else {
-          blockBuying = true
-          blockSelling = true
-          outcome = "Skip turn"
-          // Since the player chose to skip the round, highlight the advance button
-          gameFlowState = "advanceCycle"
-          updateGameFlowHighlight()
-          // Show a hint to advance to the next cycle
-          showHint("You've skipped this round. Click 'Advance to Next Cycle' to continue.")
-        }
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
-        updateStatusBars()
-        updateInventoryDisplay()
-      })
+      window
+        .showConfirm(
+          "FAMILY EMERGENCY",
+          "Your sister's in trouble. Pay off her debt or skip this cycle to help her.",
+          "Lose 30 BTC",
+          "Skip Turn",
+        )
+        .then((result) => {
+          let outcome = ""
+          if (result) {
+            btc = Math.max(0, btc - 30)
+            outcome = "Lose 30 BTC"
+          } else {
+            blockBuying = true
+            blockSelling = true
+            outcome = "Skip turn"
+            // Since the player chose to skip the round, highlight the advance button
+            gameFlowState = "advanceCycle"
+            updateGameFlowHighlight()
+            // Show a hint to advance to the next cycle
+            showHint("You've skipped this round. Click 'Advance to Next Cycle' to continue.")
+          }
+          document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
+          updateStatusBars()
+          updateInventoryDisplay()
+        })
       return "Waiting for your decision..." // Temporary message until user decides
 
     default:
@@ -966,17 +980,19 @@ function advanceCycle() {
     }
 
     // Use custom confirm instead of browser confirm
-    showConfirm(
-      "GAME OVER",
-      `You've gone dark with your earnings.\n\nFinal score: ${btc} BTC with${glock ? "" : "out"} a Glock.${cashOutDetails}\n\nSubmit your score to the leaderboard?`,
-      "Submit Score",
-      "Stay Here",
-    ).then((result) => {
-      if (result) {
-        // Redirect to submit page with verified game data
-        window.location.href = `submit.html?gameData=${encodedGameData}`
-      }
-    })
+    window
+      .showConfirm(
+        "GAME OVER",
+        `You've gone dark with your earnings.\n\nFinal score: ${btc} BTC with${glock ? "" : "out"} a Glock.${cashOutDetails}\n\nSubmit your score to the leaderboard?`,
+        "Submit Score",
+        "Stay Here",
+      )
+      .then((result) => {
+        if (result) {
+          // Redirect to submit page with verified game data
+          window.location.href = `submit.html?gameData=${encodedGameData}`
+        }
+      })
 
     return
   }
@@ -1281,175 +1297,4 @@ function generateGameHash() {
   }
 
   return Math.abs(hash).toString(16).substring(0, 8)
-}
-
-// Custom prompt function
-function showPrompt(title, message) {
-  return new Promise((resolve) => {
-    // Create overlay
-    const overlay = document.createElement("div")
-    overlay.style.position = "fixed"
-    overlay.style.top = "0"
-    overlay.style.left = "0"
-    overlay.style.width = "100%"
-    overlay.style.height = "100%"
-    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)"
-    overlay.style.zIndex = "1000"
-    document.body.appendChild(overlay)
-
-    // Create dialog box
-    const dialog = document.createElement("div")
-    dialog.style.position = "absolute"
-    dialog.style.top = "50%"
-    dialog.style.left = "50%"
-    dialog.style.transform = "translate(-50%, -50%)"
-    dialog.style.backgroundColor = "#fff"
-    dialog.style.padding = "20px"
-    dialog.style.borderRadius = "5px"
-    dialog.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.3)"
-    dialog.style.minWidth = "300px"
-    overlay.appendChild(dialog)
-
-    // Title
-    const titleElement = document.createElement("h2")
-    titleElement.textContent = title
-    dialog.appendChild(titleElement)
-
-    // Message
-    const messageElement = document.createElement("p")
-    messageElement.textContent = message
-    dialog.appendChild(messageElement)
-
-    // Input
-    const inputElement = document.createElement("input")
-    inputElement.type = "text"
-    inputElement.style.width = "100%"
-    inputElement.style.padding = "8px"
-    inputElement.style.marginTop = "10px"
-    dialog.appendChild(inputElement)
-
-    // Buttons
-    const confirmButton = document.createElement("button")
-    confirmButton.textContent = "Confirm"
-    confirmButton.style.backgroundColor = "#4CAF50"
-    confirmButton.style.color = "white"
-    confirmButton.style.padding = "10px 15px"
-    confirmButton.style.border = "none"
-    confirmButton.style.borderRadius = "4px"
-    confirmButton.style.cursor = "pointer"
-    confirmButton.style.marginRight = "10px"
-    dialog.appendChild(confirmButton)
-
-    const cancelButton = document.createElement("button")
-    cancelButton.textContent = "Cancel"
-    cancelButton.style.backgroundColor = "#f44336"
-    cancelButton.style.color = "white"
-    cancelButton.style.padding = "10px 15px"
-    cancelButton.style.border = "none"
-    cancelButton.style.borderRadius = "4px"
-    cancelButton.style.cursor = "pointer"
-    dialog.appendChild(cancelButton)
-
-    // Button event listeners
-    confirmButton.addEventListener("click", () => {
-      resolve(inputElement.value)
-      overlay.remove()
-    })
-
-    cancelButton.addEventListener("click", () => {
-      resolve(null)
-      overlay.remove()
-    })
-
-    // Focus input
-    inputElement.focus()
-
-    // Prevent background scrolling
-    document.body.style.overflow = "hidden"
-
-    // Remove scroll blocking when overlay is removed
-    overlay.addEventListener("DOMNodeRemoved", () => {
-      document.body.style.overflow = "auto"
-    })
-  })
-}
-
-// Custom confirm function
-function showConfirm(title, message, confirmText, cancelText) {
-  return new Promise((resolve) => {
-    // Create overlay
-    const overlay = document.createElement("div")
-    overlay.style.position = "fixed"
-    overlay.style.top = "0"
-    overlay.style.left = "0"
-    overlay.style.width = "100%"
-    overlay.style.height = "100%"
-    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)"
-    overlay.style.zIndex = "1000"
-    document.body.appendChild(overlay)
-
-    // Create dialog box
-    const dialog = document.createElement("div")
-    dialog.style.position = "absolute"
-    dialog.style.top = "50%"
-    dialog.style.left = "50%"
-    dialog.style.transform = "translate(-50%, -50%)"
-    dialog.style.backgroundColor = "#fff"
-    dialog.style.padding = "20px"
-    dialog.style.borderRadius = "5px"
-    dialog.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.3)"
-    dialog.style.minWidth = "300px"
-    overlay.appendChild(dialog)
-
-    // Title
-    const titleElement = document.createElement("h2")
-    titleElement.textContent = title
-    dialog.appendChild(titleElement)
-
-    // Message
-    const messageElement = document.createElement("p")
-    messageElement.textContent = message
-    dialog.appendChild(messageElement)
-
-    // Buttons
-    const confirmButton = document.createElement("button")
-    confirmButton.textContent = confirmText
-    confirmButton.style.backgroundColor = "#4CAF50"
-    confirmButton.style.color = "white"
-    confirmButton.style.padding = "10px 15px"
-    confirmButton.style.border = "none"
-    confirmButton.style.borderRadius = "4px"
-    confirmButton.style.cursor = "pointer"
-    confirmButton.style.marginRight = "10px"
-    dialog.appendChild(confirmButton)
-
-    const cancelButton = document.createElement("button")
-    cancelButton.textContent = cancelText
-    cancelButton.style.backgroundColor = "#f44336"
-    cancelButton.style.color = "white"
-    cancelButton.style.padding = "10px 15px"
-    cancelButton.style.border = "none"
-    cancelButton.style.borderRadius = "4px"
-    cancelButton.style.cursor = "pointer"
-    dialog.appendChild(cancelButton)
-
-    // Button event listeners
-    confirmButton.addEventListener("click", () => {
-      resolve(true)
-      overlay.remove()
-    })
-
-    cancelButton.addEventListener("click", () => {
-      resolve(false)
-      overlay.remove()
-    })
-
-    // Prevent background scrolling
-    document.body.style.overflow = "hidden"
-
-    // Remove scroll blocking when overlay is removed
-    overlay.addEventListener("DOMNodeRemoved", () => {
-      document.body.style.overflow = "auto"
-    })
-  })
 }
