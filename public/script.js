@@ -639,11 +639,30 @@ function runCardEffect(code, roll) {
       break
 
     case "011": // Found a Stash
-      // Declare actualCount here
-      const actualCount = Math.ceil(Math.random() * 10) // Example: 1-10 units
+      // Fixed: Properly handle the Found a Stash card
+      const actualCount = Math.ceil(Math.random() * 10) // Random 1-10 units
+
+      // Ask user to choose an item
       const itemType011 = prompt(
         `FOUND A STASH\n\nYou discovered ${actualCount} units of product!\nType the exact name of the item you want:\n\n${items.map((i) => itemNames[i]).join(", ")}\n\nOK = Get Selected Item\nCancel = Get Random Items`,
       )
+
+      // Process the user's choice
+      if (itemType011 && items.includes(itemType011.toLowerCase())) {
+        // User selected a valid item
+        const selectedItem = itemType011.toLowerCase()
+        if (!inventory[selectedItem]) inventory[selectedItem] = []
+
+        // Add the items to inventory
+        for (let i = 0; i < actualCount; i++) {
+          inventory[selectedItem].push(currentPrices[selectedItem] || 1)
+        }
+
+        message = `Gained ${actualCount} ${itemNames[selectedItem]}`
+      } else {
+        // User canceled or entered invalid item - give random items
+        message = grantItems("random", actualCount)
+      }
       break
 
     case "012": // Crypto Pump
@@ -665,6 +684,22 @@ function runCardEffect(code, roll) {
       const itemType015 = prompt(
         `WHALE BUYOUT\n\nA big player wants to buy in bulk!\nType the exact name of the item to sell at TRIPLE price:\n\n${items.map((i) => itemNames[i]).join(", ")}\n\nOK = Apply Triple Price to Selected Item\nCancel = No Effect`,
       )
+
+      // Process the user's choice
+      if (itemType015 && items.includes(itemType015.toLowerCase())) {
+        const selectedItem = itemType015.toLowerCase()
+        // Triple the price for this item
+        if (currentPrices[selectedItem]) {
+          currentPrices[selectedItem] *= 3
+          message = `${itemNames[selectedItem]} price tripled to ${currentPrices[selectedItem]} BTC`
+          // Update the market table to reflect the new price
+          updateMarketTable()
+        } else {
+          message = "No effect - roll market prices first"
+        }
+      } else {
+        message = "No effect"
+      }
       break
 
     case "016": // Deep Web Payday
@@ -1133,6 +1168,63 @@ function executeTransactions() {
   updateGameFlowHighlight()
 }
 
+// Sell everything in inventory
+function sellEverything() {
+  console.log("sellEverything function called")
+  playSound("bleep")
+
+  if (blockSelling) {
+    log("-- Cannot sell due to event effect.")
+    return
+  }
+
+  let totalSold = 0
+  let btcEarned = 0
+  const soldItems = []
+
+  // Process all items
+  for (const item of items) {
+    if (item === bannedItem) continue
+
+    const itemInventory = inventory[item] || []
+    const count = itemInventory.length
+
+    if (count > 0) {
+      const earned = count * currentPrices[item]
+      btcEarned += earned
+      totalSold += count
+
+      soldItems.push(`${count} ${itemNames[item]} for ${earned} BTC`)
+      log(`-- Sold ${count} ${itemNames[item]} for ${earned} BTC.`)
+
+      // Clear this item from inventory
+      inventory[item] = []
+    }
+  }
+
+  // Update BTC
+  btc += btcEarned
+
+  // Log summary
+  if (totalSold > 0) {
+    log(`-- Sold everything: ${totalSold} items for ${btcEarned} BTC.`)
+
+    // Record this action in game history
+    gameHistory.push({
+      action: "sellEverything",
+      cycle: cycle,
+      itemsSold: totalSold,
+      btcEarned: btcEarned,
+      newBtcTotal: btc,
+    })
+  } else {
+    log("-- No items to sell.")
+  }
+
+  updateStatusBars()
+  updateInventoryDisplay()
+}
+
 // Buy a Glock
 function buyGlock() {
   console.log("buyGlock function called")
@@ -1263,7 +1355,7 @@ function advanceCycle() {
       btc: btc,
       glock: glock,
       gameHistory: gameHistory,
-      gameHash: gameHash,
+      hash: gameHash,
     }
 
     // Encode game data for URL
