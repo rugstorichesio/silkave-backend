@@ -1286,182 +1286,170 @@ function generateGameHash() {
 // Custom prompt function
 function showPrompt(title, message) {
   return new Promise((resolve) => {
-    // Create modal container
-    const modal = document.createElement("div")
-    modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    `
+    // Create overlay
+    const overlay = document.createElement("div")
+    overlay.style.position = "fixed"
+    overlay.style.top = "0"
+    overlay.style.left = "0"
+    overlay.style.width = "100%"
+    overlay.style.height = "100%"
+    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)"
+    overlay.style.zIndex = "1000"
+    document.body.appendChild(overlay)
 
-    // Create modal content
-    const modalContent = document.createElement("div")
-    modalContent.style.cssText = `
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 5px;
-      text-align: center;
-    `
+    // Create dialog box
+    const dialog = document.createElement("div")
+    dialog.style.position = "absolute"
+    dialog.style.top = "50%"
+    dialog.style.left = "50%"
+    dialog.style.transform = "translate(-50%, -50%)"
+    dialog.style.backgroundColor = "#fff"
+    dialog.style.padding = "20px"
+    dialog.style.borderRadius = "5px"
+    dialog.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.3)"
+    dialog.style.minWidth = "300px"
+    overlay.appendChild(dialog)
 
     // Title
     const titleElement = document.createElement("h2")
     titleElement.textContent = title
-    modalContent.appendChild(titleElement)
+    dialog.appendChild(titleElement)
 
     // Message
     const messageElement = document.createElement("p")
     messageElement.textContent = message
-    modalContent.appendChild(messageElement)
+    dialog.appendChild(messageElement)
 
     // Input
     const inputElement = document.createElement("input")
     inputElement.type = "text"
-    inputElement.style.cssText = `
-      margin: 10px 0;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      width: 200px;
-    `
-    modalContent.appendChild(inputElement)
+    inputElement.style.width = "100%"
+    inputElement.style.padding = "8px"
+    inputElement.style.marginTop = "10px"
+    dialog.appendChild(inputElement)
 
-    // Buttons container
-    const buttonsContainer = document.createElement("div")
-    buttonsContainer.style.cssText = `
-      margin-top: 10px;
-    `
+    // Buttons
+    const confirmButton = document.createElement("button")
+    confirmButton.textContent = "Confirm"
+    confirmButton.style.backgroundColor = "#4CAF50"
+    confirmButton.style.color = "white"
+    confirmButton.style.padding = "10px 15px"
+    confirmButton.style.border = "none"
+    confirmButton.style.borderRadius = "4px"
+    confirmButton.style.cursor = "pointer"
+    confirmButton.style.marginRight = "10px"
+    dialog.appendChild(confirmButton)
 
-    // OK button
-    const okButton = document.createElement("button")
-    okButton.textContent = "OK"
-    okButton.style.cssText = `
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-right: 10px;
-    `
-    okButton.addEventListener("click", () => {
-      resolve(inputElement.value)
-      document.body.removeChild(modal)
-    })
-    buttonsContainer.appendChild(okButton)
-
-    // Cancel button
     const cancelButton = document.createElement("button")
     cancelButton.textContent = "Cancel"
-    cancelButton.style.cssText = `
-      background-color: #f44336;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    `
+    cancelButton.style.backgroundColor = "#f44336"
+    cancelButton.style.color = "white"
+    cancelButton.style.padding = "10px 15px"
+    cancelButton.style.border = "none"
+    cancelButton.style.borderRadius = "4px"
+    cancelButton.style.cursor = "pointer"
+    dialog.appendChild(cancelButton)
+
+    // Button event listeners
+    confirmButton.addEventListener("click", () => {
+      resolve(inputElement.value)
+      overlay.remove()
+    })
+
     cancelButton.addEventListener("click", () => {
       resolve(null)
-      document.body.removeChild(modal)
+      overlay.remove()
     })
-    buttonsContainer.appendChild(cancelButton)
 
-    modalContent.appendChild(buttonsContainer)
-    modal.appendChild(modalContent)
-
-    document.body.appendChild(modal)
+    // Focus input
     inputElement.focus()
+
+    // Prevent background scrolling
+    document.body.style.overflow = "hidden"
+
+    // Remove scroll blocking when overlay is removed
+    overlay.addEventListener("DOMNodeRemoved", () => {
+      document.body.style.overflow = "auto"
+    })
   })
 }
 
 // Custom confirm function
-function showConfirm(title, message, okText = "OK", cancelText = "Cancel") {
+function showConfirm(title, message, confirmText, cancelText) {
   return new Promise((resolve) => {
-    // Create modal container
-    const modal = document.createElement("div")
-    modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    `
+    // Create overlay
+    const overlay = document.createElement("div")
+    overlay.style.position = "fixed"
+    overlay.style.top = "0"
+    overlay.style.left = "0"
+    overlay.style.width = "100%"
+    overlay.style.height = "100%"
+    overlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)"
+    overlay.style.zIndex = "1000"
+    document.body.appendChild(overlay)
 
-    // Create modal content
-    const modalContent = document.createElement("div")
-    modalContent.style.cssText = `
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 5px;
-      text-align: center;
-    `
+    // Create dialog box
+    const dialog = document.createElement("div")
+    dialog.style.position = "absolute"
+    dialog.style.top = "50%"
+    dialog.style.left = "50%"
+    dialog.style.transform = "translate(-50%, -50%)"
+    dialog.style.backgroundColor = "#fff"
+    dialog.style.padding = "20px"
+    dialog.style.borderRadius = "5px"
+    dialog.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.3)"
+    dialog.style.minWidth = "300px"
+    overlay.appendChild(dialog)
 
     // Title
     const titleElement = document.createElement("h2")
     titleElement.textContent = title
-    modalContent.appendChild(titleElement)
+    dialog.appendChild(titleElement)
 
     // Message
     const messageElement = document.createElement("p")
     messageElement.textContent = message
-    modalContent.appendChild(messageElement)
+    dialog.appendChild(messageElement)
 
-    // Buttons container
-    const buttonsContainer = document.createElement("div")
-    buttonsContainer.style.cssText = `
-      margin-top: 20px;
-    `
+    // Buttons
+    const confirmButton = document.createElement("button")
+    confirmButton.textContent = confirmText
+    confirmButton.style.backgroundColor = "#4CAF50"
+    confirmButton.style.color = "white"
+    confirmButton.style.padding = "10px 15px"
+    confirmButton.style.border = "none"
+    confirmButton.style.borderRadius = "4px"
+    confirmButton.style.cursor = "pointer"
+    confirmButton.style.marginRight = "10px"
+    dialog.appendChild(confirmButton)
 
-    // OK button
-    const okButton = document.createElement("button")
-    okButton.textContent = okText
-    okButton.style.cssText = `
-      background-color: #4CAF50;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-right: 10px;
-    `
-    okButton.addEventListener("click", () => {
-      resolve(true)
-      document.body.removeChild(modal)
-    })
-    buttonsContainer.appendChild(okButton)
-
-    // Cancel button
     const cancelButton = document.createElement("button")
     cancelButton.textContent = cancelText
-    cancelButton.style.cssText = `
-      background-color: #f44336;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    `
+    cancelButton.style.backgroundColor = "#f44336"
+    cancelButton.style.color = "white"
+    cancelButton.style.padding = "10px 15px"
+    cancelButton.style.border = "none"
+    cancelButton.style.borderRadius = "4px"
+    cancelButton.style.cursor = "pointer"
+    dialog.appendChild(cancelButton)
+
+    // Button event listeners
+    confirmButton.addEventListener("click", () => {
+      resolve(true)
+      overlay.remove()
+    })
+
     cancelButton.addEventListener("click", () => {
       resolve(false)
-      document.body.removeChild(modal)
+      overlay.remove()
     })
-    buttonsContainer.appendChild(cancelButton)
 
-    modalContent.appendChild(buttonsContainer)
-    modal.appendChild(modalContent)
+    // Prevent background scrolling
+    document.body.style.overflow = "hidden"
 
-    document.body.appendChild(modal)
+    // Remove scroll blocking when overlay is removed
+    overlay.addEventListener("DOMNodeRemoved", () => {
+      document.body.style.overflow = "auto"
+    })
   })
 }

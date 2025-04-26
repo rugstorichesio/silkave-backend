@@ -6,9 +6,19 @@ let modalCallback = null
 let modalInputValue = ""
 
 // Mock playSound function (replace with actual implementation if available)
-function playSound(soundName) {
-  console.log(`Playing sound: ${soundName}`)
-  // In a real application, you would use an audio API here
+// Use the existing playSound function if available
+if (typeof window.playSound !== "function") {
+  window.playSound = (soundId) => {
+    try {
+      const sound = document.getElementById(soundId)
+      if (sound) {
+        sound.currentTime = 0
+        sound.play().catch((e) => console.log("Audio play failed:", e))
+      }
+    } catch (e) {
+      console.error("Error playing sound:", e)
+    }
+  }
 }
 
 // Create modal elements
@@ -117,7 +127,7 @@ function createModal(title, message, type, options = []) {
 
   // Play sound
   try {
-    playSound("bleep")
+    window.playSound("bleep")
   } catch (e) {
     console.log("Sound play failed:", e)
   }
