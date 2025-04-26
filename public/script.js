@@ -2,7 +2,7 @@
 
 let btc = 100
 let glock = false
-let cycle = 1
+const cycle = 1
 let inventory = {}
 let currentPrices = {}
 let eventCode = ""
@@ -1367,13 +1367,14 @@ function advanceCycle() {
       cashOutDetails = `\nCashed out: ${cashOutResult.soldItems.join(", ")}`
     }
 
-    // Show game over message
+    // Show game over message with clearer instructions
     const gameOver = confirm(
       `GAME OVER! You've gone dark with your earnings.
 
 Final score: ${btc} BTC with${glock ? "" : "out"} a Glock.${cashOutDetails}
 
-Would you like to submit your score to the leaderboard?`,
+Click OK to go to the leaderboard submission page.
+(You'll need to enter your name and click Submit on the next screen)`,
     )
 
     if (gameOver) {
@@ -1383,9 +1384,6 @@ Would you like to submit your score to the leaderboard?`,
 
     return
   }
-
-  // Normal cycle advancement
-  cycle++
 
   // Record this action in game history
   gameHistory.push({

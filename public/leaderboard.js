@@ -53,6 +53,12 @@ document.addEventListener("DOMContentLoaded", () => {
             scoreText += ` <span style="font-size: 0.8rem; color: #0a0;">[Game #${entry.hash.substring(0, 6)}]</span>`
           }
   
+          // Add date if available
+          if (entry.date) {
+            const formattedDate = new Date(entry.date).toLocaleDateString()
+            scoreText += ` <span style="font-size: 0.8rem;">(${formattedDate})</span>`
+          }
+  
           item.innerHTML = scoreText
   
           // Highlight top 3

@@ -97,7 +97,7 @@
       text-shadow: 0 0 5px #0f0;
       padding: 5px 0;
       position: relative;
-      animation: scroll-text 72s linear infinite; /* Slowed down by 20% (60s * 1.2 = 72s) */
+      animation: scroll-text 90s linear infinite; /* Slowed down further (from 72s to 90s) */
       animation-delay: 0s;
     }
     /* Duplicate the text to create a seamless loop */
@@ -108,10 +108,10 @@
     }
     @keyframes scroll-text {
       0% {
-        transform: translateX(0);
+        transform: translateX(100%); /* Start from right side of the container */
       }
       100% {
-        transform: translateX(-100%);
+        transform: translateX(-100%); /* End at left side (fully scrolled past) */
       }
     }
     .divider-line {
@@ -144,7 +144,6 @@
   <div class="nav-links">
     <a href="rules.html" class="nav-link">📋 Rules</a>
     <a href="companion.html" class="nav-link">🖥️ Companion</a>
-    <a href="submit.html" class="nav-link">📤 Submit Score</a>
     <a href="leaderboard.html" class="nav-link">🏆 Leaderboard</a>
   </div>
   
