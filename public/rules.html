@@ -9,18 +9,27 @@
       background-color: #111;
       color: #0f0;
       font-family: monospace;
-      padding: 2rem;
+      padding: 1rem;
       line-height: 1.6;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     h1, h2, h3 {
       text-align: center;
       margin-top: 2rem;
+    }
+    h1 {
+      font-size: 2.2rem;
+      text-shadow: 0 0 10px #0f0;
     }
     .container {
       max-width: 800px;
       margin: 0 auto;
       border: 1px solid #0f0;
       padding: 2rem;
+      flex: 1;
     }
     .section {
       margin-bottom: 2rem;
@@ -32,29 +41,29 @@
     }
     .nav-links {
       text-align: center;
-      margin-top: 2rem;
+      margin: 2rem 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
     .nav-links a {
       color: #0f0;
-      text-decoration: underline;
-      margin: 0 1rem;
+      text-decoration: none;
+      margin: 0 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid #0f0;
+      transition: all 0.3s ease;
+    }
+    .nav-links a:hover {
+      background: #0f0;
+      color: #000;
+      box-shadow: 0 0 10px #0f0;
     }
     .highlight {
-      color: #0f0;
-      background-color: transparent;
-      border: 1px solid #0f0;
+      color: #fff;
+      background-color: #0a0;
       padding: 0 0.3rem;
-      text-shadow: 0 0 5px #0f0;
-      font-weight: bold;
-      position: relative;
-    }
-    .highlight::before {
-      content: ">";
-      margin-right: 0.3rem;
-    }
-    .highlight::after {
-      content: "<";
-      margin-left: 0.3rem;
     }
     ol, ul {
       margin-left: 2rem;
@@ -64,6 +73,69 @@
       border: 1px solid #0f0;
       padding: 0.5rem;
       margin: 1rem 0;
+    }
+    
+    /* Media Queries for Responsive Design */
+    /* Mobile Devices (portrait) */
+    @media only screen and (max-width: 600px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+        margin-top: 1rem;
+      }
+      
+      h2 {
+        font-size: 1.4rem;
+      }
+      
+      .container {
+        padding: 1rem;
+        border-width: 1px;
+      }
+      
+      .section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+      }
+      
+      ol, ul {
+        margin-left: 1.5rem;
+        padding-left: 0;
+      }
+      
+      .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 1.5rem 0;
+      }
+      
+      .nav-links a {
+        display: block;
+        width: 80%;
+        margin: 0 auto;
+      }
+    }
+    
+    /* Tablets and small screens */
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+      .container {
+        max-width: 90%;
+        padding: 1.5rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+    }
+    
+    /* Detect if device supports hover - typically indicates a non-touch device */
+    @media (hover: none) {
+      .nav-links a {
+        padding: 0.7rem 1.2rem;
+      }
     }
   </style>
 </head>
@@ -154,6 +226,7 @@
     <a href="index.html">Home</a>
     <a href="companion.html">Game Companion</a>
     <a href="leaderboard.html">Leaderboard</a>
+    <a href="submit.html">Submit Score</a>
   </div>
   
   <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
@@ -171,6 +244,18 @@
       links.forEach(link => {
         link.addEventListener('click', playBleep);
       });
+      
+      // Check if we're on a mobile device and adjust the home link position
+      if (window.matchMedia("(max-width: 600px)").matches) {
+        const homeLink = document.querySelector('div[style*="position: absolute"]');
+        if (homeLink) {
+          homeLink.style.position = 'relative';
+          homeLink.style.top = 'auto';
+          homeLink.style.right = 'auto';
+          homeLink.style.textAlign = 'center';
+          homeLink.style.margin = '1rem 0';
+        }
+      }
     });
   </script>
 </body>

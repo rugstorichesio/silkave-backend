@@ -3,293 +3,193 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Silk Ave - Dark Web Trading Game</title>
+  <title>Silk Ave Leaderboard</title>
   <style>
-body {
-  background-color: #111;
-  color: #0f0;
-  font-family: monospace;
-  padding: 1rem;
-  text-align: center;
-  line-height: 1.6;
-  overflow-x: hidden;
-  margin: 0;
-  min-height: 100vh; /* Changed from height to min-height for better mobile support */
-  display: flex;
-  flex-direction: column;
-}
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 3rem; /* Space after title */
-  text-shadow: 0 0 10px #0f0;
-  padding-top: 1rem; /* Added space at top */
-}
-.ascii-art {
-  font-family: monospace;
-  margin: 0 auto;
-  display: block;
-  text-align: center;
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-  height: 12rem; /* Increased height to accommodate more spacing */
-}
-.description {
-  max-width: 800px;
-  margin: 3rem auto 2rem auto; /* Much more top margin */
-}
-.nav-links {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1.5rem; /* More space between links */
-  margin: 2rem 0; /* More vertical space */
-}
-.nav-link {
-  display: inline-block;
-  padding: 0.7rem 1.5rem; /* Larger buttons */
-  background: #000;
-  color: #0f0;
-  text-decoration: none;
-  border: 1px solid #0f0;
-  transition: all 0.3s ease;
-}
-.nav-link:hover {
-  background: #0f0;
-  color: #000;
-  box-shadow: 0 0 10px #0f0;
-}
-.footer {
-  margin-top: auto; /* Push to bottom */
-  font-size: 0.8rem;
-  opacity: 0.7;
-  padding-bottom: 1rem;
-  padding-top: 2rem; /* More space above footer */
-}
-.active-glow {
-  animation: glow-animation 2s ease-in-out infinite;
-  display: inline-block;
-  font-weight: bold;
-}
-@keyframes glow-animation {
-  0%, 100% {
-    text-shadow: 0 0 4px #0f0, 0 0 8px #0f0;
-    color: #0f0;
-  }
-  50% {
-    text-shadow: 0 0 10px #0f0, 0 0 20px #0f0, 0 0 30px #0f0;
-    color: #fff;
-  }
-}
-.scrolling-container {
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-  height: 1.5rem;
-  margin-top: 1rem; /* Space before scrolling text */
-  margin-bottom: 4rem; /* Increased to match the 4rem space above */
-}
-.scrolling-text {
-  display: inline-block;
-  white-space: nowrap;
-  font-family: monospace;
-  font-size: 0.9rem;
-  color: #0f0;
-  text-shadow: 0 0 5px #0f0;
-  padding: 5px 0;
-  position: absolute;
-  left: 0;
-  animation: scroll-text 36s linear infinite;
-}
-@keyframes scroll-text {
-  0% {
-    transform: translateX(100vw); /* Start from right edge of viewport */
-  }
-  100% {
-    transform: translateX(-100%); /* End when text is completely off screen */
-  }
-}
-.divider-line {
-  display: block;
-  margin: 1.5rem 0; /* Space around divider */
-  color: #0f0;
-  text-shadow: 0 0 3px #0f0;
-  letter-spacing: -1px;
-}
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-.boot-text {
-  margin-bottom: 1rem; /* More space after boot text */
-}
-p {
-  margin: 1rem 0; /* More space between paragraphs */
-}
-
-/* Media Queries for Responsive Design */
-/* Mobile Devices (portrait) */
-@media only screen and (max-width: 600px) {
-  h1 {
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .ascii-art {
-    height: 8rem;
-  }
-  
-  .scrolling-container {
-    margin-bottom: 2rem;
-  }
-  
-  .description {
-    margin: 1.5rem auto 1rem auto;
-  }
-  
-  .nav-links {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-  
-  .nav-link {
-    width: 80%;
-    margin: 0 auto;
-  }
-  
-  p {
-    margin: 0.7rem 0;
-    font-size: 0.9rem;
-  }
-  
-  .boot-text {
-    font-size: 0.9rem;
-  }
-}
-
-/* Tablets and small screens */
-@media only screen and (min-width: 601px) and (max-width: 1024px) {
-  h1 {
-    font-size: 2.2rem;
-    margin-bottom: 2rem;
-  }
-  
-  .ascii-art {
-    height: 10rem;
-  }
-  
-  .scrolling-container {
-    margin-bottom: 3rem;
-  }
-  
-  .description {
-    margin: 2rem auto 1.5rem auto;
-  }
-}
-
-/* Detect if device supports hover - typically indicates a non-touch device */
-@media (hover: none) {
-  .nav-link {
-    /* Make buttons bigger for touch devices */
-    padding: 0.8rem 1.8rem;
-  }
-}
-</style>
+    body {
+      background-color: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 1rem;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.2rem;
+      text-shadow: 0 0 10px #0f0;
+      margin-top: 2rem;
+    }
+    .leaderboard {
+      max-width: 800px;
+      margin: 0 auto;
+      border: 1px solid #0f0;
+      padding: 1rem;
+      flex: 1;
+    }
+    .score-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    .score-list li {
+      padding: 0.5rem;
+      border-bottom: 1px dotted #0f0;
+    }
+    .score-list li:last-child {
+      border-bottom: none;
+    }
+    .top-score {
+      color: #0f0;
+      font-weight: bold;
+    }
+    .loading {
+      text-align: center;
+      font-style: italic;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .error {
+      color: red;
+      text-align: center;
+    }
+    .nav-links {
+      text-align: center;
+      margin: 2rem 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .nav-links a {
+      color: #0f0;
+      text-decoration: none;
+      margin: 0 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid #0f0;
+      transition: all 0.3s ease;
+    }
+    .nav-links a:hover {
+      background: #0f0;
+      color: #000;
+      box-shadow: 0 0 10px #0f0;
+    }
+    .timestamp {
+      font-size: 0.8rem;
+      color: #0a0;
+      margin-top: 1rem;
+      text-align: center;
+    }
+    
+    /* Media Queries for Responsive Design */
+    /* Mobile Devices (portrait) */
+    @media only screen and (max-width: 600px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+        margin-top: 1rem;
+      }
+      
+      h2 {
+        font-size: 1.4rem;
+      }
+      
+      .leaderboard {
+        padding: 0.5rem;
+        border-width: 1px;
+      }
+      
+      .score-list li {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+      }
+      
+      .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 1.5rem 0;
+      }
+      
+      .nav-links a {
+        display: block;
+        width: 80%;
+        margin: 0 auto;
+      }
+      
+      .home-link {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        text-align: center;
+        margin: 1rem 0;
+        display: block;
+      }
+    }
+    
+    /* Tablets and small screens */
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+      .leaderboard {
+        max-width: 90%;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+    }
+    
+    /* Detect if device supports hover - typically indicates a non-touch device */
+    @media (hover: none) {
+      .nav-links a {
+        padding: 0.7rem 1.2rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>WELCOME TO SILK AVE</h1>
-  
-  <div class="ascii-art">
-    <div class="scrolling-container" id="scrollingContainer">
-      <div class="scrolling-text">
-        [SYS:ACTIVE] :: MINING NODES: 42 :: PROXIES: ENABLED :: TOR CIRCUITS: 7 :: ENCRYPTION: AES-256 :: MONITORING DARK NET MARKETS :: SCRAPING VENDOR DATA :: ANALYZING PRICE FLUCTUATIONS :: TRACKING FBI HONEYPOTS :: SCANNING FOR VULNERABILITIES :: ROUTING THROUGH EXIT NODES :: BLOCKCHAIN VERIFICATION IN PROGRESS :: CRYPTO WALLETS SECURED :: VPN TUNNELS ESTABLISHED :: FIREWALL BYPASSED :: SILK AVE PROTOCOL INITIALIZED :: DARKNET CRAWLERS DEPLOYED :: MARKET ANALYSIS RUNNING :: STEALTH MODE ENGAGED :: ANONYMIZING TRAFFIC :: OBFUSCATING METADATA :: ZERO-DAY EXPLOITS LOADED :: DEAD DROPS MAPPED :: BURNER DEALS IDENTIFIED :: SECURE COMMS ESTABLISHED :: ONION ROUTING ACTIVE
-      </div>
-    </div>
-    <span class="divider-line">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+  <div class="home-link" style="position: absolute; top: 1rem; right: 2rem;">
+    <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
   </div>
-  
-  <div class="description">
-    <p>The solo card-based crime economy sim.</p>
-    <p>Flip burner deals. Stack dirty crypto. Escape filthy rich.</p>
-    <p>Build your empire round by round: buy low, sell high, dodge FBI stings and bad karma. All you start with is 100 BTC and a dream. Can you flip your way to legend, or will Silk Ave eat you alive?</p>
-  </div>
-  
-  <div class="nav-links">
-    <a href="rules.html" class="nav-link">📋 Rules</a>
-    <a href="companion.html" class="nav-link">🖥️ Companion</a>
-    <a href="leaderboard.html" class="nav-link">🏆 Leaderboard</a>
-  </div>
-  
-  <div class="footer">
-    <p>🔒 All entries are final. Scores submitted to the chain cannot be altered.</p>
-    <p>© 2023 Silk Ave. No affiliation with anything real. This is satire.</p>
-  </div>
-  
-  <script>
-// Restore full boot sequence but keep it reasonably fast
-document.addEventListener("DOMContentLoaded", function() {
-  // Check if we're on a mobile device
-  const isMobile = window.matchMedia("(max-width: 600px)").matches;
-  
-  // Simulate boot sequence for the description
-  const description = document.querySelector('.description');
-  const paragraphs = description.querySelectorAll('p');
-  
-  // Hide all paragraphs initially
-  paragraphs.forEach(p => {
-    p.style.opacity = '0';
-    p.style.display = 'block';
-  });
-  
-  // Show boot sequence text
-  const bootText = document.createElement('div');
-  bootText.className = 'boot-text';
-  bootText.innerHTML = '> INITIALIZING SILK AVE SYSTEM...<br>> LOADING MODULES...<br>> ESTABLISHING SECURE CONNECTION...';
-  bootText.style.color = '#0f0';
-  bootText.style.fontFamily = 'monospace';
-  bootText.style.marginBottom = '1rem';
-  description.prepend(bootText);
 
-  // Adjust timing for mobile devices
-  const lineDelay = isMobile ? 250 : 350;
-  const initialDelay = isMobile ? 600 : 800;
-  
-  // Reveal paragraphs in sequence with moderate timing
-  setTimeout(() => {
-    // Add each line with a delay to simulate loading
-    const lines = [
-      '> SYSTEM READY',
-      '> DARK WEB ACCESS GRANTED',
-      '> NODE: SILK AVE <span class="active-glow">[ACTIVE]</span>',
-      '> IP MASKED | ENCRYPTION LOCKED',
-      '> BEGIN OPERATION'
-    ];
-    
-    let lineIndex = 0;
-    const addLine = () => {
-      if (lineIndex < lines.length) {
-        bootText.innerHTML += '<br>' + lines[lineIndex];
-        lineIndex++;
-        setTimeout(addLine, lineDelay);
-      } else {
-        // After all lines are added, reveal paragraphs
-        let i = 0;
-        const revealParagraph = () => {
-          if (i < paragraphs.length) {
-            paragraphs[i].style.opacity = '1';
-            paragraphs[i].style.transition = 'opacity 0.3s';
-            i++;
-            setTimeout(revealParagraph, lineDelay);
+  <h1>Silk Ave Leaderboard</h1>
+  <div class="leaderboard">
+    <h2>Top Dealers</h2>
+    <ul id="scoreList" class="score-list">
+      <li class="loading">Loading scores...</li>
+    </ul>
+    <div class="timestamp">Last updated: <span id="lastUpdated"></span></div>
+  </div>
+
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="companion.html">Game Companion</a>
+    <a href="submit.html">Submit Score</a>
+  </div>
+
+  <script src="leaderboard.js"></script>
+  <script>
+    // Check if we're on a mobile device
+    document.addEventListener('DOMContentLoaded', function() {
+      // Play sound on link clicks
+      const links = document.querySelectorAll('a');
+      links.forEach(link => {
+        link.addEventListener('click', function() {
+          const sound = document.getElementById('bleep');
+          if (sound) {
+            sound.currentTime = 0;
+            sound.play().catch(e => console.log("Audio play failed:", e));
           }
-        };
-        
-        setTimeout(revealParagraph, lineDelay);
-      }
-    };
-    
-    setTimeout(addLine, lineDelay);
-  }, initialDelay);
-});
-</script>
+        });
+      });
+    });
+  </script>
+  <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
 </body>
 </html>

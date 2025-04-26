@@ -9,10 +9,19 @@
       background-color: #111;
       color: #0f0;
       font-family: monospace;
-      padding: 2rem;
+      padding: 1rem;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     h1, h2, h3 {
       text-align: center;
+    }
+    h1 {
+      font-size: 2.2rem;
+      text-shadow: 0 0 10px #0f0;
+      margin-top: 1rem;
     }
     input, select, button {
       margin: 0.3rem;
@@ -94,71 +103,128 @@
     }
     .nav-links {
       text-align: center;
-      margin-top: 2rem;
+      margin: 2rem 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
     .nav-links a {
       color: #0f0;
-      text-decoration: underline;
-      margin: 0 1rem;
-    }
-    .active-glow {
-      animation: activeGlow 1.5s infinite;
-      font-weight: bold;
-      text-shadow: 0 0 5px #0f0;
-    }
-    @keyframes activeGlow {
-      0% {
-        text-shadow: 0 0 5px #0f0;
-        color: #0f0;
-      }
-      50% {
-        text-shadow: 0 0 10px #0f0, 0 0 15px #0f0, 0 0 20px #0f0;
-        color: #fff;
-      }
-      100% {
-        text-shadow: 0 0 5px #0f0;
-        color: #0f0;
-      }
-    }
-    .log-container {
-      margin-top: 2rem;
+      text-decoration: none;
+      margin: 0 0.5rem;
+      padding: 0.5rem 1rem;
       border: 1px solid #0f0;
-      padding: 0.5rem;
+      transition: all 0.3s ease;
     }
-
-    .log-container h3 {
-      margin-top: 0;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px dotted #0f0;
+    .nav-links a:hover {
+      background: #0f0;
+      color: #000;
+      box-shadow: 0 0 10px #0f0;
     }
-
-    .log {
-      max-height: 200px;
-      overflow-y: auto;
-      padding: 0.5rem;
-      background: #000;
-      border: 1px solid #0f0;
-      white-space: pre-line;
-      scrollbar-width: thin;
-      scrollbar-color: #0f0 #000;
+    
+    /* Media Queries for Responsive Design */
+    /* Mobile Devices (portrait) */
+    @media only screen and (max-width: 600px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+        margin-top: 0.5rem;
+      }
+      
+      h2, h3 {
+        font-size: 1.4rem;
+        margin-top: 1rem;
+      }
+      
+      input, select, button {
+        margin: 0.2rem;
+        padding: 0.4rem;
+        font-size: 0.9rem;
+      }
+      
+      table {
+        font-size: 0.9rem;
+      }
+      
+      th, td {
+        padding: 0.3rem;
+      }
+      
+      .event-section {
+        padding: 0.7rem;
+      }
+      
+      .event-input {
+        flex-direction: column;
+      }
+      
+      .log, .inventory-status {
+        font-size: 0.8rem;
+        padding: 0.7rem;
+      }
+      
+      .bottom-bar {
+        font-size: 0.9rem;
+      }
+      
+      .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 1.5rem 0;
+      }
+      
+      .nav-links a {
+        display: block;
+        width: 80%;
+        margin: 0 auto;
+      }
+      
+      .home-link {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        text-align: center;
+        margin: 1rem 0;
+        display: block;
+      }
     }
-
-    .log::-webkit-scrollbar {
-      width: 8px;
+    
+    /* Tablets and small screens */
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      table {
+        width: 95%;
+        margin: 1rem auto;
+      }
+      
+      .event-section, .log, .inventory-status {
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+      }
     }
-
-    .log::-webkit-scrollbar-track {
-      background: #000;
-    }
-
-    .log::-webkit-scrollbar-thumb {
-      background-color: #0f0;
-      border-radius: 4px;
+    
+    /* Detect if device supports hover - typically indicates a non-touch device */
+    @media (hover: none) {
+      .nav-links a {
+        padding: 0.7rem 1.2rem;
+      }
+      
+      button {
+        padding: 0.6rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div style="position: absolute; top: 1rem; right: 2rem;">
+  <div class="home-link" style="position: absolute; top: 1rem; right: 2rem;">
     <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
   </div>
 
@@ -220,16 +286,11 @@
       <tbody></tbody>
     </table>
     <button id="executeTransactionsBtn" onclick="executeTransactions()">Execute Transactions</button>
-    <button id="sellEverythingBtn" onclick="sellEverything()">Sell Everything</button>
     <button id="buyGlockBtn" onclick="buyGlock()">Buy Glock (20 BTC)</button>
   </div>
 
+  <div class="log" id="log"></div>
   <div class="inventory-status" id="inventoryStatus"></div>
-
-  <div class="log-container">
-    <h3>Game Events</h3>
-    <div class="log" id="log"></div>
-  </div>
 
   <div style="text-align: center; margin-top: 2rem;">
     <button id="advanceCycleBtn" onclick="advanceCycle()">Advance to Next Cycle</button>
@@ -245,6 +306,7 @@
   <div class="nav-links">
     <a href="index.html">Home</a>
     <a href="leaderboard.html">Leaderboard</a>
+    <a href="submit.html">Submit Score</a>
   </div>
 
   <!-- Sound effects -->
@@ -254,18 +316,26 @@
 
   <script src="script.js"></script>
   <script>
-    // Play sound on button clicks with reduced volume
+    // Play sound on button clicks
     function playBleep() {
       const sound = document.getElementById('bleep');
       if (sound) {
-        sound.volume = 0.5; // Set volume to 50%
         sound.currentTime = 0;
         sound.play().catch(e => console.log("Audio play failed:", e));
       }
     }
     
-    // Add sound to all buttons
+    // Check if we're on a mobile device
     document.addEventListener('DOMContentLoaded', function() {
+      if (window.matchMedia("(max-width: 600px)").matches) {
+        const homeLink = document.querySelector('.home-link');
+        if (homeLink) {
+          homeLink.style.position = 'relative';
+          homeLink.style.top = 'auto';
+          homeLink.style.right = 'auto';
+        }
+      }
+      
       // Add click sound to all buttons
       const buttons = document.querySelectorAll('button');
       buttons.forEach(button => {
