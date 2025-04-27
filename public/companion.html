@@ -245,11 +245,11 @@
       margin-top: 0.5rem;
     }
 
+    /* Updated burner deal styling */
     .burner-deal-item {
-      color: #0f0;
+      color: #00ff00;
       font-weight: bold;
-      position: relative;
-      animation: burner-flash 1.5s infinite;
+      animation: burner-flash 1s infinite;
     }
 
     .burner-deal-item::before {
@@ -261,8 +261,8 @@
     }
 
     @keyframes burner-flash {
-      0%, 100% { color: #0f0; }
-      50% { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
+      0%, 100% { color: #0f0; text-shadow: none; }
+      50% { color: #00ff00; text-shadow: 0 0 8px #00ff00; }
     }
 
     @media only screen and (max-width: 600px) {
