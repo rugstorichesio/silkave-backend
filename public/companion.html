@@ -246,14 +246,23 @@
     }
 
     .burner-deal-item {
-      color: #ff0;
+      color: #0f0;
       font-weight: bold;
       position: relative;
+      animation: burner-flash 1.5s infinite;
+    }
+
+    .burner-deal-item::before {
+      content: "<< ";
     }
 
     .burner-deal-item::after {
-      content: " [BURNER]";
-      font-size: 0.8em;
+      content: " >>";
+    }
+
+    @keyframes burner-flash {
+      0%, 100% { color: #0f0; }
+      50% { color: #00ff00; text-shadow: 0 0 5px #00ff00; }
     }
 
     @media only screen and (max-width: 600px) {
