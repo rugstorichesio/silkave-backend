@@ -69,6 +69,12 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch (e) {
     console.error("Error setting up sound:", e)
   }
+
+  // Set initial button text based on cycle
+  const advanceButton = document.getElementById("advanceCycleBtn")
+  if (cycle === 10) {
+    advanceButton.textContent = "Cash Out and Go Dark"
+  }
 })
 
 // Play a sound
@@ -864,12 +870,21 @@ function updateMarketTable() {
   const tableBody = document.querySelector("#marketTable tbody")
   tableBody.innerHTML = ""
 
+  // Get the current burner deal
+  const burnerItem = document.getElementById("burnerDeal").value
+
   for (const item of items) {
     const row = document.createElement("tr")
 
     // Item name cell
     const nameCell = document.createElement("td")
     nameCell.textContent = itemNames[item]
+
+    // Highlight burner deal item
+    if (item === burnerItem) {
+      nameCell.classList.add("burner-deal-item")
+    }
+
     if (item === bannedItem) {
       nameCell.style.textDecoration = "line-through"
       nameCell.style.color = "red"
@@ -1046,6 +1061,50 @@ function executeTransactions() {
   updateGameFlowHighlight()
 }
 
+// Sell everything in inventory
+function sellEverything() {
+  playSound("bleep")
+
+  if (blockSelling) {
+    log("-- Cannot sell due to event effect.")
+    return
+  }
+
+  let totalSold = 0
+  let btcEarned = 0
+
+  for (const item of items) {
+    if (item === bannedItem) continue
+
+    const itemInventory = inventory[item] || []
+    const count = itemInventory.length
+
+    if (count > 0) {
+      const price = currentPrices[item] || 1
+      const earned = count * price
+
+      btcEarned += earned
+      totalSold += count
+
+      log(`-- Sold ${count} ${itemNames[item]} for ${earned} BTC.`)
+      inventory[item] = []
+    }
+  }
+
+  // Update BTC after selling
+  btc += btcEarned
+
+  // Log summary
+  if (totalSold > 0) {
+    log(`-- Sold everything: ${totalSold} items for ${btcEarned} BTC.`)
+  } else {
+    log("-- No items to sell.")
+  }
+
+  updateStatusBars()
+  updateInventoryDisplay()
+}
+
 // Buy a Glock
 function buyGlock() {
   playSound("bleep")
@@ -1112,6 +1171,9 @@ function cashOutInventory() {
 // Advance to next cycle
 function advanceCycle() {
   playSound("bleep")
+
+  // Update button text based on cycle
+  const advanceButton = document.getElementById("advanceCycleBtn")
 
   if (cycle >= 10) {
     // This is the final round - cash out and end game
@@ -1181,6 +1243,13 @@ function advanceCycle() {
 
   // Update the highlighted element
   updateGameFlowHighlight()
+
+  // Update button text for next cycle
+  if (cycle === 9) {
+    advanceButton.textContent = "Cash Out and Go Dark"
+  } else {
+    advanceButton.textContent = "Advance to Next Cycle"
+  }
 
   // Robust scroll to top implementation
   scrollToTop()
