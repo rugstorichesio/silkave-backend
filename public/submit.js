@@ -10,6 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // Decode and parse the game data
         const decodedData = JSON.parse(atob(gameData))
   
+        // Verify we have valid game data
+        if (!decodedData.btc || !decodedData.hash) {
+          // Invalid game data - show thematic error
+          showInvalidAccessMessage()
+          return
+        }
+  
         // Pre-fill the form with the game data
         document.getElementById("btc").value = decodedData.btc || ""
         document.getElementById("glock").value = decodedData.glock ? "Yes" : "No"
@@ -20,14 +27,80 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (e) {
         console.error("Error parsing game data:", e)
+        showInvalidAccessMessage()
       }
+    } else {
+      // No game data - show thematic error
+      showInvalidAccessMessage()
     }
   })
   
-  // Declare playBleep function (replace with actual implementation or import)
+  // Show thematic message for invalid access attempts
+  function showInvalidAccessMessage() {
+    const form = document.getElementById("scoreForm")
+    form.style.display = "none"
+  
+    const message = document.getElementById("successMessage")
+    message.classList.remove("hidden")
+    message.classList.add("error-message")
+  
+    // Array of thematic error messages
+    const errorMessages = [
+      "ACCESS DENIED: Nice try, script kiddie. Our zero-day exploits detected your pathetic attempt to hack the leaderboard. Play the game like everyone else.",
+  
+      "SECURITY BREACH DETECTED: Your IP has been logged and forwarded to the darknet authorities. Or you could just play the game legitimately...",
+  
+      "SYSTEM: Countermeasures activated. Your attempt to falsify dark web credentials has been flagged. Real dealers earn their BTC the hard way.",
+  
+      "CRITICAL ERROR: Fake score submission detected. Did you really think our blockchain verification would miss that? Come back when you've actually run product.",
+  
+      "TERMINAL LOCKOUT: Your amateur attempt to spoof game data has triggered our dead man's switch. Earn your spot on the leaderboard or stay off the network.",
+    ]
+  
+    // Pick a random error message
+    const randomMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)]
+    message.innerHTML = `<span style="color: red; font-weight: bold;">[!] ${randomMessage}</span>`
+  
+    // Add a return button with thematic text
+    const returnButton = document.createElement("button")
+    returnButton.textContent = "Return to Surface Web"
+    returnButton.style.marginTop = "1rem"
+    returnButton.onclick = () => {
+      window.location.href = "index.html"
+    }
+    message.appendChild(returnButton)
+  
+    // Add a typing effect to the error message
+    let i = 0
+    const txt = message.innerHTML
+    message.innerHTML = ""
+  
+    function typeWriter() {
+      if (i < txt.length) {
+        message.innerHTML += txt.charAt(i)
+        i++
+        setTimeout(typeWriter, 15) // typing speed
+      }
+    }
+  
+    // Start typing effect
+    typeWriter()
+  
+    // Play error sound
+    const sound = document.getElementById("bleep")
+    if (sound) {
+      sound.currentTime = 0
+      sound.play().catch((e) => console.log("Audio play failed:", e))
+    }
+  }
+  
+  // Play sound effect
   function playBleep() {
-    // Placeholder for the bleep sound effect
-    console.log("Bleep!")
+    const sound = document.getElementById("bleep")
+    if (sound) {
+      sound.currentTime = 0
+      sound.play().catch((e) => console.log("Audio play failed:", e))
+    }
   }
   
   // Submit score function
@@ -40,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const glock = document.getElementById("glock").value
     const hash = document.getElementById("hash").value
   
-    if (!alias || !btc) {
+    if (!alias || !btc || !hash) {
       alert("Please fill in all required fields")
       return
     }
@@ -74,6 +147,15 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("successMessage").classList.remove("hidden")
         document.getElementById("successMessage").textContent =
           "Score submitted successfully! Check the leaderboard to see your ranking."
+  
+        // Add a view leaderboard button
+        const leaderboardButton = document.createElement("button")
+        leaderboardButton.textContent = "View Leaderboard"
+        leaderboardButton.style.marginTop = "1rem"
+        leaderboardButton.onclick = () => {
+          window.location.href = "leaderboard.html"
+        }
+        document.getElementById("successMessage").appendChild(leaderboardButton)
       })
       .catch((error) => {
         console.error("Error submitting score:", error)
@@ -81,7 +163,16 @@ document.addEventListener("DOMContentLoaded", () => {
         form.style.display = "none"
         document.getElementById("successMessage").classList.remove("hidden")
         document.getElementById("successMessage").textContent =
-          "Could not connect to the server, but your score has been recorded locally. Please try again later."
+          "Connection to secure server failed. Proxy may be compromised."
+  
+        // Add a retry button
+        const retryButton = document.createElement("button")
+        retryButton.textContent = "Reroute Connection"
+        retryButton.style.marginTop = "1rem"
+        retryButton.onclick = () => {
+          window.location.reload()
+        }
+        document.getElementById("successMessage").appendChild(retryButton)
       })
   }
   
