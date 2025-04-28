@@ -27,12 +27,11 @@
       justify-content: center;
       gap: 8px;
     }
-    .title-icon {
-      height: 1.8rem;
-      width: auto;
-      filter: brightness(0) saturate(100%) invert(100%) sepia(100%) saturate(1000%) hue-rotate(86deg) brightness(100%);
-      vertical-align: middle;
+    .camel-icon {
+      width: 24px;
+      height: 24px;
       margin-right: 5px;
+      fill: #0f0;
     }
     .leaderboard {
       max-width: 800px;
@@ -199,7 +198,10 @@
   </div>
 
   <h1>
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAABmJLR0QA/wD/AP+gvaeTAAAJJElEQVR4nO2de4xU1R3HP787swvLPljYXRaWp7wUEAWkVhRrNdXWxkdqbE1jTJrGxMQ/+kdN2vSPpjHGxD9M2qZN2tg0bWyaWtOmWqlWqFoQEUQQ5LW8lmVhgV12H8w+Zub++sdll2WZx8zcuXdm4X6Sm+zOPef8zu/7m3vPPffccwQTMHPmzJKioqIlwFJVnQ8sAOYBU4FiQIAB4CpwCTgLnBSRY8aYw52dnUcbGxsHTcRlCyLiWqGlpaVzVPVe4D5gFTDFpXIHgQPAHmCPMeZQQ0NDn0tlZw1ZFaS0tHRuKBR6BHgUqMlmXQk4BbwCvGSMOZBPwmRckNLS0tuMMU8CG4BQpst3iQjwGvC8MeadTFeeEUHKysrmhEKhzcDjQEEm6swCEeAF4Lnm5uazbitwLUh5efnscDj8FPAkUOhWuTnCIPBLY8zPmpqaLjgtwJEgZWVlM8Ph8NPAj4Ewee4VJSACPAv8tLm5+aqdjGyLUVFRUdLf3/8M8BRQ5KQsn9EH/Ky4uPiZtra2HquJloJUVlYW9/X1PQs8TZ6LkYAB4Jni4uKftbe3D6RKSClIVVVV0dWrV58HnshEhD7nWWNM07lz5wYTnUwoSHV1deHly5d/DWzKcHB+5jljzJPnz58fGn8iriDV1dWFly5degF4OEvB+ZXnjDFPjRdlnCDzVPUPwANZDsy3qL4hIo+OHbOMEqS0tHSuMeYgsCwH0fkVVT0qIqsbGxsv3DhoCACzZ88uMca8jRXDZIrKyspCEakWkQoRmSYixSIyICJ9qtoLnBeRM6p6srOzs7W+vj6SqXpVdZmIvF1WVja3sbHxPIwSZGho6Fms+ZSsUlNTM7W/v3+VMWYlsBxYgvWIJuXQSkSGgBMickhE9onI/vr6+r5MxKWqK4GXgA0wQpCysrJ7gD9lojI7VFdXF/b09KwzxmwE7gdmuVDseeANEdlZUlKyq62tbdhpgaq6rqKi4s8wIkhJScnbwFrHYdqkqqpqRm9v7+OqugmY7nb5YxgG3hWRF6ZMmbKjra3tmt0CVPVPY8wDhWVlZTNE5KIXUlRVVRX19fU9paqPAVO8qCMFvcDLIvLLtra2D+0kqmpRcXHxQEFZWdkKEdnnRXTV1dWFPT09m1X1R0CZF3U44CzwnIj8pr29/UqqxKq6sqCsrGy/iCz3IqLKysri/v7+Z1X1h/gnRjwN/Li4uPiX7e3tA8kSqerygvLy8p8DT3gRSWVlZXFfX9/zwA+8KD9LvGCMebKpqelKogSqOr+goqJiK/CQFxGUl5eHw+HwVqwlVPnCNmPMY01NTZcTnVTVGQUVFRXbgfu8iKC8vDwcDoe3Ad/3onwP2W6MebipqelSvJOqWlRQUVGxA1jjRQTl5eXhcDi8HXjQi/I9ZqcxZn1TU1NvvJMFFRUVO/FIjPLy8nA4HN5BfooB8KAxZkdlZWVxvJMFlZWVO/BIjLKysnA4HN4JrPOifI9Za4zZWVVVNWP8iYKqqqodeCRGaWlpOBQK7QK+40X5HvMdEdlVXV09ZeyJgurq6l14JMaMGTNCxpi/AN/1onyPuU9E/lpTUzN19MGCmpqaXXgkRklJSUhV/wbc70X5HrNGVf9eW1s7beRAQW1t7S48EqO4uFhU9a/AOi/K95i1qrqntrZ2OkBBbW3tbjwSY9q0aQK8DKz3onyPWaeqe2pra0sKZs+evQePxJg6dSrAy8AGj6rIGBUVFSXhcHiJMWaRqs5X1TnALKAUmI61rr4PuAJcEJEzqnpCVY+1t7ef7OjoGIwta72q7qmpqSkpmDNnzl48EmPKlCkArwAb3S7bLjU1NVP7+vrWGmPWA2uAhTaLOA28KyJvFhUV7W5vbx+KPaGq62pqakpCc+fO3YtHYhQVFQG8CjzkZrl2qKqqmtHb2/uEqm4G5jstR0TOAr8TkRdbWlqOjT6nqmtramqmhObNm7cXj8QoLCwEeA142K1yU1FZWVnc39//lKo+CUzPRJmqelFEflNUVPRiS0vLRQBVXVNTUzM1NH/+/L14JEZBQQHADuARN8pNRnl5eTgcDv8AeAZrfX7GUdVBEfldQUHBL9ra2vpVdXVNTc200IIFC/bikRjhcBhgJ/CoG+UmoqKioqS/v/9nqvqDLFd9SkSea2lp2aGqq2pqaqaHFi5cuA+PxAiFQgC7gMfcKDceVVVVM3p7e59W1aeyXXcMr4vIT1pbW1eGFi1atA+PxAgGgwDvAI+7UW4sVVVV03t7e59R1R9mu+4EvCYiT7W2tq4ILV68eB8eiREIBAD2AN9zo9wYFRUVJQMDA8+q6lNZqc8er4rID1tbW5eGlixZsg+PxBCJLPl7F3jCjXJjDA4OPqeqT2alPnu8IiJPtLa2Lg4tXbp0Hx6JISIAe4En3Shz5MnqT7JSlz1eFpEnW1tba0PLli3bj0diqCoisg/Y5EaZAwMDW1T1yaxUaJ+XROTp1tbWRaHly5fvxyMxVBUR2Q9scqPM/v7+Lar6w6xUaJ8XReTHra2tC0MrVqw4gEdiqCoi8gHwPTfK7Ovr26KqT2alQvtsE5Gn29raFoRWrlx5EI/EUFVEpAV40I0ye3t7t6jqD7JSoX1+LyI/aWtrqw2tWrXqEB6JoapE3lJ80I0yu7u7t6rqk1mp0D4viMgzbW1t80KrV68+jEdiqCqqehR4wI0yu7q6tqrqD7JSoX22GmOebm5urg2tWbPmCB6JoaqIyDHgfjfK7Ozs3Kqqm7NSoX1+a4x5prm5eW5o7dq1R/FIjMjL1seBdW6U2dHRsVVVN2elQvtsNcY829zcPCe0bt26Y3gkRuRVlhPAt90os7W1dauqbs5KhfbZYox5trW1dXZo/fr1x/FIjMjnCCeBe90os6WlZauqPp6VCu3zS2PMc62trbNC999//wk8EiPyTdEp4B43ymxubt6qqpuyUqF9njfGbGlra5sZeuCBB07ikRiRb4pOA3e7UWZjY+NWVX0sKxXa53+MMVva29tLQxs2bDiNR2JEvlw8A9zlRpkNDQ1bVXVjViq0z3+MMT9pb28vCW3cuPEMHokR+YLxLHCnG2XW19dvVdUNWanQPv81xvyso6OjOLRp06azeCSGiKCqXcBKN8qsq6vbqqoPZ6VC+/zPGPPzjo6OKaHNmzefwyMxRARV7QZWuFFmXV3dVlV9KCsV2ue/xpgtHR0dU0Jbtmw5j0diiAiq2gOscKPMurq6raq6PisV2uc/xpgtnZ2dU0Jbtmy5gEdiiAiq2gvc5kaZdXV1W1X1waxUaJ//GmO2dHZ2Tglt3br1Ih6JISKoaj9Q60aZdXV1W1X1gaxUaJ9/G2O2dHV1TQn9D+oA2OYwGpqcAAAAAElFTkSuQmCC" alt="" class="title-icon">
+    <!-- Simple camel SVG icon -->
+    <svg class="camel-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19.5,4.5c0-2-1.5-3-3.5-3c-2.5,0-4,2-4,2s-1.5-2-4-2c-2,0-3.5,1-3.5,3c0,1.5,1,2.5,1,2.5L4,9l2,9h2l1-4h6l1,4h2l2-9l-1.5-2 C18.5,7,19.5,6,19.5,4.5z M8,11.5c-0.8,0-1.5-0.7-1.5-1.5S7.2,8.5,8,8.5s1.5,0.7,1.5,1.5S8.8,11.5,8,11.5z"/>
+    </svg>
     Silk Ave Leaderboard
   </h1>
   <div class="leaderboard">
