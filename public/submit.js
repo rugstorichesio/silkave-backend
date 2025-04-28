@@ -33,6 +33,15 @@ document.addEventListener("DOMContentLoaded", () => {
       // No game data - show thematic error
       showInvalidAccessMessage()
     }
+  
+    // Add submit event listener to the form
+    const form = document.getElementById("scoreForm")
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault()
+        submitScore()
+      })
+    }
   })
   
   // Show thematic message for invalid access attempts
@@ -116,6 +125,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function submitScore() {
     playBleep()
   
+    // Show loading indicator
+    const submitButton = document.querySelector("#scoreForm button[type='submit']")
+    if (submitButton) {
+      submitButton.disabled = true
+      submitButton.textContent = "Submitting..."
+    }
+  
     const form = document.getElementById("scoreForm")
     const alias = document.getElementById("alias").value
     const btc = document.getElementById("btc").value
@@ -124,6 +140,10 @@ document.addEventListener("DOMContentLoaded", () => {
   
     if (!alias || !btc || !hash) {
       alert("Please fill in all required fields")
+      if (submitButton) {
+        submitButton.disabled = false
+        submitButton.textContent = "Submit Score"
+      }
       return
     }
   
@@ -146,11 +166,13 @@ document.addEventListener("DOMContentLoaded", () => {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Network response was not ok")
+          throw new Error(`Network response was not ok: ${response.status}`)
         }
         return response.json()
       })
       .then((data) => {
+        console.log("Score submitted successfully:", data)
+  
         // Show success message
         form.style.display = "none"
         const successMsg = document.getElementById("successMessage")
@@ -160,22 +182,45 @@ document.addEventListener("DOMContentLoaded", () => {
         // Clear previous content
         successMsg.innerHTML = ""
   
-        // Add success text
+        // Add success text with animation
         const successText = document.createElement("div")
-        successText.textContent = "Score submitted successfully! Check the leaderboard to see your ranking."
+        successText.className = "success-message"
+        successText.innerHTML = `<span class="success-icon">✓</span> Score submitted successfully!<br>Your score of ${btc} BTC has been recorded.`
         successMsg.appendChild(successText)
   
         // Add a view leaderboard button
         const leaderboardButton = document.createElement("button")
         leaderboardButton.textContent = "View Leaderboard"
+        leaderboardButton.className = "action-button"
         leaderboardButton.style.marginTop = "1rem"
         leaderboardButton.onclick = () => {
           window.location.href = "leaderboard.html"
         }
         successMsg.appendChild(leaderboardButton)
+  
+        // Add a play again button
+        const playAgainButton = document.createElement("button")
+        playAgainButton.textContent = "Play Again"
+        playAgainButton.className = "action-button"
+        playAgainButton.style.marginTop = "1rem"
+        playAgainButton.style.marginLeft = "1rem"
+        playAgainButton.onclick = () => {
+          window.location.href = "companion.html"
+        }
+        successMsg.appendChild(playAgainButton)
+  
+        // Play success sound
+        playSound("success")
       })
       .catch((error) => {
         console.error("Error submitting score:", error)
+  
+        // Re-enable submit button
+        if (submitButton) {
+          submitButton.disabled = false
+          submitButton.textContent = "Submit Score"
+        }
+  
         // Show error message but still hide the form
         form.style.display = "none"
         const errorMsg = document.getElementById("successMessage")
@@ -191,6 +236,14 @@ document.addEventListener("DOMContentLoaded", () => {
         errorText.style.color = "red"
         errorMsg.appendChild(errorText)
   
+        // Add error details for debugging
+        const errorDetails = document.createElement("div")
+        errorDetails.textContent = `Error: ${error.message}`
+        errorDetails.style.fontSize = "0.8rem"
+        errorDetails.style.color = "#ff6666"
+        errorDetails.style.marginTop = "0.5rem"
+        errorMsg.appendChild(errorDetails)
+  
         // Add a retry button
         const retryButton = document.createElement("button")
         retryButton.textContent = "Reroute Connection"
@@ -199,6 +252,29 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.reload()
         }
         errorMsg.appendChild(retryButton)
+  
+        // Add a return button
+        const returnButton = document.createElement("button")
+        returnButton.textContent = "Return to Game"
+        returnButton.style.marginTop = "1rem"
+        returnButton.style.marginLeft = "1rem"
+        returnButton.onclick = () => {
+          window.location.href = "companion.html"
+        }
+        errorMsg.appendChild(returnButton)
       })
+  }
+  
+  // Play a sound
+  function playSound(soundId) {
+    try {
+      const sound = document.getElementById(soundId || "bleep")
+      if (sound) {
+        sound.currentTime = 0
+        sound.play().catch((e) => console.log("Audio play failed:", e))
+      }
+    } catch (e) {
+      console.error("Error playing sound:", e)
+    }
   }
   

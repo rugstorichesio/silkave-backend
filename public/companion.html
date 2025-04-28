@@ -245,6 +245,29 @@
       margin-top: 0.5rem;
     }
 
+    .liquid-btc {
+      display: inline-block;
+      background-color: #000;
+      color: #0f0;
+      border: 1px solid #0f0;
+      padding: 0.5rem;
+      font-weight: bold;
+      text-align: center;
+      animation: btc-pulse 2s infinite;
+    }
+
+    @keyframes btc-pulse {
+      0%, 100% { box-shadow: 0 0 5px #0f0; }
+      50% { box-shadow: 0 0 15px #0f0; }
+    }
+
+    @media only screen and (max-width: 600px) {
+      .liquid-btc {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+    }
+
     /* Updated burner deal styling */
     .burner-deal-item {
       color: #00ff00;
@@ -274,7 +297,34 @@
         height: 150px;
       }
     }
-  </style>
+
+  .liquid-btc-container {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #0f0;
+    border-radius: 4px;
+    color: #0f0;
+    font-weight: bold;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.4); }
+    70% { box-shadow: 0 0 0 5px rgba(0, 255, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+  }
+  
+  .liquid-btc-label {
+    font-size: 0.8em;
+    margin-right: 5px;
+  }
+  
+  .liquid-btc-value {
+    font-size: 1em;
+  }
+</style>
 </head>
 <body>
   <div class="home-link" style="position: absolute; top: 1rem; right: 2rem;">
@@ -342,6 +392,10 @@
       <button id="executeTransactionsBtn" onclick="executeTransactions()">Execute Transactions</button>
       <button id="buyGlockBtn" onclick="buyGlock()">Buy Glock (20 BTC)</button>
       <button id="sellAllBtn" onclick="sellEverything()">Sell Everything</button>
+      <div class="liquid-btc-container">
+        <span class="liquid-btc-label">Liquid BTC:</span>
+        <span id="liquidBtc" class="liquid-btc-value">100</span>
+      </div>
     </div>
   </div>
 

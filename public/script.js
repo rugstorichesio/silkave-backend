@@ -329,6 +329,7 @@ function runCardEffect(code, roll) {
       break
 
     case "008": // RANSOM DEMAND
+      // Declare totalInventoryCount here
       const totalInventoryCount = countInventory()
       window
         .showConfirm(
@@ -781,9 +782,21 @@ ${items.map((i) => itemNames[i]).join(", ")}`,
 // Helper function for random item grants
 function grantRandomItems(count) {
   let added = 0
+  let autoSold = 0
+  let btcEarned = 0
   const itemsAdded = []
+  const itemsSold = []
 
-  for (let i = 0; i < count; i++) {
+  // Check current inventory space
+  const currentCount = countInventory()
+  const spaceLeft = inventoryLimit - currentCount
+
+  // Determine how many items can be added and how many need to be auto-sold
+  const itemsToAdd = Math.min(count, spaceLeft)
+  const itemsToSell = count - itemsToAdd
+
+  // Add items to inventory if there's space
+  for (let i = 0; i < itemsToAdd; i++) {
     const randomItem = items[Math.floor(Math.random() * items.length)]
     if (!inventory[randomItem]) inventory[randomItem] = []
     inventory[randomItem].push(currentPrices[randomItem] || 5) // Use current price or default to 5
@@ -791,9 +804,87 @@ function grantRandomItems(count) {
     added++
   }
 
+  // Auto-sell items if inventory is full
+  for (let i = 0; i < itemsToSell; i++) {
+    const randomItem = items[Math.floor(Math.random() * items.length)]
+    const itemPrice = currentPrices[randomItem] || 5
+    const sellPrice = Math.floor(itemPrice * 0.75) // 75% of market value
+    btcEarned += sellPrice
+    itemsSold.push(`${itemNames[randomItem]} for ${sellPrice} BTC`)
+    autoSold++
+  }
+
+  // Update BTC if any items were auto-sold
+  if (autoSold > 0) {
+    btc += btcEarned
+  }
+
   updateInventoryDisplay()
   updateStatusBars()
-  return `${itemsAdded.join(", ")}`
+
+  // Return appropriate message based on what happened
+  if (added > 0 && autoSold > 0) {
+    log(`-- Added ${added} items to inventory, auto-fenced ${autoSold} items for ${btcEarned} BTC (inventory full)`)
+    return `Added: ${itemsAdded.join(", ")}. Inventory full! ${autoSold} items auto-fenced for ${btcEarned} BTC (75% value)`
+  } else if (added > 0) {
+    return `${itemsAdded.join(", ")}`
+  } else if (autoSold > 0) {
+    log(`-- Inventory full! Auto-fenced ${autoSold} items for ${btcEarned} BTC (75% value)`)
+    return `Inventory full! All items auto-fenced for ${btcEarned} BTC (75% value)`
+  }
+
+  return "No items added"
+}
+
+// Replace prompt in grantItems function
+function grantItems(method, count) {
+  const currentCount = countInventory()
+  const spaceLeft = inventoryLimit - currentCount
+
+  if (spaceLeft <= 0) {
+    // If inventory is full, give bonus BTC instead of items
+    btc += 25 // Bonus if inventory is full
+    return `Inventory full - gained 25 BTC instead`
+  }
+
+  const actualCount = Math.min(count, spaceLeft)
+
+  if (method === "choose") {
+    // Use custom prompt instead of browser prompt
+    showPrompt(
+      "COMMUNITY BOOST",
+      `Choose an item to receive ${actualCount} units of:\n\n${items.map((i) => itemNames[i]).join(", ")}`,
+    ).then((itemType) => {
+      if (itemType) {
+        // Find matching item (case insensitive)
+        const matchedItem = items.find(
+          (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
+        )
+
+        if (matchedItem) {
+          if (!inventory[matchedItem]) inventory[matchedItem] = []
+          for (let i = 0; i < actualCount; i++) {
+            inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+          }
+          log(`-- Gained ${actualCount} ${itemNames[matchedItem]}`)
+          updateInventoryDisplay()
+          updateStatusBars()
+        } else {
+          // If invalid choice, give random items
+          const randomResult = grantRandomItems(actualCount)
+          log(`-- Invalid item choice. ${randomResult}`)
+        }
+      } else {
+        // If canceled, give random items
+        const randomResult = grantRandomItems(actualCount)
+        log(`-- ${randomResult}`)
+      }
+    })
+
+    return "Waiting for your item selection..."
+  } else {
+    return grantRandomItems(actualCount)
+  }
 }
 
 // Roll market prices
@@ -1244,8 +1335,8 @@ function advanceCycle() {
   // Update the highlighted element
   updateGameFlowHighlight()
 
-  // Update button text for next cycle
-  if (cycle === 9) {
+  // Update button text for next cycle - FIXED: Only show "Cash Out" on cycle 10
+  if (cycle === 10) {
     advanceButton.textContent = "Cash Out and Go Dark"
   } else {
     advanceButton.textContent = "Advance to Next Cycle"
@@ -1288,6 +1379,9 @@ function updateStatusBars() {
   document.getElementById("btcBottom").textContent = btc
   document.getElementById("glockBottom").textContent = glock ? "Yes" : "No"
   document.getElementById("invCountBottom").textContent = countInventory()
+
+  // Update Liquid BTC display
+  document.getElementById("liquidBtc").textContent = btc
 }
 
 // Update inventory display
@@ -1526,4 +1620,188 @@ function generateGameHash() {
   }
 
   return Math.abs(hash).toString(16).substring(0, 8)
+}
+
+// Custom confirm dialog
+function showConfirm(title, message, okText, cancelText) {
+  return new Promise((resolve) => {
+    // Create modal container
+    const modal = document.createElement("div")
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    `
+
+    // Create dialog box
+    const dialog = document.createElement("div")
+    dialog.style.cssText = `
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    `
+
+    // Title
+    const titleElem = document.createElement("h2")
+    titleElem.textContent = title
+    dialog.appendChild(titleElem)
+
+    // Message
+    const messageElem = document.createElement("p")
+    messageElem.textContent = message
+    dialog.appendChild(messageElem)
+
+    // Button container
+    const buttonContainer = document.createElement("div")
+    buttonContainer.style.cssText = `
+      margin-top: 20px;
+    `
+
+    // OK button
+    const okButton = document.createElement("button")
+    okButton.textContent = okText
+    okButton.style.cssText = `
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    `
+    okButton.addEventListener("click", () => {
+      document.body.removeChild(modal)
+      resolve(true)
+    })
+    buttonContainer.appendChild(okButton)
+
+    // Cancel button
+    const cancelButton = document.createElement("button")
+    cancelButton.textContent = cancelText
+    cancelButton.style.cssText = `
+      background-color: #f44336;
+      color: white;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    `
+    cancelButton.addEventListener("click", () => {
+      document.body.removeChild(modal)
+      resolve(false)
+    })
+    buttonContainer.appendChild(cancelButton)
+
+    dialog.appendChild(buttonContainer)
+    modal.appendChild(dialog)
+    document.body.appendChild(modal)
+  })
+}
+
+// Custom prompt dialog
+function showPrompt(title, message) {
+  return new Promise((resolve) => {
+    // Create modal container
+    const modal = document.createElement("div")
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    `
+
+    // Create dialog box
+    const dialog = document.createElement("div")
+    dialog.style.cssText = `
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    `
+
+    // Title
+    const titleElem = document.createElement("h2")
+    titleElem.textContent = title
+    dialog.appendChild(titleElem)
+
+    // Message
+    const messageElem = document.createElement("p")
+    messageElem.textContent = message
+    dialog.appendChild(messageElem)
+
+    // Input field
+    const inputField = document.createElement("input")
+    inputField.type = "text"
+    inputField.style.cssText = `
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    `
+    dialog.appendChild(inputField)
+
+    // Button container
+    const buttonContainer = document.createElement("div")
+    buttonContainer.style.cssText = `
+      margin-top: 20px;
+    `
+
+    // OK button
+    const okButton = document.createElement("button")
+    okButton.textContent = "OK"
+    okButton.style.cssText = `
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    `
+    okButton.addEventListener("click", () => {
+      document.body.removeChild(modal)
+      resolve(inputField.value)
+    })
+    buttonContainer.appendChild(okButton)
+
+    // Cancel button
+    const cancelButton = document.createElement("button")
+    cancelButton.textContent = "Cancel"
+    cancelButton.style.cssText = `
+      background-color: #f44336;
+      color: white;
+      padding: 10px 20px;
+      margin: 0 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    `
+    cancelButton.addEventListener("click", () => {
+      document.body.removeChild(modal)
+      resolve(null)
+    })
+    buttonContainer.appendChild(cancelButton)
+
+    dialog.appendChild(buttonContainer)
+    modal.appendChild(dialog)
+    document.body.appendChild(modal)
+  })
 }
