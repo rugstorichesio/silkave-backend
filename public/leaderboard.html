@@ -22,18 +22,6 @@
       font-size: 2.2rem;
       text-shadow: 0 0 10px #0f0;
       margin-top: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .camel-icon {
-      width: 40px;
-      height: 40px;
-      margin-right: 10px;
-      fill: #0f0;
-      stroke: #0f0;
-      stroke-width: 0.5;
     }
     .leaderboard {
       max-width: 800px;
@@ -41,10 +29,29 @@
       border: 1px solid #0f0;
       padding: 1rem;
       flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    .leaderboard::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url('your-camel-image.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.2;
+      z-index: -1;
+      filter: brightness(0.7) contrast(1.1);
     }
     .score-list {
       list-style-type: none;
       padding: 0;
+      position: relative;
+      z-index: 1;
     }
     .score-list li {
       padding: 0.5rem;
@@ -56,6 +63,7 @@
     .top-score {
       color: #0f0;
       font-weight: bold;
+      text-shadow: 0 0 5px #0f0;
     }
     .loading {
       text-align: center;
@@ -96,6 +104,8 @@
       color: #0a0;
       margin-top: 1rem;
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
     
     /* Media Queries for Responsive Design */
@@ -167,6 +177,8 @@
       text-align: center;
       margin: 10px 0;
       min-height: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     .status-error {
@@ -180,6 +192,8 @@
       padding: 5px 10px;
       margin-top: 10px;
       cursor: pointer;
+      position: relative;
+      z-index: 1;
     }
 
     .refresh-button:hover {
@@ -191,6 +205,24 @@
       color: #ff6666;
       text-align: center;
       padding: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Style for the leaderboard title to ensure it stands out against the background */
+    h2 {
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 8px #0f0;
+    }
+    
+    /* Make sure score items stand out against the background */
+    .score-item {
+      color: #0f0;
+      text-shadow: 0 0 3px #0f0;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 3px;
+      margin-bottom: 3px;
     }
   </style>
 </head>
@@ -199,17 +231,7 @@
     <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
   </div>
 
-  <h1>
-    <!-- More detailed camel SVG that resembles the original image -->
-    <svg class="camel-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M30,70 Q35,60 40,70 L45,85 Q50,90 55,85 L60,70 Q65,60 70,70 L75,85 Q80,90 85,85 L90,70 Q95,60 95,50 Q95,40 90,35 Q85,30 80,35 L75,40 Q70,45 65,40 L60,35 Q55,30 50,35 L45,40 Q40,45 35,40 L30,35 Q25,30 20,35 Q15,40 15,50 Q15,60 20,65 L25,70 Z" stroke="#0f0" stroke-width="1" fill="none"/>
-      <path d="M25,40 Q20,30 25,20 Q30,15 35,20 L40,30" stroke="#0f0" stroke-width="1" fill="none"/>
-      <path d="M75,40 Q80,30 75,20 Q70,15 65,20 L60,30" stroke="#0f0" stroke-width="1" fill="none"/>
-      <circle cx="30" cy="45" r="2" fill="#0f0"/>
-      <circle cx="70" cy="45" r="2" fill="#0f0"/>
-    </svg>
-    Silk Ave Leaderboard
-  </h1>
+  <h1>Silk Ave Leaderboard</h1>
   <div class="leaderboard">
     <h2>Top Dealers</h2>
     <div id="leaderboardStatus" class="status-message"></div>
