@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     scoreList.innerHTML = "<li class='loading'>Loading scores...</li>"
   
     // Try to fetch from the backend
-    fetch("https://silkave-backend.onrender.com/scores")
+    fetch("https://silkave-leaderboard.onrender.com/scores")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok")
@@ -66,11 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((error) => {
         console.error("Error fetching scores:", error)
   
-        // Show error message and fallback to sample data
-        scoreList.innerHTML =
-          "<li class='error'>Could not connect to leaderboard server. Showing sample data instead.</li>"
-  
-        // Display sample data as fallback
+        // Just show sample data without the error message
         displaySampleScores()
       })
   }
@@ -78,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Fallback function to display sample scores if backend is unavailable
   function displaySampleScores() {
     const scoreList = document.getElementById("scoreList")
+    scoreList.innerHTML = "" // Clear any existing content
   
     // Sample leaderboard data
     const sampleScores = [

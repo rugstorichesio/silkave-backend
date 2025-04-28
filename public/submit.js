@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
     // Send the data to the backend
-    fetch("https://silkave-backend.onrender.com/submit-score", {
+    fetch("https://silkave-leaderboard.onrender.com/submit-score", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
