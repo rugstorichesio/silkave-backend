@@ -59,7 +59,16 @@ document.addEventListener("DOMContentLoaded", () => {
   
     // Pick a random error message
     const randomMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)]
-    message.innerHTML = `<span style="color: red; font-weight: bold;">[!] ${randomMessage}</span>`
+  
+    // Create the error message with proper styling
+    const errorSpan = document.createElement("span")
+    errorSpan.style.color = "red"
+    errorSpan.style.fontWeight = "bold"
+    errorSpan.textContent = "[!] " + randomMessage
+  
+    // Clear the message div and append the styled error
+    message.innerHTML = ""
+    message.appendChild(errorSpan)
   
     // Add a return button with thematic text
     const returnButton = document.createElement("button")
@@ -70,14 +79,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     message.appendChild(returnButton)
   
-    // Add a typing effect to the error message
+    // Add a typing effect to just the text content
+    const fullText = randomMessage
+    errorSpan.textContent = "[!] "
     let i = 0
-    const txt = message.innerHTML
-    message.innerHTML = ""
   
     function typeWriter() {
-      if (i < txt.length) {
-        message.innerHTML += txt.charAt(i)
+      if (i < fullText.length) {
+        errorSpan.textContent += fullText.charAt(i)
         i++
         setTimeout(typeWriter, 15) // typing speed
       }
@@ -144,9 +153,17 @@ document.addEventListener("DOMContentLoaded", () => {
       .then((data) => {
         // Show success message
         form.style.display = "none"
-        document.getElementById("successMessage").classList.remove("hidden")
-        document.getElementById("successMessage").textContent =
-          "Score submitted successfully! Check the leaderboard to see your ranking."
+        const successMsg = document.getElementById("successMessage")
+        successMsg.classList.remove("hidden")
+        successMsg.classList.remove("error-message") // Remove error styling if present
+  
+        // Clear previous content
+        successMsg.innerHTML = ""
+  
+        // Add success text
+        const successText = document.createElement("div")
+        successText.textContent = "Score submitted successfully! Check the leaderboard to see your ranking."
+        successMsg.appendChild(successText)
   
         // Add a view leaderboard button
         const leaderboardButton = document.createElement("button")
@@ -155,15 +172,24 @@ document.addEventListener("DOMContentLoaded", () => {
         leaderboardButton.onclick = () => {
           window.location.href = "leaderboard.html"
         }
-        document.getElementById("successMessage").appendChild(leaderboardButton)
+        successMsg.appendChild(leaderboardButton)
       })
       .catch((error) => {
         console.error("Error submitting score:", error)
         // Show error message but still hide the form
         form.style.display = "none"
-        document.getElementById("successMessage").classList.remove("hidden")
-        document.getElementById("successMessage").textContent =
-          "Connection to secure server failed. Proxy may be compromised."
+        const errorMsg = document.getElementById("successMessage")
+        errorMsg.classList.remove("hidden")
+        errorMsg.classList.add("error-message")
+  
+        // Clear previous content
+        errorMsg.innerHTML = ""
+  
+        // Add error text
+        const errorText = document.createElement("div")
+        errorText.textContent = "Connection to secure server failed. Proxy may be compromised."
+        errorText.style.color = "red"
+        errorMsg.appendChild(errorText)
   
         // Add a retry button
         const retryButton = document.createElement("button")
@@ -172,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
         retryButton.onclick = () => {
           window.location.reload()
         }
-        document.getElementById("successMessage").appendChild(retryButton)
+        errorMsg.appendChild(retryButton)
       })
   }
   
