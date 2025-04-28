@@ -1,0 +1,28 @@
+SILK AVE BACKEND INFORMATION
+
+The Silk Ave game uses a simple backend API hosted on Render.com to store and retrieve leaderboard scores.
+
+API ENDPOINTS:
+
+1. GET https://silkave-backend.onrender.com/scores
+   - Returns all scores in the leaderboard
+   - No authentication required
+
+2. POST https://silkave-backend.onrender.com/scores
+   - Adds a new score to the leaderboard
+   - This endpoint is only accessible through the game completion flow
+   - Scores can only be submitted after completing all 10 cycles of the game
+   - Required fields:
+     * alias: Player name
+     * btc: Final BTC amount (number)
+     * glock: "Yes" or "No"
+   - Optional fields:
+     * date: Date of the game (YYYY-MM-DD)
+     * hash: Game verification hash
+     * gameHistory: JSON string of game actions
+
+The backend automatically stores all submissions and makes them available to the leaderboard.
+Scores are sorted by BTC amount (highest first) when displayed.
+
+Note: The backend may take up to 30 seconds to "wake up" if it hasn't been used recently,
+as it's hosted on a free tier that spins down after inactivity.
