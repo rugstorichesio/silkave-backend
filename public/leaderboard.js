@@ -34,6 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
     // Try to fetch from the backend with a timeout
+    // Update the fetch URL to your actual server URL
+    // Find this line:
+    // Replace it with your actual server URL. If you're using Render, it might look like:
+    // Or if you're running it locally:
+    // const fetchPromise = fetch("http://localhost:3000/scores")
     const fetchPromise = fetch("https://silkave-leaderboard.onrender.com/scores")
   
     // Set a timeout of 10 seconds
@@ -113,14 +118,21 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch((error) => {
         console.error("Error fetching scores:", error)
   
-        // Show error status
+        // Show error status with more details
         const statusElement = document.getElementById("leaderboardStatus")
         if (statusElement) {
           statusElement.textContent = `Error loading scores: ${error.message}`
           statusElement.className = "status-error"
         }
   
-        // Display sample data without the error message
+        // Add a refresh button
+        const scoreList = document.getElementById("scoreList")
+        scoreList.innerHTML = `
+      <li class="error-message">Failed to connect to leaderboard server: ${error.message}</li>
+      <li><button onclick="fetchScores()" class="refresh-button">Try Again</button></li>
+    `
+  
+        // Display sample data as fallback
         displaySampleScores()
       })
   }
