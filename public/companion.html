@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Silk Ave Companion</title>
   <link rel="stylesheet" href="modal.css">
-  <!-- Rest of the head content remains the same -->
   <style>
     body {
       background-color: #111;
@@ -334,27 +333,51 @@
   .liquid-btc-value {
     font-size: 1em;
   }
-  /* Override any conflicting modal styles */
-  .modal-overlay * {
-    color: #0f0 !important;
-  }
   
+  /* CRITICAL FIX: Force all modals to have dark background and green text */
+  .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    z-index: 1000 !important;
+  }
+
   .modal-container {
     background-color: #111 !important;
+    color: #0f0 !important;
     border: 2px solid #0f0 !important;
+    box-shadow: 0 0 20px #0f0 !important;
   }
-  
+
+  .modal-header {
+    color: #0f0 !important;
+    text-shadow: 0 0 5px #0f0 !important;
+  }
+
+  .modal-content {
+    color: #0f0 !important;
+  }
+
   .modal-button {
     background-color: #000 !important;
     color: #0f0 !important;
     border: 1px solid #0f0 !important;
   }
-  
+
   .modal-button:hover {
     background-color: #0f0 !important;
     color: #000 !important;
   }
-</style>
+
+  /* Override any browser default styles that might be interfering */
+  div[class^="modal"], div[class*=" modal"] {
+    background-color: #111 !important;
+    color: #0f0 !important;
+  }
+
+  button[class^="modal"], button[class*=" modal"] {
+    background-color: #000 !important;
+    color: #0f0 !important;
+  }
+  </style>
 </head>
 <body>
   <div class="home-link" style="position: absolute; top: 1rem; right: 2rem;">

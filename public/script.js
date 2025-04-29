@@ -331,34 +331,88 @@ function runCardEffect(code, roll) {
     case "008": // RANSOM DEMAND
       // Declare totalInventoryCount here
       const totalInventoryCount = countInventory()
-      window
-        .showConfirm(
-          "RANSOM DEMAND",
-          `You've got locked out. Pay up or lose your stash.
+
+      // Create a custom modal with forced styling for this specific card
+      const modalOverlay = document.createElement("div")
+      modalOverlay.className = "modal-overlay"
+      modalOverlay.style.cssText =
+        "position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.85); z-index: 1000; display: flex; justify-content: center; align-items: center;"
+
+      const modalContainer = document.createElement("div")
+      modalContainer.className = "modal-container"
+      modalContainer.style.cssText =
+        "background-color: #111 !important; color: #0f0 !important; border: 2px solid #0f0 !important; box-shadow: 0 0 20px #0f0 !important; padding: 1.5rem; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;"
+
+      const modalHeader = document.createElement("div")
+      modalHeader.className = "modal-header"
+      modalHeader.textContent = "RANSOM DEMAND"
+      modalHeader.style.cssText =
+        "color: #0f0 !important; text-align: center; margin-bottom: 1rem; font-size: 1.5rem; text-shadow: 0 0 5px #0f0;"
+
+      const modalContent = document.createElement("div")
+      modalContent.className = "modal-content"
+      modalContent.textContent = `You've got locked out. Pay up or lose your stash.
 
 Your current BTC: ${btc}
 Your current inventory: ${totalInventoryCount} items
 
-Choose your response:`,
-          "Pay 30 BTC",
-          `Lose Half Inventory (${Math.ceil(totalInventoryCount / 2)} items)`,
-        )
-        .then((result) => {
-          let outcome = ""
-          if (result) {
-            // Pay 30 BTC
-            btc = Math.max(0, btc - 30)
-            outcome = "Paid 30 BTC ransom"
-          } else {
-            // Lose half inventory
-            wipeHalfInventory()
-            outcome = "Lost half of your inventory"
-          }
-          document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
-          updateStatusBars()
-          updateInventoryDisplay()
-          updateGameFlowHighlight()
-        })
+Choose your response:`
+      modalContent.style.cssText =
+        "color: #0f0 !important; margin-bottom: 1.5rem; font-size: 1.1rem; line-height: 1.5; white-space: pre-line;"
+
+      const modalButtons = document.createElement("div")
+      modalButtons.className = "modal-buttons"
+      modalButtons.style.cssText = "display: flex; justify-content: center; gap: 1rem;"
+
+      const payButton = document.createElement("button")
+      payButton.className = "modal-button"
+      payButton.textContent = "Pay 30 BTC"
+      payButton.style.cssText =
+        "background-color: #000 !important; color: #0f0 !important; border: 1px solid #0f0 !important; padding: 0.5rem 1.5rem; cursor: pointer; font-family: monospace; font-size: 1rem;"
+
+      const loseButton = document.createElement("button")
+      loseButton.className = "modal-button"
+      loseButton.textContent = `Lose Half Inventory (${Math.ceil(totalInventoryCount / 2)} items)`
+      loseButton.style.cssText =
+        "background-color: #000 !important; color: #0f0 !important; border: 1px solid #0f0 !important; padding: 0.5rem 1.5rem; cursor: pointer; font-family: monospace; font-size: 1rem;"
+
+      // Add event listeners
+      payButton.addEventListener("click", () => {
+        document.body.removeChild(modalOverlay)
+        // Pay 30 BTC
+        btc = Math.max(0, btc - 30)
+        const outcome = "Paid 30 BTC ransom"
+        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
+        updateStatusBars()
+        updateInventoryDisplay()
+        updateGameFlowHighlight()
+      })
+
+      loseButton.addEventListener("click", () => {
+        document.body.removeChild(modalOverlay)
+        // Lose half inventory
+        wipeHalfInventory()
+        const outcome = "Lost half of your inventory"
+        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
+        updateStatusBars()
+        updateInventoryDisplay()
+        updateGameFlowHighlight()
+      })
+
+      // Assemble the modal
+      modalButtons.appendChild(payButton)
+      modalButtons.appendChild(loseButton)
+      modalContainer.appendChild(modalHeader)
+      modalContainer.appendChild(modalContent)
+      modalContainer.appendChild(modalButtons)
+      modalOverlay.appendChild(modalContainer)
+
+      // Add to document
+      document.body.appendChild(modalOverlay)
+
+      // Play sound
+      playSound("bleep")
+
       return "Waiting for your decision..." // Temporary message until user decides
 
     case "009": // SILK NETWORK REROUTE

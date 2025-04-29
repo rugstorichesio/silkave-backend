@@ -23,33 +23,66 @@ function createModal(title, message, type, options = []) {
   // Create overlay
   const overlay = document.createElement("div")
   overlay.className = "modal-overlay"
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  `
 
   // Create container
   const container = document.createElement("div")
   container.className = "modal-container"
-  // Force dark background and green text/border with !important
   container.style.cssText = `
     background-color: #111 !important;
     color: #0f0 !important;
     border: 2px solid #0f0 !important;
     box-shadow: 0 0 20px #0f0 !important;
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
   `
 
   // Create header
   const header = document.createElement("div")
   header.className = "modal-header"
   header.textContent = title
-  header.style.cssText = `color: #0f0 !important; text-shadow: 0 0 5px #0f0;`
+  header.style.cssText = `
+    color: #0f0 !important; 
+    text-shadow: 0 0 5px #0f0 !important;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+  `
 
   // Create content
   const content = document.createElement("div")
   content.className = "modal-content"
   content.textContent = message
-  content.style.cssText = `color: #0f0 !important;`
+  content.style.cssText = `
+    color: #0f0 !important;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    white-space: pre-line;
+  `
 
   // Create buttons container
   const buttons = document.createElement("div")
   buttons.className = "modal-buttons"
+  buttons.style.cssText = `
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  `
 
   // Add input field for prompt type
   if (type === "prompt") {
@@ -61,6 +94,10 @@ function createModal(title, message, type, options = []) {
       background-color: #000 !important;
       color: #0f0 !important;
       border: 1px solid #0f0 !important;
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      font-family: monospace;
     `
     input.addEventListener("input", (e) => {
       modalInputValue = e.target.value
@@ -85,6 +122,10 @@ function createModal(title, message, type, options = []) {
       background-color: #000 !important;
       color: #0f0 !important;
       border: 1px solid #0f0 !important;
+      padding: 0.5rem 1.5rem;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 1rem;
     `
     okButton.addEventListener("click", () => {
       closeModal()
@@ -100,6 +141,10 @@ function createModal(title, message, type, options = []) {
       background-color: #000 !important;
       color: #0f0 !important;
       border: 1px solid #0f0 !important;
+      padding: 0.5rem 1.5rem;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 1rem;
     `
     okButton.addEventListener("click", () => {
       closeModal()
@@ -114,6 +159,10 @@ function createModal(title, message, type, options = []) {
       background-color: #000 !important;
       color: #0f0 !important;
       border: 1px solid #0f0 !important;
+      padding: 0.5rem 1.5rem;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 1rem;
     `
     cancelButton.addEventListener("click", () => {
       closeModal()
@@ -131,6 +180,10 @@ function createModal(title, message, type, options = []) {
       background-color: #000 !important;
       color: #0f0 !important;
       border: 1px solid #0f0 !important;
+      padding: 0.5rem 1.5rem;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 1rem;
     `
     okButton.addEventListener("click", () => {
       closeModal()
@@ -145,6 +198,10 @@ function createModal(title, message, type, options = []) {
       background-color: #000 !important;
       color: #0f0 !important;
       border: 1px solid #0f0 !important;
+      padding: 0.5rem 1.5rem;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 1rem;
     `
     cancelButton.addEventListener("click", () => {
       closeModal()
