@@ -334,7 +334,7 @@ function runCardEffect(code, roll) {
       window
         .showConfirm(
           "RANSOM DEMAND",
-          `You got locked out. Pay up or lose your stash.
+          `You've got locked out. Pay up or lose your stash.
 
 Your current BTC: ${btc}
 Your current inventory: ${totalInventoryCount} items

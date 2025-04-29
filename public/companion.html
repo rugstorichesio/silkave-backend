@@ -243,6 +243,7 @@
       flex-wrap: wrap;
       gap: 0.5rem;
       margin-top: 0.5rem;
+      position: relative;
     }
 
     .liquid-btc {
@@ -300,16 +301,14 @@
 
   .liquid-btc-container {
     display: inline-block;
-    position: absolute;
-    right: 1rem;
-    padding: 4px 8px;
     background-color: rgba(0, 0, 0, 0.7);
     border: 1px solid #0f0;
     border-radius: 4px;
     color: #0f0;
     font-weight: bold;
     animation: subtle-pulse 3s infinite;
-    margin-left: 1rem;
+    margin-left: auto;
+    padding: 4px 8px;
   }
   
   @keyframes subtle-pulse {
@@ -378,7 +377,7 @@
           <option value="passports">Fake Passports</option>
           <option value="accounts">Hacked Accounts</option>
           <option value="ccs">Credit Cards</option>
-          <option value="files">Stolen Files</files>
+          <option value="files">Stolen Files</option>
         </select>
       </label>
       <button id="applyBurnerBtn" onclick="applyBurnerDeal()">Apply Burner Deal</button>
@@ -403,6 +402,10 @@
       <button id="executeTransactionsBtn" onclick="executeTransactions()">Execute Transactions</button>
       <button id="buyGlockBtn" onclick="buyGlock()">Buy Glock (20 BTC)</button>
       <button id="sellAllBtn" onclick="sellEverything()">Sell Everything</button>
+      <div class="liquid-btc-container">
+        <span class="liquid-btc-label">Liquid BTC:</span>
+        <span id="liquidBtc" class="liquid-btc-value">100</span>
+      </div>
     </div>
   </div>
 

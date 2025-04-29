@@ -67,24 +67,36 @@ document.addEventListener("DOMContentLoaded", () => {
           const item = document.createElement("li")
           item.className = "score-item"
   
-          // Format the score entry
+          // Create main score content
+          const scoreContent = document.createElement("div")
+          scoreContent.className = "score-content"
+  
+          // Format the main score entry
           let scoreText = `<strong>${index + 1}.</strong> ${entry.alias} – ${entry.btc} BTC`
           if (entry.glock === "Yes") {
             scoreText += " – with Glock"
           }
+          scoreContent.innerHTML = scoreText
   
-          // Add game hash if available
+          // Create game hash element
+          const hashSpan = document.createElement("span")
+          hashSpan.className = "game-hash"
           if (entry.hash) {
-            scoreText += ` <span class="game-hash">[Game #${entry.hash.substring(0, 6)}]</span>`
+            hashSpan.textContent = `[Game #${entry.hash.substring(0, 6)}]`
           }
   
-          // Add timestamp if available
+          // Create date element
+          const dateSpan = document.createElement("span")
+          dateSpan.className = "score-date"
           if (entry.timestamp) {
             const date = new Date(entry.timestamp)
-            scoreText += ` <span class="timestamp">${date.toLocaleDateString()}</span>`
+            dateSpan.textContent = date.toLocaleDateString()
           }
   
-          item.innerHTML = scoreText
+          // Add all elements to the list item
+          item.appendChild(scoreContent)
+          item.appendChild(hashSpan)
+          item.appendChild(dateSpan)
   
           // Highlight top 3
           if (index < 3) {
@@ -181,18 +193,27 @@ document.addEventListener("DOMContentLoaded", () => {
       const item = document.createElement("li")
       item.className = "score-item sample-data"
   
-      // Format the score entry
+      // Create main score content
+      const scoreContent = document.createElement("div")
+      scoreContent.className = "score-content"
+  
+      // Format the main score entry
       let scoreText = `<strong>${index + 1}.</strong> ${entry.alias} – ${entry.btc} BTC`
       if (entry.glock === "Yes") {
         scoreText += " – with Glock"
       }
+      scoreContent.innerHTML = scoreText
   
-      // Add game hash if available
+      // Create game hash element
+      const hashSpan = document.createElement("span")
+      hashSpan.className = "game-hash"
       if (entry.hash) {
-        scoreText += ` <span class="game-hash">[Game #${entry.hash}]</span>`
+        hashSpan.textContent = `[Game #${entry.hash}]`
       }
   
-      item.innerHTML = scoreText
+      // Add all elements to the list item
+      item.appendChild(scoreContent)
+      item.appendChild(hashSpan)
   
       // Highlight top 3
       if (index < 3) {
@@ -226,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       .sample-data-note {
-        color: #ff9900;
+        color: #0f0;
         margin-bottom: 10px;
         font-style: italic;
       }
@@ -236,24 +257,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       
       .status-success {
-        color: green;
+        color: #0f0;
         font-size: 0.9rem;
+        text-shadow: 0 0 3px #0f0;
       }
       
       .status-error {
-        color: red;
+        color: #ff6666;
         font-size: 0.9rem;
-      }
-      
-      .game-hash {
-        font-size: 0.8rem;
-        color: #0a0;
-      }
-      
-      .timestamp {
-        font-size: 0.8rem;
-        color: #666;
-        float: right;
+        text-shadow: 0 0 3px #ff6666;
       }
     `
     document.head.appendChild(style)

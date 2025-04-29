@@ -43,8 +43,8 @@
       background-size: contain;
       background-position: center;
       background-repeat: no-repeat;
-      opacity: 0.2;
-      z-index: -1;
+      opacity: 0.15;
+      z-index: 1;
       filter: brightness(0.7) contrast(1.1);
     }
     .score-list {
@@ -218,12 +218,58 @@
     
     /* Make sure score items stand out against the background */
     .score-item {
-      color: #0f0;
-      text-shadow: 0 0 3px #0f0;
-      background-color: rgba(0, 0, 0, 0.5);
-      border-radius: 3px;
-      margin-bottom: 3px;
-    }
+    color: #0f0;
+    text-shadow: 0 0 3px #0f0;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 3px;
+    margin-bottom: 3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    position: relative;
+    z-index: 2;
+  }
+  
+  /* Fix for the game hash and timestamp */
+  .game-hash {
+    font-size: 0.9rem;
+    color: #0f0;
+    text-shadow: 0 0 3px #0f0;
+    margin-left: 0.5rem;
+    font-weight: bold;
+  }
+  
+  .score-date {
+    font-size: 0.9rem;
+    color: #0f0;
+    text-shadow: 0 0 3px #0f0;
+    margin-left: auto;
+    padding-left: 1rem;
+    font-weight: bold;
+  }
+  
+  /* Main score content */
+  .score-content {
+    flex: 1;
+  }
+  
+  /* Adjust the background image to ensure it doesn't interfere with text */
+  .leaderboard::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('your-camel-image.png');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.15;
+    z-index: 1;
+    filter: brightness(0.7) contrast(1.1);
+  }
   </style>
 </head>
 <body>
