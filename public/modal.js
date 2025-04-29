@@ -27,21 +27,25 @@ function createModal(title, message, type, options = []) {
   // Create container
   const container = document.createElement("div")
   container.className = "modal-container"
-  container.style.backgroundColor = "#111"
-  container.style.color = "#0f0"
-  container.style.border = "2px solid #0f0"
+  // Force dark background and green text/border with !important
+  container.style.cssText = `
+    background-color: #111 !important;
+    color: #0f0 !important;
+    border: 2px solid #0f0 !important;
+    box-shadow: 0 0 20px #0f0 !important;
+  `
 
   // Create header
   const header = document.createElement("div")
   header.className = "modal-header"
   header.textContent = title
-  header.style.color = "#0f0"
+  header.style.cssText = `color: #0f0 !important; text-shadow: 0 0 5px #0f0;`
 
   // Create content
   const content = document.createElement("div")
   content.className = "modal-content"
   content.textContent = message
-  content.style.color = "#0f0"
+  content.style.cssText = `color: #0f0 !important;`
 
   // Create buttons container
   const buttons = document.createElement("div")
@@ -53,9 +57,11 @@ function createModal(title, message, type, options = []) {
     input.type = "text"
     input.className = "modal-input"
     input.placeholder = "Enter your response..."
-    input.style.backgroundColor = "#000"
-    input.style.color = "#0f0"
-    input.style.border = "1px solid #0f0"
+    input.style.cssText = `
+      background-color: #000 !important;
+      color: #0f0 !important;
+      border: 1px solid #0f0 !important;
+    `
     input.addEventListener("input", (e) => {
       modalInputValue = e.target.value
     })
@@ -75,9 +81,11 @@ function createModal(title, message, type, options = []) {
     const okButton = document.createElement("button")
     okButton.className = "modal-button"
     okButton.textContent = "OK"
-    okButton.style.backgroundColor = "#000"
-    okButton.style.color = "#0f0"
-    okButton.style.border = "1px solid #0f0"
+    okButton.style.cssText = `
+      background-color: #000 !important;
+      color: #0f0 !important;
+      border: 1px solid #0f0 !important;
+    `
     okButton.addEventListener("click", () => {
       closeModal()
       if (modalCallback) modalCallback(true)
@@ -88,9 +96,11 @@ function createModal(title, message, type, options = []) {
     const okButton = document.createElement("button")
     okButton.className = "modal-button"
     okButton.textContent = options[0] || "OK"
-    okButton.style.backgroundColor = "#000"
-    okButton.style.color = "#0f0"
-    okButton.style.border = "1px solid #0f0"
+    okButton.style.cssText = `
+      background-color: #000 !important;
+      color: #0f0 !important;
+      border: 1px solid #0f0 !important;
+    `
     okButton.addEventListener("click", () => {
       closeModal()
       if (modalCallback) modalCallback(true)
@@ -100,9 +110,11 @@ function createModal(title, message, type, options = []) {
     const cancelButton = document.createElement("button")
     cancelButton.className = "modal-button"
     cancelButton.textContent = options[1] || "Cancel"
-    cancelButton.style.backgroundColor = "#000"
-    cancelButton.style.color = "#0f0"
-    cancelButton.style.border = "1px solid #0f0"
+    cancelButton.style.cssText = `
+      background-color: #000 !important;
+      color: #0f0 !important;
+      border: 1px solid #0f0 !important;
+    `
     cancelButton.addEventListener("click", () => {
       closeModal()
       if (modalCallback) modalCallback(false)
@@ -115,9 +127,11 @@ function createModal(title, message, type, options = []) {
     const okButton = document.createElement("button")
     okButton.className = "modal-button"
     okButton.textContent = "OK"
-    okButton.style.backgroundColor = "#000"
-    okButton.style.color = "#0f0"
-    okButton.style.border = "1px solid #0f0"
+    okButton.style.cssText = `
+      background-color: #000 !important;
+      color: #0f0 !important;
+      border: 1px solid #0f0 !important;
+    `
     okButton.addEventListener("click", () => {
       closeModal()
       if (modalCallback) modalCallback(modalInputValue)
@@ -127,9 +141,11 @@ function createModal(title, message, type, options = []) {
     const cancelButton = document.createElement("button")
     cancelButton.className = "modal-button"
     cancelButton.textContent = "Cancel"
-    cancelButton.style.backgroundColor = "#000"
-    cancelButton.style.color = "#0f0"
-    cancelButton.style.border = "1px solid #0f0"
+    cancelButton.style.cssText = `
+      background-color: #000 !important;
+      color: #0f0 !important;
+      border: 1px solid #0f0 !important;
+    `
     cancelButton.addEventListener("click", () => {
       closeModal()
       if (modalCallback) modalCallback(null)
