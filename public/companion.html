@@ -299,28 +299,33 @@
     }
 
   .liquid-btc-container {
-  position: absolute;
-  right: 1rem;
-  top: 8rem;
-  padding: 8px 12px;
-  background-color: rgba(0, 0, 0, 0.7);
-  border: 1px solid #0f0;
-  border-radius: 4px;
-  color: #0f0;
-  font-weight: bold;
-  animation: pulse 2s infinite;
-  z-index: 10;
-}
-
-@media only screen and (max-width: 600px) {
-  .liquid-btc-container {
-    position: static;
-    display: block;
-    margin: 0.5rem auto;
-    width: 80%;
-    text-align: center;
+    display: inline-block;
+    position: absolute;
+    right: 1rem;
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #0f0;
+    border-radius: 4px;
+    color: #0f0;
+    font-weight: bold;
+    animation: subtle-pulse 3s infinite;
+    margin-left: 1rem;
   }
-}
+  
+  @keyframes subtle-pulse {
+    0%, 100% { box-shadow: 0 0 3px #0f0; }
+    50% { box-shadow: 0 0 8px #0f0; }
+  }
+  
+  @media only screen and (max-width: 600px) {
+    .liquid-btc-container {
+      position: static;
+      display: block;
+      margin: 0.5rem auto;
+      width: 80%;
+      text-align: center;
+    }
+  }
   
   .liquid-btc-label {
     font-size: 0.8em;
@@ -373,7 +378,7 @@
           <option value="passports">Fake Passports</option>
           <option value="accounts">Hacked Accounts</option>
           <option value="ccs">Credit Cards</option>
-          <option value="files">Stolen Files</option>
+          <option value="files">Stolen Files</files>
         </select>
       </label>
       <button id="applyBurnerBtn" onclick="applyBurnerDeal()">Apply Burner Deal</button>
@@ -390,10 +395,6 @@
 
   <div id="transactionSection" class="inventory">
     <h3>Buy/Sell</h3>
-    <div class="liquid-btc-container">
-      <span class="liquid-btc-label">Liquid BTC:</span>
-      <span id="liquidBtc" class="liquid-btc-value">100</span>
-    </div>
     <table id="transactionTable">
       <thead><tr><th>Item</th><th>Buy</th><th>Sell</th></tr></thead>
       <tbody></tbody>
