@@ -497,11 +497,12 @@
   <div id="transactionSection" class="inventory">
     <h3>Buy/Sell</h3>
     <table id="transactionTable">
-      <thead><tr><th>Item</th><th>Buy</th><th>Sell</th></tr></thead>
+      <thead><tr><th style="text-align: left; padding-left: 10px;">Item</th><th>Owned</th><th>Buy</th><th>Sell</th></tr></thead>
       <tbody>
         <!-- Fallback static rows in case JavaScript fails -->
         <tr>
-          <td>LSD</td>
+          <td style="text-align: left; padding-left: 10px;">LSD</td>
+          <td style="text-align: center;" id="owned-lsd">0</td>
           <td>
             <input type="number" id="buy-lsd" min="0" style="width: 50px">
             <button class="max-button" onclick="setMaxBuy('lsd')">Max</button>
@@ -512,7 +513,8 @@
           </td>
         </tr>
         <tr>
-          <td>Weed</td>
+          <td style="text-align: left; padding-left: 10px;">Weed</td>
+          <td style="text-align: center;" id="owned-weed">0</td>
           <td>
             <input type="number" id="buy-weed" min="0" style="width: 50px">
             <button class="max-button" onclick="setMaxBuy('weed')">Max</button>
@@ -523,7 +525,8 @@
           </td>
         </tr>
         <tr>
-          <td>Cocaine</td>
+          <td style="text-align: left; padding-left: 10px;">Cocaine</td>
+          <td style="text-align: center;" id="owned-cocaine">0</td>
           <td>
             <input type="number" id="buy-cocaine" min="0" style="width: 50px">
             <button class="max-button" onclick="setMaxBuy('cocaine')">Max</button>
@@ -534,7 +537,8 @@
           </td>
         </tr>
         <tr>
-          <td>MDMA</td>
+          <td style="text-align: left; padding-left: 10px;">MDMA</td>
+          <td style="text-align: center;" id="owned-mdma">0</td>
           <td>
             <input type="number" id="buy-mdma" min="0" style="width: 50px">
             <button class="max-button" onclick="setMaxBuy('mdma')">Max</button>
@@ -545,7 +549,8 @@
           </td>
         </tr>
         <tr>
-          <td>Fake Passports</td>
+          <td style="text-align: left; padding-left: 10px;">Fake Passports</td>
+          <td style="text-align: center;" id="owned-passports">0</td>
           <td>
             <input type="number" id="buy-passports" min="0" style="width: 50px">
             <button class="max-button" onclick="setMaxBuy('passports')">Max</button>
@@ -556,7 +561,8 @@
           </td>
         </tr>
         <tr>
-          <td>Hacked Accounts</td>
+          <td style="text-align: left; padding-left: 10px;">Hacked Accounts</td>
+          <td style="text-align: center;" id="owned-accounts">0</td>
           <td>
             <input type="number" id="buy-accounts" min="0" style="width: 50px">
             <button class="max-button" onclick="setMaxBuy('accounts')">Max</button>
@@ -567,7 +573,8 @@
           </td>
         </tr>
         <tr>
-          <td>Credit Cards</td>
+          <td style="text-align: left; padding-left: 10px;">Credit Cards</td>
+          <td style="text-align: center;" id="owned-ccs">0</td>
           <td>
             <input type="number" id="buy-ccs" min="0" style="width: 50px">
             <button class="max-button" onclick="setMaxBuy('ccs')">Max</button>
@@ -578,7 +585,8 @@
           </td>
         </tr>
         <tr>
-          <td>Stolen Files</td>
+          <td style="text-align: left; padding-left: 10px;">Stolen Files</td>
+          <td style="text-align: center;" id="owned-files">0</td>
           <td>
             <input type="number" id="buy-files" min="0" style="width: 50px">
             <button class="max-button" onclick="setMaxBuy('files')">Max</button>
