@@ -336,8 +336,16 @@
   
   /* CRITICAL FIX: Force all modals to have dark background and green text */
   .modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
     background-color: rgba(0, 0, 0, 0.85) !important;
     z-index: 1000 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
 
   .modal-container {
@@ -345,26 +353,58 @@
     color: #0f0 !important;
     border: 2px solid #0f0 !important;
     box-shadow: 0 0 20px #0f0 !important;
+    padding: 1.5rem !important;
+    width: 90% !important;
+    max-width: 500px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
   }
 
   .modal-header {
     color: #0f0 !important;
+    text-align: center !important;
+    margin-bottom: 1rem !important;
+    font-size: 1.5rem !important;
     text-shadow: 0 0 5px #0f0 !important;
   }
 
   .modal-content {
     color: #0f0 !important;
+    margin-bottom: 1.5rem !important;
+    font-size: 1.1rem !important;
+    line-height: 1.5 !important;
+    white-space: pre-line !important;
+  }
+
+  .modal-buttons {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 1rem !important;
   }
 
   .modal-button {
     background-color: #000 !important;
     color: #0f0 !important;
     border: 1px solid #0f0 !important;
+    padding: 0.5rem 1.5rem !important;
+    cursor: pointer !important;
+    font-family: monospace !important;
+    font-size: 1rem !important;
   }
 
   .modal-button:hover {
     background-color: #0f0 !important;
     color: #000 !important;
+  }
+
+  .modal-input {
+    width: 100% !important;
+    background-color: #000 !important;
+    color: #0f0 !important;
+    border: 1px solid #0f0 !important;
+    padding: 0.5rem !important;
+    margin-bottom: 1rem !important;
+    font-family: monospace !important;
   }
 
   /* Override any browser default styles that might be interfering */
