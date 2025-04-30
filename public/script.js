@@ -1385,7 +1385,8 @@ function updateMarketTable() {
   }
 }
 
-// Modify the populateTransactionTable function to add max buttons
+// Find the populateTransactionTable function and replace it with this improved version:
+
 function populateTransactionTable() {
   const tableBody = document.querySelector("#transactionTable tbody")
   tableBody.innerHTML = ""
@@ -1406,20 +1407,24 @@ function populateTransactionTable() {
     buyInput.id = `buy-${item}`
     buyInput.className = "buy-input"
     buyInput.style.width = "50px"
+    buyCell.appendChild(buyInput)
 
-    // Add max buy button
+    // Add max buy button with more visible styling
     const maxBuyBtn = document.createElement("button")
     maxBuyBtn.textContent = "Max"
+    maxBuyBtn.className = "max-button"
     maxBuyBtn.style.marginLeft = "5px"
     maxBuyBtn.style.padding = "2px 5px"
     maxBuyBtn.style.fontSize = "0.8rem"
-    maxBuyBtn.addEventListener("click", (e) => {
-      e.preventDefault() // Prevent form submission
+    maxBuyBtn.style.backgroundColor = "#000"
+    maxBuyBtn.style.color = "#0f0"
+    maxBuyBtn.style.border = "1px solid #0f0"
+    maxBuyBtn.style.cursor = "pointer"
+    maxBuyBtn.onclick = (e) => {
+      e.preventDefault()
       setMaxBuy(item)
       playSound("bleep")
-    })
-
-    buyCell.appendChild(buyInput)
+    }
     buyCell.appendChild(maxBuyBtn)
     row.appendChild(buyCell)
 
@@ -1431,25 +1436,35 @@ function populateTransactionTable() {
     sellInput.id = `sell-${item}`
     sellInput.className = "sell-input"
     sellInput.style.width = "50px"
+    sellCell.appendChild(sellInput)
 
-    // Add max sell button
+    // Add max sell button with more visible styling
     const maxSellBtn = document.createElement("button")
     maxSellBtn.textContent = "Max"
+    maxSellBtn.className = "max-button"
     maxSellBtn.style.marginLeft = "5px"
     maxSellBtn.style.padding = "2px 5px"
     maxSellBtn.style.fontSize = "0.8rem"
-    maxSellBtn.addEventListener("click", (e) => {
-      e.preventDefault() // Prevent form submission
+    maxSellBtn.style.backgroundColor = "#000"
+    maxSellBtn.style.color = "#0f0"
+    maxSellBtn.style.border = "1px solid #0f0"
+    maxSellBtn.style.cursor = "pointer"
+    maxSellBtn.onclick = (e) => {
+      e.preventDefault()
       setMaxSell(item)
       playSound("bleep")
-    })
-
-    sellCell.appendChild(sellInput)
+    }
     sellCell.appendChild(maxSellBtn)
     row.appendChild(sellCell)
 
     tableBody.appendChild(row)
   }
+
+  // Force a refresh of the table
+  tableBody.style.display = "none"
+  setTimeout(() => {
+    tableBody.style.display = ""
+  }, 10)
 }
 
 // Add these new functions for setting max buy/sell values
