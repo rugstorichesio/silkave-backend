@@ -551,7 +551,17 @@ function applyEvent() {
 
   // Check if it's a roll card
   isRollCard = ["004", "009", "011", "012", "017", "020", "029", "036", "037"].includes(eventCode)
-  document.getElementById("rollCardBtn").style.display = isRollCard ? "inline-block" : "none"
+
+  // Reset the roll button state
+  const rollButton = document.getElementById("rollCardBtn")
+  if (rollButton) {
+    rollButton.disabled = false
+    rollButton.style.opacity = "1"
+    rollButton.style.cursor = "pointer"
+    rollButton.style.display = isRollCard ? "inline-block" : "none"
+  }
+
+  // Clear previous result
   document.getElementById("cardDiceResult").textContent = ""
 
   log(`-- Event code ${eventCode} applied.`)
@@ -566,7 +576,12 @@ function applyEvent() {
       log(`-- ${result}`)
     } else {
       const result = runCardEffect(eventCode, null)
-      document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+      // Make sure the result is displayed
+      const cardDiceResult = document.getElementById("cardDiceResult")
+      if (cardDiceResult) {
+        cardDiceResult.textContent = "✓ Outcome: " + result
+        cardDiceResult.style.display = "block"
+      }
       log(`-- Card ${eventCode}: ${result}`)
     }
 
@@ -629,6 +644,14 @@ function rollCardDice() {
   playSound("bleep")
 
   if (!isRollCard || eventCode === "") return
+
+  // Disable the roll button to prevent multiple rolls
+  const rollButton = document.getElementById("rollCardBtn")
+  if (rollButton) {
+    rollButton.disabled = true
+    rollButton.style.opacity = "0.5"
+    rollButton.style.cursor = "not-allowed"
+  }
 
   const result = Math.ceil(Math.random() * 6)
   document.getElementById("cardDiceResult").textContent = `🎲 You rolled: ${result}`
@@ -1221,6 +1244,14 @@ function applyWhaleBuyout() {
 function rollMarket() {
   debugGameFlow("Rolling market prices")
   playSound("bleep")
+
+  // Disable the roll market button to prevent multiple rolls
+  const rollMarketButton = document.getElementById("rollMarketBtn")
+  if (rollMarketButton) {
+    rollMarketButton.disabled = true
+    rollMarketButton.style.opacity = "0.5"
+    rollMarketButton.style.cursor = "not-allowed"
+  }
 
   // Reset prices from any previous effects
   currentPrices = {}
@@ -1998,6 +2029,14 @@ function advanceCycle() {
 
   // Reset burner deal
   document.getElementById("burnerDeal").value = ""
+
+  // Re-enable the roll market button for the next cycle
+  const rollMarketButton = document.getElementById("rollMarketBtn")
+  if (rollMarketButton) {
+    rollMarketButton.disabled = false
+    rollMarketButton.style.opacity = "1"
+    rollMarketButton.style.cursor = "pointer"
+  }
 
   log(`-- Advanced to Cycle ${cycle}/10`)
   updateStatusBars()
