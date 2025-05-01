@@ -500,6 +500,66 @@
   cursor: pointer;
   z-index: 1000;
 }
+
+  .card-result {
+    margin-top: 0.5rem;
+    font-weight: bold;
+    min-height: 2.5rem !important;
+    background-color: rgba(0, 20, 0, 0.3);
+    padding: 0.5rem;
+    border: 1px dashed #0f0;
+    white-space: pre-line;
+    display: block !important;
+  }
+  
+  #cardDiceResult {
+    white-space: pre-line;
+    margin-top: 0.5rem;
+  }
+  
+  /* Make the roll button more visible */
+  #rollCardBtn {
+    background-color: #001800;
+    color: #0f0;
+    border: 1px solid #0f0;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    animation: pulse 1.5s infinite;
+  }
+  
+  #rollCardBtn:hover {
+    background-color: #0f0;
+    color: #000;
+  }
+
+/* Make market and transaction tables more compact on mobile */
+@media only screen and (max-width: 600px) {
+  #marketTable, #transactionTable {
+    font-size: 0.75rem;
+  }
+  
+  #marketTable th, #marketTable td,
+  #transactionTable th, #transactionTable td {
+    padding: 0.15rem;
+  }
+  
+  .highlight-pulse {
+    box-shadow: 0 0 5px #0f0;
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 3px #0f0;
+    }
+    50% {
+      box-shadow: 0 0 10px #0f0;
+    }
+    100% {
+      box-shadow: 0 0 3px #0f0;
+    }
+  }
+}
   </style>
 </head>
 <body>
@@ -748,35 +808,14 @@
     setTimeout(function() {
       updateGameFlowHighlight();
     }, 100);
+    
+    // Make sure the card result area is always visible
+    const cardResult = document.querySelector('.card-result');
+    if (cardResult) {
+      cardResult.style.minHeight = '2.5rem';
+      cardResult.style.display = 'block';
+    }
   });
 </script>
-
-/* Make market and transaction tables more compact on mobile */
-@media only screen and (max-width: 600px) {
-  #marketTable, #transactionTable {
-    font-size: 0.75rem;
-  }
-  
-  #marketTable th, #marketTable td,
-  #transactionTable th, #transactionTable td {
-    padding: 0.15rem;
-  }
-  
-  .highlight-pulse {
-    box-shadow: 0 0 5px #0f0;
-  }
-  
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 3px #0f0;
-    }
-    50% {
-      box-shadow: 0 0 10px #0f0;
-    }
-    100% {
-      box-shadow: 0 0 3px #0f0;
-    }
-  }
-}
 </body>
 </html>
