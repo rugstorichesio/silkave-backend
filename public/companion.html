@@ -500,6 +500,34 @@
   cursor: pointer;
   z-index: 1000;
 }
+
+/* Make market and transaction tables more compact on mobile */
+@media only screen and (max-width: 600px) {
+  #marketTable, #transactionTable {
+    font-size: 0.75rem;
+  }
+  
+  #marketTable th, #marketTable td,
+  #transactionTable th, #transactionTable td {
+    padding: 0.15rem;
+  }
+  
+  .highlight-pulse {
+    box-shadow: 0 0 5px #0f0;
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 3px #0f0;
+    }
+    50% {
+      box-shadow: 0 0 10px #0f0;
+    }
+    100% {
+      box-shadow: 0 0 3px #0f0;
+    }
+  }
+}
   </style>
 </head>
 <body>
@@ -525,7 +553,7 @@
       <label>Event Card Code: <input type="text" id="eventCode" placeholder="Enter code"></label>
       <button id="applyEventBtn" onclick="applyEvent()">Apply Event</button>
     </div>
-    <div class="card-result">
+    <div class="card-result" style="display: block; min-height: 2.5rem; white-space: pre-line;">
       <button id="rollCardBtn" onclick="rollCardDice()" style="display: none;">🎲 Roll for Card</button>
       <div id="cardDiceResult"></div>
     </div>
@@ -750,33 +778,5 @@
     }, 100);
   });
 </script>
-
-/* Make market and transaction tables more compact on mobile */
-@media only screen and (max-width: 600px) {
-  #marketTable, #transactionTable {
-    font-size: 0.75rem;
-  }
-  
-  #marketTable th, #marketTable td,
-  #transactionTable th, #transactionTable td {
-    padding: 0.15rem;
-  }
-  
-  .highlight-pulse {
-    box-shadow: 0 0 5px #0f0;
-  }
-  
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 3px #0f0;
-    }
-    50% {
-      box-shadow: 0 0 10px #0f0;
-    }
-    100% {
-      box-shadow: 0 0 3px #0f0;
-    }
-  }
-}
 </body>
 </html>
