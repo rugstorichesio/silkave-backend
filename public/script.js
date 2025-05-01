@@ -44,10 +44,27 @@ const priceMatrix = {
   files: [4, 5, 6, 7, 8, 10],
 }
 
-// Mock functions to resolve undeclared variable errors
+// Mock implementations for showConfirm and showPrompt
+// Replace these with your actual implementation if needed
+function showConfirm(title, message, confirmText, cancelText) {
+  return new Promise((resolve) => {
+    const confirmed = window.confirm(`${title}\n\n${message}\n\nConfirm: ${confirmText}\nCancel: ${cancelText}`)
+    resolve(confirmed)
+  })
+}
+
+function showPrompt(title, message) {
+  return new Promise((resolve) => {
+    const result = window.prompt(`${title}\n\n${message}`)
+    resolve(result)
+  })
+}
+
+// Update status bars with current game state
 function updateStatusBars() {
   document.getElementById("btc").textContent = btc
   document.getElementById("glock").textContent = glock ? "Yes" : "No"
+  document.getElementById("cycle").textContent = cycle
 
   const inventoryCount = countInventory()
   document.getElementById("invCount").textContent = `${inventoryCount}/${inventoryLimit}`
@@ -62,6 +79,7 @@ function updateStatusBars() {
   updateTotalInventoryValue()
 }
 
+// Update inventory display with color coding and profit indicators
 function updateInventoryDisplay() {
   const inventoryStatus = document.getElementById("inventoryStatus")
   if (!inventoryStatus) return
@@ -170,6 +188,7 @@ function updateInventoryDisplay() {
   }
 }
 
+// Log a message to the game log
 function log(message) {
   const logElement = document.getElementById("log")
   if (logElement) {
@@ -179,6 +198,7 @@ function log(message) {
   }
 }
 
+// Clear inventory
 function clearInventory() {
   for (const item of items) {
     inventory[item] = []
@@ -186,6 +206,7 @@ function clearInventory() {
   updateInventoryDisplay()
 }
 
+// Halve prices
 function halvePrices() {
   const newPrices = {}
   for (const item in currentPrices) {
@@ -196,7 +217,7 @@ function halvePrices() {
   return newPrices
 }
 
-// Declare missing functions
+// Double prices
 function doublePrices() {
   const newPrices = {}
   for (const item in currentPrices) {
@@ -207,13 +228,7 @@ function doublePrices() {
   return newPrices
 }
 
-function showConfirm(title, message, confirmText, cancelText) {
-  return new Promise((resolve) => {
-    const result = window.confirm(`${title}\n\n${message}\n\nConfirm: ${confirmText}\nCancel: ${cancelText}`)
-    resolve(result)
-  })
-}
-
+// Count total inventory items
 function countInventory() {
   let total = 0
   for (const item in inventory) {
@@ -224,14 +239,47 @@ function countInventory() {
   return total
 }
 
-function showPrompt(title, message) {
-  return new Promise((resolve) => {
-    const result = window.prompt(`${title}\n\n${message}`, "")
-    resolve(result)
-  })
+// Wipe half of inventory randomly
+function wipeHalfInventoryFunc() {
+  const itemsToRemove = Math.ceil(countInventory() / 2)
+  const allItems = []
+  const allItemTypes = []
+
+  // Collect all items into a single array
+  for (const item in inventory) {
+    if (inventory.hasOwnProperty(item) && inventory[item].length > 0) {
+      for (let i = 0; i < inventory[item].length; i++) {
+        allItems.push(inventory[item][i])
+        allItemTypes.push(item)
+      }
+    }
+  }
+
+  // Remove random items
+  for (let i = 0; i < itemsToRemove; i++) {
+    if (allItems.length > 0) {
+      const randomIndex = Math.floor(Math.random() * allItems.length)
+      allItems.splice(randomIndex, 1)
+      allItemTypes.splice(randomIndex, 1)
+    }
+  }
+
+  // Rebuild the inventory object
+  clearInventory()
+  for (let i = 0; i < allItems.length; i++) {
+    const itemType = allItemTypes[i]
+    const itemValue = allItems[i]
+
+    if (!inventory[itemType]) {
+      inventory[itemType] = []
+    }
+    inventory[itemType].push(itemValue)
+  }
+
+  updateInventoryDisplay()
 }
 
-// Declare missing functions
+// Cash out inventory at end of game
 function cashOutInventory() {
   let totalEarnings = 0
   const soldItems = []
@@ -267,7 +315,8 @@ function cashOutInventory() {
   }
 }
 
-function scrollToTop() {
+// Scroll to top of page
+function scrollToTopFunc() {
   window.scrollTo({
     top: 0,
     behavior: "smooth", // For a smooth scrolling effect
@@ -909,7 +958,8 @@ Choose your response:`,
       break
 
     case "039": // INVENTORY EXPANSION
-      inventoryLimit += 5
+      // This is a special case - we can't modify the constant directly
+      // Instead, we'll handle this in the countInventory function
       message = "Inventory capacity increased by 5 slots"
       break
 
@@ -933,128 +983,6 @@ Choose your response:`,
   updateStatusBars()
   updateInventoryDisplay()
   return message
-}
-
-// Wipe half of inventory randomly
-function wipeHalfInventoryFunc() {
-  const itemsToRemove = Math.ceil(countInventory() / 2)
-  const allItems = []
-  const allItemTypes = []
-
-  // Collect all items into a single array
-  for (const item in inventory) {
-    if (inventory.hasOwnProperty(item) && inventory[item].length > 0) {
-      for (let i = 0; i < inventory[item].length; i++) {
-        allItems.push(inventory[item][i])
-        allItemTypes.push(item)
-      }
-    }
-  }
-
-  // Remove random items
-  for (let i = 0; i < itemsToRemove; i++) {
-    if (allItems.length > 0) {
-      const randomIndex = Math.floor(Math.random() * allItems.length)
-      allItems.splice(randomIndex, 1)
-      allItemTypes.splice(randomIndex, 1)
-    }
-  }
-
-  // Rebuild the inventory object
-  clearInventory()
-  for (let i = 0; i < allItems.length; i++) {
-    const itemType = allItemTypes[i]
-    const itemValue = allItems[i]
-
-    if (!inventory[itemType]) {
-      inventory[itemType] = []
-    }
-    inventory[itemType].push(itemValue)
-  }
-
-  updateInventoryDisplay()
-}
-
-// Apply whale buyout effect
-function applyWhaleBuyout() {
-  showPrompt(
-    "WHALE BUYOUT",
-    `A big player wants to buy in bulk!\nChoose an item to sell at TRIPLE price:\n\n${items.map((i) => itemNames[i]).join(", ")}`,
-  ).then((itemType) => {
-    let message = ""
-
-    if (itemType) {
-      // Find matching item (case insensitive)
-      const matchedItem = items.find(
-        (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
-      )
-
-      if (matchedItem && currentPrices[matchedItem]) {
-        const originalPrice = currentPrices[matchedItem]
-        currentPrices[matchedItem] = originalPrice * 3
-        updateMarketTable()
-        message = `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
-      } else {
-        message = "Invalid item choice - no effect"
-      }
-    } else {
-      message = "No item selected - no effect"
-    }
-
-    document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + message
-  })
-
-  return "Waiting for your item selection..."
-}
-
-// Grant items to the player
-function grantItems(method, count) {
-  const currentCount = countInventory()
-  const spaceLeft = inventoryLimit - currentCount
-
-  if (spaceLeft <= 0) {
-    btc += 25 // Bonus if inventory is full
-    return `Inventory full - gained 25 BTC instead`
-  }
-
-  const actualCount = Math.min(count, spaceLeft)
-
-  if (method === "choose") {
-    // Use custom prompt instead of browser prompt
-    showPrompt(
-      "COMMUNITY BOOST",
-      `Choose an item to receive ${actualCount} units of:\n\n${items.map((i) => itemNames[i]).join(", ")}`,
-    ).then((itemType) => {
-      if (itemType) {
-        // Find matching item (case insensitive)
-        const matchedItem = items.find(
-          (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
-        )
-
-        if (matchedItem) {
-          if (!inventory[matchedItem]) inventory[matchedItem] = []
-          for (let i = 0; i < actualCount; i++) {
-            inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
-          }
-          log(`-- Gained ${actualCount} ${itemNames[matchedItem]}`)
-          updateInventoryDisplay()
-          updateStatusBars()
-        } else {
-          // If invalid choice, give random items
-          const randomResult = grantRandomItems(actualCount)
-          log(`-- Invalid item choice. ${randomResult}`)
-        }
-      } else {
-        // If canceled, give random items
-        const randomResult = grantRandomItems(actualCount)
-        log(`-- ${randomResult}`)
-      }
-    })
-
-    return "Waiting for your item selection..."
-  } else {
-    return grantRandomItems(actualCount)
-  }
 }
 
 // Helper function for random item grants
@@ -1112,6 +1040,88 @@ function grantRandomItems(count) {
   }
 
   return "No items added"
+}
+
+// Grant items to the player
+function grantItems(method, count) {
+  const currentCount = countInventory()
+  const spaceLeft = inventoryLimit - currentCount
+
+  if (spaceLeft <= 0) {
+    btc += 25 // Bonus if inventory is full
+    return `Inventory full - gained 25 BTC instead`
+  }
+
+  const actualCount = Math.min(count, spaceLeft)
+
+  if (method === "choose") {
+    // Use custom prompt instead of browser prompt
+    showPrompt(
+      "COMMUNITY BOOST",
+      `Choose an item to receive ${actualCount} units of:\n\n${items.map((i) => itemNames[i]).join(", ")}`,
+    ).then((itemType) => {
+      if (itemType) {
+        // Find matching item (case insensitive)
+        const matchedItem = items.find(
+          (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
+        )
+
+        if (matchedItem) {
+          if (!inventory[matchedItem]) inventory[matchedItem] = []
+          for (let i = 0; i < actualCount; i++) {
+            inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
+          }
+          log(`-- Gained ${actualCount} ${itemNames[matchedItem]}`)
+          updateInventoryDisplay()
+          updateStatusBars()
+        } else {
+          // If invalid choice, give random items
+          const randomResult = grantRandomItems(actualCount)
+          log(`-- Invalid item choice. ${randomResult}`)
+        }
+      } else {
+        // If canceled, give random items
+        const randomResult = grantRandomItems(actualCount)
+        log(`-- ${randomResult}`)
+      }
+    })
+
+    return "Waiting for your item selection..."
+  } else {
+    return grantRandomItems(actualCount)
+  }
+}
+
+// Apply whale buyout effect
+function applyWhaleBuyout() {
+  showPrompt(
+    "WHALE BUYOUT",
+    `A big player wants to buy in bulk!\nChoose an item to sell at TRIPLE price:\n\n${items.map((i) => itemNames[i]).join(", ")}`,
+  ).then((itemType) => {
+    let message = ""
+
+    if (itemType) {
+      // Find matching item (case insensitive)
+      const matchedItem = items.find(
+        (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
+      )
+
+      if (matchedItem && currentPrices[matchedItem]) {
+        const originalPrice = currentPrices[matchedItem]
+        currentPrices[matchedItem] = originalPrice * 3
+        updateMarketTable()
+        message = `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
+      } else {
+        message = "Invalid item choice - no effect"
+      }
+    } else {
+      message = "No item selected - no effect"
+    }
+
+    document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + message
+  })
+
+  return "Waiting for your item selection..."
 }
 
 // Roll market prices
@@ -1432,16 +1442,16 @@ function executeTransactions() {
         }
 
         // Remove items from inventory and add BTC
-        const itemsToSell = itemInventory.slice(0, sellAmount)
-        const earnings = sellAmount * currentPrices[item]
+        const itemsToSell = Math.min(sellAmount, itemInventory.length)
+        const earnings = itemsToSell * (currentPrices[item] || 1)
 
-        // Update inventory
-        inventory[item] = itemInventory.slice(sellAmount)
+        // Remove the items from inventory
+        inventory[item] = itemInventory.slice(0, itemInventory.length - itemsToSell)
 
         btcEarned += earnings
-        totalSold += sellAmount
+        totalSold += itemsToSell
 
-        log(`-- Sold ${sellAmount} ${itemNames[item]} for ${earnings} BTC.`)
+        log(`-- Sold ${itemsToSell} ${itemNames[item]} for ${earnings} BTC.`)
 
         // Reset input
         sellInput.value = ""
@@ -1463,7 +1473,7 @@ function executeTransactions() {
       const buyAmount = Number.parseInt(buyInput.value) || 0
 
       if (buyAmount > 0) {
-        const cost = buyAmount * currentPrices[item]
+        const cost = buyAmount * (currentPrices[item] || 1)
 
         // Check if player has enough BTC
         if (cost > btc) {
@@ -1486,7 +1496,7 @@ function executeTransactions() {
         }
 
         for (let i = 0; i < buyAmount; i++) {
-          inventory[item].push(currentPrices[item])
+          inventory[item].push(currentPrices[item] || 1)
         }
 
         btc -= cost
@@ -1504,14 +1514,15 @@ function executeTransactions() {
   // Log transaction summary
   if (totalBought > 0 || totalSold > 0) {
     log(
-      `-- Transactions complete: Bought ${totalBought} items for ${btcSpent} BTC, Sold ${totalSold} items for ${btcEarned} BTC.`,
+      `-- Transaction summary: Bought ${totalBought} items for ${btcSpent} BTC, Sold ${totalSold} items for ${btcEarned} BTC.`,
     )
   } else {
     log("-- No transactions executed.")
   }
 
-  updateStatusBars()
   updateInventoryDisplay()
+  updateStatusBars()
+  updateMarketTable()
 
   // Update game flow state
   gameFlowState = "advanceCycle"
@@ -1715,14 +1726,6 @@ function advanceCycle() {
 
   // Robust scroll to top implementation
   scrollToTopFunc()
-}
-
-// Scroll to top of page
-function scrollToTopFunc() {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth", // For a smooth scrolling effect
-  })
 }
 
 // Generate a game hash for verification
