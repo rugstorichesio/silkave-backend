@@ -366,14 +366,55 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 })
 
-// Setup sorting options
+// Add sorting options UI to the inventory display
+// Add this function after the setupSortingOptions function
+
+// Add sorting options to the inventory display
 function setupSortingOptions() {
-  const sortSelect = document.getElementById("sortInventory")
-  if (sortSelect) {
+  // Create sorting options container if it doesn't exist
+  let sortingContainer = document.getElementById("sortingOptions")
+  if (!sortingContainer) {
+    const inventoryStatus = document.getElementById("inventoryStatus")
+    if (!inventoryStatus) return
+
+    sortingContainer = document.createElement("div")
+    sortingContainer.id = "sortingOptions"
+    sortingContainer.style.marginBottom = "10px"
+    sortingContainer.style.textAlign = "right"
+
+    // Create sort label
+    const sortLabel = document.createElement("span")
+    sortLabel.textContent = "Sort by: "
+    sortingContainer.appendChild(sortLabel)
+
+    // Create sort select
+    const sortSelect = document.createElement("select")
+    sortSelect.id = "sortInventory"
+
+    const sortOptions = [
+      { value: "default", text: "Default" },
+      { value: "alphabetical", text: "Name" },
+      { value: "quantity", text: "Quantity" },
+      { value: "value", text: "Value" },
+      { value: "profit", text: "Profit" },
+    ]
+
+    sortOptions.forEach((option) => {
+      const optionElement = document.createElement("option")
+      optionElement.value = option.value
+      optionElement.textContent = option.text
+      sortSelect.appendChild(optionElement)
+    })
+
     sortSelect.addEventListener("change", function () {
       sortMethod = this.value
       updateInventoryDisplay()
     })
+
+    sortingContainer.appendChild(sortSelect)
+
+    // Insert sorting options before inventory status content
+    inventoryStatus.parentNode.insertBefore(sortingContainer, inventoryStatus)
   }
 }
 
@@ -1531,6 +1572,16 @@ function executeTransactions() {
   updateGameFlowHighlight()
 }
 
+// Buy items (wrapper for executeTransactions)
+function buyItems() {
+  executeTransactions()
+}
+
+// Sell items (wrapper for executeTransactions)
+function sellItems() {
+  executeTransactions()
+}
+
 // Buy a Glock
 function buyGlock() {
   playSound("bleep")
@@ -1616,29 +1667,56 @@ function sellEverything() {
 
 // Update total inventory value
 function updateTotalInventoryValue() {
-  const totalValueElement = document.getElementById("total-inventory-value")
-  if (!totalValueElement) return
-
+  // Calculate total inventory value
   let totalValue = 0
+  let totalCost = 0
+
   for (const item in inventory) {
     if (inventory.hasOwnProperty(item)) {
       const itemCount = inventory[item].length
       const itemPrice = currentPrices[item] || 0
-      totalValue += itemCount * itemPrice
+      const itemValue = itemCount * itemPrice
+      totalValue += itemValue
+
+      // Calculate original cost
+      const originalCost = inventory[item].reduce((sum, price) => sum + price, 0)
+      totalCost += originalCost
     }
   }
 
-  totalValueElement.textContent = totalValue
+  // Calculate profit/loss
+  const profit = totalValue - totalCost
+  const profitPercent = totalCost > 0 ? (profit / totalCost) * 100 : 0
 
-  // Add color coding based on value
-  if (totalValue > 100) {
-    totalValueElement.style.color = "#00ff00" // Bright green
-  } else if (totalValue > 50) {
-    totalValueElement.style.color = "#00cc00" // Medium green
-  } else if (totalValue > 0) {
-    totalValueElement.style.color = "#009900" // Dark green
-  } else {
-    totalValueElement.style.color = "#0f0" // Default green
+  // Update the liquid BTC display
+  const liquidBtcElement = document.getElementById("liquid-btc")
+  if (liquidBtcElement) {
+    liquidBtcElement.textContent = btc
+  }
+
+  // Add total value to inventory display
+  const inventoryStatus = document.getElementById("inventoryStatus")
+  if (inventoryStatus && inventoryStatus.innerHTML && !inventoryStatus.innerHTML.includes("Empty")) {
+    // Only add if inventory is not empty and doesn't already have the total value
+    if (!document.getElementById("total-inventory-value")) {
+      const totalValueDiv = document.createElement("div")
+      totalValueDiv.id = "total-inventory-value-container"
+      totalValueDiv.style.marginTop = "10px"
+      totalValueDiv.style.borderTop = "1px dotted #0f0"
+      totalValueDiv.style.paddingTop = "5px"
+
+      let valueText = `Total inventory value: <span id="total-inventory-value" style="color: #0f0; font-weight: bold;">${totalValue.toFixed(1)}</span> BTC`
+
+      // Add profit/loss indicator
+      if (profit !== 0 && !isNaN(profit)) {
+        const profitColor = profit > 0 ? "#0f0" : "#ff6666"
+        const profitSign = profit > 0 ? "+" : ""
+        valueText += ` <span style="color: ${profitColor}">(${profitSign}${profit.toFixed(1)} BTC, ${profitSign}${profitPercent.toFixed(0)}%)</span>`
+      }
+
+      totalValueDiv.innerHTML = valueText
+      inventoryStatus.appendChild(totalValueDiv)
+    }
   }
 }
 
