@@ -96,9 +96,11 @@ function debugGameFlow(message) {
   updateGameFlowHighlight()
 }
 
-// Mock implementations for showConfirm and showPrompt
-// Replace these with your actual implementation if needed
-function showConfirm(title, message, confirmText, cancelText) {
+// Find the mock implementations for showConfirm and showPrompt
+// Replace these functions with the proper modal implementations
+
+// Replace these mock implementations:
+/*function showConfirm(title, message, confirmText, cancelText) {
   return new Promise((resolve) => {
     const confirmed = window.confirm(`${title}\n\n${message}\n\nConfirm: ${confirmText}\nCancel: ${cancelText}`)
     resolve(confirmed)
@@ -110,7 +112,11 @@ function showPrompt(title, message) {
     const result = window.prompt(`${title}\n\n${message}`)
     resolve(result)
   })
-}
+}*/
+
+// With these proper implementations that use the modal.js functions:
+// Use the custom modal implementation from modal.js
+// Use the custom modal implementation from modal.js
 
 // Update status bars with current game state
 function updateStatusBars() {
@@ -582,7 +588,9 @@ function applyEvent() {
   }
 
   // Clear previous result
-  document.getElementById("cardDiceResult").textContent = ""
+  const cardDiceResult = document.getElementById("cardDiceResult")
+  cardDiceResult.innerHTML = ""
+  cardDiceResult.style.display = "block"
 
   log(`-- Event code ${eventCode} applied.`)
 
@@ -592,33 +600,24 @@ function applyEvent() {
     if (ignoreNextNegative && isNegativeCard(eventCode)) {
       ignoreNextNegative = false
       const result = "Negative effect ignored due to Silk Security Patch"
-      const cardDiceResult = document.getElementById("cardDiceResult")
-      if (cardDiceResult) {
-        cardDiceResult.textContent = "✓ Outcome: " + result
-        cardDiceResult.style.display = "block"
-        // Force visibility with inline style
-        cardDiceResult.setAttribute("style", "font-weight: bold; display: block !important; min-height: 1.5rem;")
-      }
+      cardDiceResult.innerHTML = "✓ Outcome: " + result
       log(`-- ${result}`)
     } else {
       const result = runCardEffect(eventCode, null)
-      // Make sure the result is displayed
-      const cardDiceResult = document.getElementById("cardDiceResult")
-      if (cardDiceResult) {
-        cardDiceResult.textContent = "✓ Outcome: " + result
-        cardDiceResult.style.display = "block"
-        // Force visibility with inline style
-        cardDiceResult.setAttribute("style", "font-weight: bold; display: block !important; min-height: 1.5rem;")
+      // Only update if we got a direct result (not a promise)
+      if (result && !result.includes("Waiting")) {
+        cardDiceResult.innerHTML = "✓ Outcome: " + result
       }
       log(`-- Card ${eventCode}: ${result}`)
     }
 
-    // Update game flow state
-    gameFlowState = "rollMarket"
+    // Update game flow state if we're not waiting for user input
+    if (!cardDiceResult.innerHTML.includes("Waiting")) {
+      gameFlowState = "rollMarket"
+    }
   } else {
     // For roll cards, just indicate that a roll is needed
-    document.getElementById("cardDiceResult").textContent = "🎲 Roll required for this card"
-    document.getElementById("cardDiceResult").style.display = "block"
+    cardDiceResult.innerHTML = "🎲 Roll required for this card"
 
     // Update game flow state
     gameFlowState = "rollCard"
@@ -682,30 +681,21 @@ function rollCardDice() {
   }
 
   const result = Math.ceil(Math.random() * 6)
-  document.getElementById("cardDiceResult").textContent = `🎲 You rolled: ${result}`
-  document.getElementById("cardDiceResult").style.display = "block"
+  const cardDiceResult = document.getElementById("cardDiceResult")
+
+  // Clear previous content
+  cardDiceResult.innerHTML = `🎲 You rolled: ${result}`
+  cardDiceResult.style.display = "block"
 
   // Check if we should ignore this negative effect
   if (ignoreNextNegative && isNegativeCard(eventCode)) {
     ignoreNextNegative = false
     const outcome = "Negative effect ignored due to Silk Security Patch"
-    const cardDiceResult = document.getElementById("cardDiceResult")
-    if (cardDiceResult) {
-      cardDiceResult.textContent += `\n✓ Outcome: ${outcome}`
-      cardDiceResult.style.display = "block"
-      // Force visibility with inline style
-      cardDiceResult.setAttribute("style", "font-weight: bold; display: block !important; min-height: 1.5rem;")
-    }
+    cardDiceResult.innerHTML += `<br>✓ Outcome: ${outcome}`
     log(`-- ${outcome}`)
   } else {
     const outcome = runCardEffect(eventCode, result)
-    const cardDiceResult = document.getElementById("cardDiceResult")
-    if (cardDiceResult) {
-      cardDiceResult.textContent += `\n✓ Outcome: ${outcome}`
-      cardDiceResult.style.display = "block"
-      // Force visibility with inline style
-      cardDiceResult.setAttribute("style", "font-weight: bold; display: block !important; min-height: 1.5rem;")
-    }
+    cardDiceResult.innerHTML += `<br>✓ Outcome: ${outcome}`
     log(`-- Card ${eventCode}: ${outcome}`)
   }
 
@@ -1288,7 +1278,7 @@ function rollMarket() {
   // Disable the roll market button to prevent multiple rolls
   const rollMarketButton = document.getElementById("rollMarketBtn")
   if (rollMarketButton) {
-    rollMarketButton.disabled = true
+    rollMarketButton.disabled = false
     rollMarketButton.style.opacity = "0.5"
     rollMarketButton.style.cursor = "not-allowed"
   }
@@ -2122,3 +2112,6 @@ function generateGameHash() {
   // Convert to hex and ensure it's positive
   return Math.abs(hash).toString(16).padStart(8, "0")
 }
+
+// Import showConfirm and showPrompt from modal.js
+import { showConfirm, showPrompt } from "./modal.js"
