@@ -1,5 +1,25 @@
 // Silk Ave - Game Companion Script
 
+// Add this at the beginning of the file, after the existing CSS definitions
+document.addEventListener("DOMContentLoaded", () => {
+  // Add CSS to ensure card result is always visible
+  const style = document.createElement("style")
+  style.textContent = `
+    .card-result {
+      display: block !important;
+      min-height: 2.5rem !important;
+      white-space: pre-line !important;
+      margin-top: 1rem !important;
+    }
+    #cardDiceResult {
+      display: block !important;
+      min-height: 1.5rem !important;
+      font-weight: bold !important;
+    }
+  `
+  document.head.appendChild(style)
+})
+
 // Game state variables
 let btc = 100
 let glock = false
@@ -572,7 +592,13 @@ function applyEvent() {
     if (ignoreNextNegative && isNegativeCard(eventCode)) {
       ignoreNextNegative = false
       const result = "Negative effect ignored due to Silk Security Patch"
-      document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+      const cardDiceResult = document.getElementById("cardDiceResult")
+      if (cardDiceResult) {
+        cardDiceResult.textContent = "✓ Outcome: " + result
+        cardDiceResult.style.display = "block"
+        // Force visibility with inline style
+        cardDiceResult.setAttribute("style", "font-weight: bold; display: block !important; min-height: 1.5rem;")
+      }
       log(`-- ${result}`)
     } else {
       const result = runCardEffect(eventCode, null)
@@ -581,6 +607,8 @@ function applyEvent() {
       if (cardDiceResult) {
         cardDiceResult.textContent = "✓ Outcome: " + result
         cardDiceResult.style.display = "block"
+        // Force visibility with inline style
+        cardDiceResult.setAttribute("style", "font-weight: bold; display: block !important; min-height: 1.5rem;")
       }
       log(`-- Card ${eventCode}: ${result}`)
     }
@@ -661,11 +689,23 @@ function rollCardDice() {
   if (ignoreNextNegative && isNegativeCard(eventCode)) {
     ignoreNextNegative = false
     const outcome = "Negative effect ignored due to Silk Security Patch"
-    document.getElementById("cardDiceResult").textContent += `\n✓ Outcome: ${outcome}`
+    const cardDiceResult = document.getElementById("cardDiceResult")
+    if (cardDiceResult) {
+      cardDiceResult.textContent += `\n✓ Outcome: ${outcome}`
+      cardDiceResult.style.display = "block"
+      // Force visibility with inline style
+      cardDiceResult.setAttribute("style", "font-weight: bold; display: block !important; min-height: 1.5rem;")
+    }
     log(`-- ${outcome}`)
   } else {
     const outcome = runCardEffect(eventCode, result)
-    document.getElementById("cardDiceResult").textContent += `\n✓ Outcome: ${outcome}`
+    const cardDiceResult = document.getElementById("cardDiceResult")
+    if (cardDiceResult) {
+      cardDiceResult.textContent += `\n✓ Outcome: ${outcome}`
+      cardDiceResult.style.display = "block"
+      // Force visibility with inline style
+      cardDiceResult.setAttribute("style", "font-weight: bold; display: block !important; min-height: 1.5rem;")
+    }
     log(`-- Card ${eventCode}: ${outcome}`)
   }
 
