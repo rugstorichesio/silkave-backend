@@ -487,116 +487,162 @@
   </div>
 
   <div class="market">
-    <h3>Market Prices</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Owned</th>
-          <th>Buy</th>
-          <th>Sell</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td style="text-align: left; padding-left: 10px;">LSD</td>
-          <td style="text-align: center;" id="owned-lsd">0</td>
-          <td>
-            <input type="number" id="buy-lsd" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxBuy('lsd')">Max</button>
-          </td>
-          <td>
-            <input type="number" id="sell-lsd" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxSell('lsd')">Max</button>
-          </td>
-        </tr>
-        <tr>
-          <td style="text-align: left; padding-left: 10px;">Weed</td>
-          <td style="text-align: center;" id="owned-weed">0</td>
-          <td>
-            <input type="number" id="buy-weed" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxBuy('weed')">Max</button>
-          </td>
-          <td>
-            <input type="number" id="sell-weed" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxSell('weed')">Max</button>
-          </td>
-        </tr>
-        <tr>
-          <td style="text-align: left; padding-left: 10px;">Cocaine</td>
-          <td style="text-align: center;" id="owned-cocaine">0</td>
-          <td>
-            <input type="number" id="buy-cocaine" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxBuy('cocaine')">Max</button>
-          </td>
-          <td>
-            <input type="number" id="sell-cocaine" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxSell('cocaine')">Max</button>
-          </td>
-        </tr>
-        <tr>
-          <td style="text-align: left; padding-left: 10px;">MDMA</td>
-          <td style="text-align: center;" id="owned-mdma">0</td>
-          <td>
-            <input type="number" id="buy-mdma" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxBuy('mdma')">Max</button>
-          </td>
-          <td>
-            <input type="number" id="sell-mdma" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxSell('mdma')">Max</button>
-          </td>
-        </tr>
-        <tr>
-          <td style="text-align: left; padding-left: 10px;">Forged Passports</td>
-          <td style="text-align: center;" id="owned-passports">0</td>
-          <td>
-            <input type="number" id="buy-passports" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxBuy('passports')">Max</button>
-          </td>
-          <td>
-            <input type="number" id="sell-passports" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxSell('passports')">Max</button>
-          </td>
-        </tr>
-        <tr>
-          <td style="text-align: left; padding-left: 10px;">Hacked Accounts</td>
-          <td style="text-align: center;" id="owned-accounts">0</td>
-          <td>
-            <input type="number" id="buy-accounts" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxBuy('accounts')">Max</button>
-          </td>
-          <td>
-            <input type="number" id="sell-accounts" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxSell('accounts')">Max</button>
-          </td>
-        </tr>
-        <tr>
-          <td style="text-align: left; padding-left: 10px;">Skimmed Credit Cards</td>
-          <td style="text-align: center;" id="owned-ccs">0</td>
-          <td>
-            <input type="number" id="buy-ccs" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxBuy('ccs')">Max</button>
-          </td>
-          <td>
-            <input type="number" id="sell-ccs" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxSell('ccs')">Max</button>
-          </td>
-        </tr>
-        <tr>
-          <td style="text-align: left; padding-left: 10px;">Leaked Intel</td>
-          <td style="text-align: center;" id="owned-files">0</td>
-          <td>
-            <input type="number" id="buy-files" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxBuy('files')">Max</button>
-          </td>
-          <td>
-            <input type="number" id="sell-files" min="0" style="width: 50px">
-            <button class="max-button" onclick="setMaxSell('files')">Max</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <h3>Market Prices</h3>
+  <table id="marketTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>LSD</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Weed</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Cocaine</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>MDMA</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Forged Passports</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Hacked Accounts</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Skimmed Credit Cards</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Leaked Intel</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="transactions">
+  <h3>Buy & Sell</h3>
+  <table id="transactionTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Owned</th>
+        <th>Buy</th>
+        <th>Sell</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: left; padding-left: 10px;">LSD</td>
+        <td style="text-align: center;" id="owned-lsd">0</td>
+        <td>
+          <input type="number" id="buy-lsd" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxBuy('lsd')">Max</button>
+        </td>
+        <td>
+          <input type="number" id="sell-lsd" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxSell('lsd')">Max</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: left; padding-left: 10px;">Weed</td>
+        <td style="text-align: center;" id="owned-weed">0</td>
+        <td>
+          <input type="number" id="buy-weed" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxBuy('weed')">Max</button>
+        </td>
+        <td>
+          <input type="number" id="sell-weed" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxSell('weed')">Max</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: left; padding-left: 10px;">Cocaine</td>
+        <td style="text-align: center;" id="owned-cocaine">0</td>
+        <td>
+          <input type="number" id="buy-cocaine" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxBuy('cocaine')">Max</button>
+        </td>
+        <td>
+          <input type="number" id="sell-cocaine" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxSell('cocaine')">Max</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: left; padding-left: 10px;">MDMA</td>
+        <td style="text-align: center;" id="owned-mdma">0</td>
+        <td>
+          <input type="number" id="buy-mdma" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxBuy('mdma')">Max</button>
+        </td>
+        <td>
+          <input type="number" id="sell-mdma" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxSell('mdma')">Max</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: left; padding-left: 10px;">Forged Passports</td>
+        <td style="text-align: center;" id="owned-passports">0</td>
+        <td>
+          <input type="number" id="buy-passports" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxBuy('passports')">Max</button>
+        </td>
+        <td>
+          <input type="number" id="sell-passports" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxSell('passports')">Max</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: left; padding-left: 10px;">Hacked Accounts</td>
+        <td style="text-align: center;" id="owned-accounts">0</td>
+        <td>
+          <input type="number" id="buy-accounts" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxBuy('accounts')">Max</button>
+        </td>
+        <td>
+          <input type="number" id="sell-accounts" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxSell('accounts')">Max</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: left; padding-left: 10px;">Skimmed Credit Cards</td>
+        <td style="text-align: center;" id="owned-ccs">0</td>
+        <td>
+          <input type="number" id="buy-ccs" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxBuy('ccs')">Max</button>
+        </td>
+        <td>
+          <input type="number" id="sell-ccs" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxSell('ccs')">Max</button>
+        </td>
+      </tr>
+      <tr>
+        <td style="text-align: left; padding-left: 10px;">Leaked Intel</td>
+        <td style="text-align: center;" id="owned-files">0</td>
+        <td>
+          <input type="number" id="buy-files" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxBuy('files')">Max</button>
+        </td>
+        <td>
+          <input type="number" id="sell-files" min="0" style="width: 50px">
+          <button class="max-button" onclick="setMaxSell('files')">Max</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
   <div class="transaction-buttons">
     <button onclick="buyItems()">Buy Items</button>

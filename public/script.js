@@ -1236,50 +1236,61 @@ function applyBurnerDeal() {
 
 // Update market table with current prices
 function updateMarketTable() {
-  const tableBody = document.querySelector("#marketTable tbody")
-  if (!tableBody) return
-
-  tableBody.innerHTML = ""
+  // First, make sure we have a market table to update
+  const marketTable = document.querySelector("table")
+  if (!marketTable) {
+    console.error("Market table not found")
+    return
+  }
 
   // Get the current burner deal
   const burnerItem = document.getElementById("burnerDeal").value
 
+  // Update each row in the table
   for (const item of items) {
-    const row = document.createElement("tr")
+    // Find the row for this item
+    const itemNameCell = Array.from(marketTable.querySelectorAll("td")).find(
+      (cell) => cell.textContent === itemNames[item],
+    )
 
-    // Item name cell
-    const nameCell = document.createElement("td")
-    nameCell.textContent = itemNames[item]
+    if (!itemNameCell) continue
 
-    // Highlight burner deal item
+    const row = itemNameCell.parentElement
+    if (!row) continue
+
+    // Clear any previous burner deal styling
+    itemNameCell.classList.remove("burner-deal-item")
+
+    // Apply burner deal styling if this is the burner item
     if (item === burnerItem) {
-      nameCell.classList.add("burner-deal-item")
+      itemNameCell.classList.add("burner-deal-item")
     }
 
-    if (item === bannedItem) {
-      nameCell.style.textDecoration = "line-through"
-      nameCell.style.color = "red"
-    }
-    row.appendChild(nameCell)
+    // Update the price cell
+    const priceCell = row.querySelector("td:nth-child(2)")
+    if (priceCell) {
+      priceCell.textContent = currentPrices[item] ? `${currentPrices[item]} BTC` : "—"
 
-    // Price cell
-    const priceCell = document.createElement("td")
-    priceCell.textContent = currentPrices[item] ? `${currentPrices[item]} BTC` : "—"
-
-    // Highlight profitable items
-    if (inventory[item] && inventory[item].length > 0) {
-      const avgCost = inventory[item].reduce((sum, price) => sum + price, 0) / inventory[item].length
-      if (currentPrices[item] > avgCost) {
-        priceCell.style.color = "#0f0" // Green for profit
-        priceCell.style.fontWeight = "bold"
-      } else if (currentPrices[item] < avgCost) {
-        priceCell.style.color = "#ff6666" // Red for loss
+      // Highlight profitable items
+      if (inventory[item] && inventory[item].length > 0) {
+        const avgCost = inventory[item].reduce((sum, price) => sum + price, 0) / inventory[item].length
+        if (currentPrices[item] > avgCost) {
+          priceCell.style.color = "#0f0" // Green for profit
+          priceCell.style.fontWeight = "bold"
+        } else if (currentPrices[item] < avgCost) {
+          priceCell.style.color = "#ff6666" // Red for loss
+        }
       }
     }
 
-    row.appendChild(priceCell)
-
-    tableBody.appendChild(row)
+    // Apply banned item styling
+    if (item === bannedItem) {
+      itemNameCell.style.textDecoration = "line-through"
+      itemNameCell.style.color = "red"
+    } else {
+      itemNameCell.style.textDecoration = ""
+      itemNameCell.style.color = ""
+    }
   }
 }
 
@@ -1572,14 +1583,141 @@ function executeTransactions() {
   updateGameFlowHighlight()
 }
 
-// Buy items (wrapper for executeTransactions)
+// Buy items function
 function buyItems() {
-  executeTransactions()
+  // Check if buying is blocked
+  if (blockBuying) {
+    log("-- Cannot buy this round due to event effect.")
+    return
+  }
+
+  let totalBought = 0
+  let btcSpent = 0
+
+  // Process buys
+  for (const item of items) {
+    if (item === bannedItem) continue
+
+    const buyInput = document.getElementById(`buy-${item}`)
+    if (!buyInput) continue
+
+    const buyAmount = Number.parseInt(buyInput.value) || 0
+
+    if (buyAmount > 0) {
+      const cost = buyAmount * (currentPrices[item] || 1)
+
+      // Check if player has enough BTC
+      if (cost > btc) {
+        log(`-- Error: Cannot afford ${buyAmount} ${itemNames[item]}.`)
+        continue
+      }
+
+      // Check if there is enough space in inventory
+      const currentInventoryCount = countInventory()
+      const spaceLeft = inventoryLimit - currentInventoryCount
+
+      if (buyAmount > spaceLeft) {
+        log(`-- Error: Not enough space in inventory to buy ${buyAmount} ${itemNames[item]}.`)
+        continue
+      }
+
+      // Add items to inventory and subtract BTC
+      if (!inventory[item]) {
+        inventory[item] = []
+      }
+
+      for (let i = 0; i < buyAmount; i++) {
+        inventory[item].push(currentPrices[item] || 1)
+      }
+
+      btc -= cost
+      btcSpent += cost
+      totalBought += buyAmount
+
+      log(`-- Bought ${buyAmount} ${itemNames[item]} for ${cost} BTC.`)
+
+      // Reset input
+      buyInput.value = ""
+    }
+  }
+
+  // Log transaction summary
+  if (totalBought > 0) {
+    log(`-- Transaction summary: Bought ${totalBought} items for ${btcSpent} BTC.`)
+  } else {
+    log("-- No items bought.")
+  }
+
+  updateInventoryDisplay()
+  updateStatusBars()
+
+  // Update game flow state
+  gameFlowState = "advanceCycle"
+
+  // Update the highlighted element
+  updateGameFlowHighlight()
 }
 
-// Sell items (wrapper for executeTransactions)
+// Sell items function
 function sellItems() {
-  executeTransactions()
+  // Check if selling is blocked
+  if (blockSelling) {
+    log("-- Cannot sell this round due to event effect.")
+    return
+  }
+
+  let totalSold = 0
+  let btcEarned = 0
+
+  // Process sells
+  for (const item of items) {
+    if (item === bannedItem) continue
+
+    const sellInput = document.getElementById(`sell-${item}`)
+    if (!sellInput) continue
+
+    const sellAmount = Number.parseInt(sellInput.value) || 0
+
+    if (sellAmount > 0) {
+      const itemInventory = inventory[item] || []
+      if (sellAmount > itemInventory.length) {
+        log(`-- Error: Cannot sell ${sellAmount} ${itemNames[item]}. You only have ${itemInventory.length}.`)
+        continue
+      }
+
+      // Remove items from inventory and add BTC
+      const itemsToSell = Math.min(sellAmount, itemInventory.length)
+      const earnings = itemsToSell * (currentPrices[item] || 1)
+
+      // Remove the items from inventory
+      inventory[item] = itemInventory.slice(0, itemInventory.length - itemsToSell)
+
+      btc += earnings
+      btcEarned += earnings
+      totalSold += itemsToSell
+
+      log(`-- Sold ${itemsToSell} ${itemNames[item]} for ${earnings} BTC.`)
+
+      // Reset input
+      sellInput.value = ""
+    }
+  }
+
+  // Log transaction summary
+  if (totalSold > 0) {
+    log(`-- Transaction summary: Sold ${totalSold} items for ${btcEarned} BTC.`)
+  } else {
+    log("-- No items sold.")
+  }
+
+  updateInventoryDisplay()
+  updateStatusBars()
+
+  // Update game flow state
+  gameFlowState = "advanceCycle"
+
+  // Update the highlighted element
+  updateGameFlowHighlight()
 }
 
 // Buy a Glock
