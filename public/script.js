@@ -44,6 +44,28 @@ const priceMatrix = {
   files: [4, 5, 6, 7, 8, 10],
 }
 
+// Debug toggle function
+function toggleDebug() {
+  const debugElement = document.getElementById("debugState")
+  if (debugElement) {
+    debugElement.style.display = debugElement.style.display === "none" ? "block" : "none"
+  }
+}
+
+// Update the current state display
+function updateDebugState() {
+  const stateElement = document.getElementById("currentState")
+  if (stateElement) {
+    stateElement.textContent = gameFlowState
+  }
+}
+
+// Debug function to help troubleshoot game flow
+function debugGameFlow(message) {
+  console.log(`[GAME FLOW] ${message} (State: ${gameFlowState})`)
+  updateGameFlowHighlight()
+}
+
 // Mock implementations for showConfirm and showPrompt
 // Replace these with your actual implementation if needed
 function showConfirm(title, message, confirmText, cancelText) {
@@ -347,6 +369,12 @@ document.addEventListener("DOMContentLoaded", () => {
       advanceButton.textContent = "Cash Out and Go Dark"
     }
   }
+
+  // Force initial highlight update
+  setTimeout(() => {
+    updateGameFlowHighlight()
+    console.log("Initial highlight applied to: " + gameFlowState)
+  }, 500)
 })
 
 // Add sorting options UI to the inventory display
@@ -417,6 +445,7 @@ function playSound(soundId) {
 
 // Update the highlighted element based on game flow state
 function updateGameFlowHighlight() {
+  console.log("Updating game flow highlight: " + gameFlowState)
   // Remove highlight from all elements
   const allElements = document.querySelectorAll(".highlight-pulse")
   allElements.forEach((el) => {
@@ -463,6 +492,8 @@ function updateGameFlowHighlight() {
       hideHint()
       break
   }
+  // Update debug display
+  updateDebugState()
 }
 
 // Show a hint message
@@ -492,6 +523,7 @@ function highlightElement(elementId) {
 
 // Event card application
 function applyEvent() {
+  debugGameFlow("Applying event")
   playSound("bleep")
 
   eventCode = document.getElementById("eventCode").value.trim()
@@ -568,6 +600,7 @@ function isNegativeCard(code) {
 
 // Roll dice for card effect
 function rollCardDice() {
+  debugGameFlow("Rolling card dice")
   playSound("bleep")
 
   if (!isRollCard || eventCode === "") return
@@ -1151,6 +1184,7 @@ function applyWhaleBuyout() {
 
 // Roll market prices
 function rollMarket() {
+  debugGameFlow("Rolling market prices")
   playSound("bleep")
 
   // Reset prices from any previous effects
@@ -1186,6 +1220,7 @@ function rollMarket() {
 
 // Apply burner deal
 function applyBurnerDeal() {
+  debugGameFlow("Applying burner deal")
   playSound("bleep")
 
   const burnerItem = document.getElementById("burnerDeal").value
@@ -1448,6 +1483,7 @@ function setMaxSell(item) {
 
 // Execute buy/sell transactions
 function executeTransactions() {
+  debugGameFlow("Executing transactions")
   playSound("bleep")
 
   if (blockBuying && blockSelling) {
@@ -1759,6 +1795,7 @@ function sellAllAtHalf() {
 
 // Sell everything at current prices
 function sellEverything() {
+  debugGameFlow("Selling everything")
   playSound("bleep")
 
   if (blockSelling) {
@@ -1865,6 +1902,7 @@ function updateTotalInventoryValue() {
 
 // Cash out inventory at end of game
 function advanceCycle() {
+  debugGameFlow("Advancing cycle")
   playSound("bleep")
 
   if (cycle >= 10) {

@@ -82,6 +82,10 @@
     .highlight-pulse {
       animation: pulse 1.5s infinite;
       box-shadow: 0 0 10px #0f0;
+      position: relative;
+      z-index: 5;
+      border: 2px solid #0f0 !important;
+      background-color: rgba(0, 255, 0, 0.1);
     }
     @keyframes pulse {
       0% {
@@ -436,6 +440,20 @@
     color: #000 !important;
     box-shadow: 0 0 5px #0f0 !important;
   }
+
+/* Debug toggle */
+.debug-toggle {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: #000;
+  color: #666;
+  border: 1px solid #333;
+  padding: 5px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  z-index: 1000;
+}
   </style>
 </head>
 <body>
@@ -449,6 +467,7 @@
   </div>
 
   <div id="gameHint" class="game-hint">Enter a 3-digit event card code</div>
+  <div id="debugState" style="text-align: center; font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; display: none;">Current state: <span id="currentState">enterEventCode</span></div>
 
   <div id="eventCodeSection" class="event-section">
     <h3 class="event-title">Event Card</h3>
@@ -665,13 +684,8 @@
   &copy; 2025 Silk Ave - A Dark Web Trading Simulation by MM
 </div>
 
-  <script>
-    // JavaScript functions will go here
-    // Example:
-    function applyEvent() {
-      alert('Applying event!');
-    }
-  </script>
+  <button class="debug-toggle" onclick="toggleDebug()">Debug</button>
+  <!-- Script imports -->
   <script src="modal.js"></script>
   <script src="script.js"></script>
 </body>
