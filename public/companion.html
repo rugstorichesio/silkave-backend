@@ -445,7 +445,6 @@
 
   <h1>Silk Ave Game Companion</h1>
   <div>
-    <h2>Cycle: <span id="cycle">1</span> / 10</h2>
     <h3>BTC: <span id="btc">100</span> | Glock: <span id="glock">No</span> | Inventory: <span id="invCount">0</span>/20</h3>
   </div>
 
@@ -647,6 +646,7 @@
   <div class="transaction-buttons">
     <button onclick="buyItems()">Buy Items</button>
     <button onclick="sellItems()">Sell Items</button>
+    <button onclick="sellEverything()">Sell Everything</button>
     <button id="advanceCycleBtn" onclick="advanceCycle()">Advance to Next Cycle</button>
   </div>
 
@@ -655,15 +655,15 @@
     <span class="liquid-btc-value" id="liquid-btc">0</span>
   </div>
 
+  <div id="inventoryStatus" class="inventory-status"></div>
+
   <div class="log-container">
     <div id="log" class="log"></div>
   </div>
 
-  <div id="inventoryStatus" class="inventory-status"></div>
-
   <div class="bottom-bar">
-    &copy; 2024 Silk Ave Game - v0.9 - by R.A.
-  </div>
+  &copy; 2025 Silk Ave - A Dark Web Trading Simulation by MM
+</div>
 
   <script>
     // JavaScript functions will go here

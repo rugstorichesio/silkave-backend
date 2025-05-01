@@ -14,7 +14,7 @@ let bannedItem = null
 const inventoryLimit = 20
 const gameHistory = []
 let ignoreNextNegative = false // For card 022 - Silk Security Patch
-let sortMethod = "default" // For inventory sorting
+const sortMethod = "default" // For inventory sorting
 
 // Game flow state tracking
 let gameFlowState = "enterEventCode"
@@ -67,7 +67,7 @@ function updateStatusBars() {
   document.getElementById("cycle").textContent = cycle
 
   const inventoryCount = countInventory()
-  document.getElementById("invCount").textContent = `${inventoryCount}/${inventoryLimit}`
+  document.getElementById("invCount").textContent = inventoryCount
 
   // Update liquid BTC display
   const liquidBtcElement = document.getElementById("liquid-btc")
@@ -114,23 +114,6 @@ function updateInventoryDisplay() {
       totalItems += itemInventory.length
       totalValue += itemValue
     }
-  }
-
-  // Sort inventory based on selected method
-  switch (sortMethod) {
-    case "value":
-      inventoryItems.sort((a, b) => b.value - a.value)
-      break
-    case "profit":
-      inventoryItems.sort((a, b) => b.profit - a.profit)
-      break
-    case "quantity":
-      inventoryItems.sort((a, b) => b.count - a.count)
-      break
-    case "alphabetical":
-      inventoryItems.sort((a, b) => a.name.localeCompare(b.name))
-      break
-    // default keeps the original order
   }
 
   // Build inventory text
@@ -340,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
   })
 
   // Add event listeners for sorting options
-  setupSortingOptions()
+  //setupSortingOptions()
 
   // Start the guided highlighting
   updateGameFlowHighlight()
@@ -370,7 +353,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // Add this function after the setupSortingOptions function
 
 // Add sorting options to the inventory display
-function setupSortingOptions() {
+// Remove this function entirely
+/*function setupSortingOptions() {
   // Create sorting options container if it doesn't exist
   let sortingContainer = document.getElementById("sortingOptions")
   if (!sortingContainer) {
@@ -416,7 +400,7 @@ function setupSortingOptions() {
     // Insert sorting options before inventory status content
     inventoryStatus.parentNode.insertBefore(sortingContainer, inventoryStatus)
   }
-}
+}*/
 
 // Play a sound
 function playSound(soundId) {
@@ -699,7 +683,7 @@ Choose your response:`,
       return "Waiting for your decision..." // Temporary message until user decides
 
     case "009": // SILK NETWORK REROUTE
-      if (roll) {
+      if (roll <= 6) {
         // If we have a roll value
         const productCount = glock ? 2 : 1
         const itemsResult = grantRandomItems(productCount)
@@ -726,7 +710,7 @@ Choose your response:`,
       break
 
     case "012": // FOUND A STASH
-      if (roll) {
+      if (roll <= 6) {
         const itemsResult = grantRandomItems(5)
         message = `Found a stash: ${itemsResult}`
       } else {
@@ -975,7 +959,7 @@ Choose your response:`,
       break
 
     case "036": // LUCKY FIND
-      if (roll) {
+      if (roll <= 6) {
         btc += roll * 5
         message = `Found ${roll * 5} BTC in an old wallet`
       } else {
@@ -1775,12 +1759,21 @@ function sellAllAtHalf() {
 
 // Sell everything at current prices
 function sellEverything() {
+  playSound("bleep")
+
+  if (blockSelling) {
+    log("-- Cannot sell this round due to event effect.")
+    return
+  }
+
   let totalEarnings = 0
   let itemsSold = 0
 
   for (const item in inventory) {
     if (inventory.hasOwnProperty(item)) {
       const itemCount = inventory[item].length
+      if (itemCount === 0) continue
+
       const itemPrice = currentPrices[item] || 1 // Use current price or default to 1
       const earnings = itemCount * itemPrice
 
@@ -1799,6 +1792,18 @@ function sellEverything() {
 
   updateInventoryDisplay()
   updateStatusBars()
+
+  if (itemsSold > 0) {
+    log(`-- Sold all ${itemsSold} items for ${totalEarnings} BTC.`)
+  } else {
+    log("-- No items to sell.")
+  }
+
+  // Update game flow state
+  gameFlowState = "advanceCycle"
+
+  // Update the highlighted element
+  updateGameFlowHighlight()
 
   return `Sold all ${itemsSold} items for ${totalEarnings} BTC.`
 }
