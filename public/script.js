@@ -330,6 +330,9 @@ function scrollToTopFunc() {
 
 // Initialize the game when the page loads
 document.addEventListener("DOMContentLoaded", () => {
+  // Set initial game state
+  gameFlowState = "enterEventCode"
+
   updateStatusBars()
   updateInventoryDisplay()
   updateMarketTable()
@@ -344,10 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
-  // Add event listeners for sorting options
-  //setupSortingOptions()
-
-  // Start the guided highlighting
+  // Start the guided highlighting immediately
   updateGameFlowHighlight()
 
   // Play bleep sound when buttons are clicked
@@ -369,12 +369,6 @@ document.addEventListener("DOMContentLoaded", () => {
       advanceButton.textContent = "Cash Out and Go Dark"
     }
   }
-
-  // Force initial highlight update
-  setTimeout(() => {
-    updateGameFlowHighlight()
-    console.log("Initial highlight applied to: " + gameFlowState)
-  }, 500)
 })
 
 // Add sorting options UI to the inventory display
@@ -446,6 +440,7 @@ function playSound(soundId) {
 // Update the highlighted element based on game flow state
 function updateGameFlowHighlight() {
   console.log("Updating game flow highlight: " + gameFlowState)
+
   // Remove highlight from all elements
   const allElements = document.querySelectorAll(".highlight-pulse")
   allElements.forEach((el) => {
@@ -492,6 +487,7 @@ function updateGameFlowHighlight() {
       hideHint()
       break
   }
+
   // Update debug display
   updateDebugState()
 }
@@ -569,6 +565,11 @@ function applyEvent() {
 
   // Update the highlighted element
   updateGameFlowHighlight()
+
+  // Update status bars and inventory display to reflect changes
+  updateStatusBars()
+  updateInventoryDisplay()
+  updateMarketTable()
 }
 
 // Check if a card is negative

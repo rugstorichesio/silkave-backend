@@ -688,5 +688,17 @@
   <!-- Script imports -->
   <script src="modal.js"></script>
   <script src="script.js"></script>
+<script>
+  // Force immediate highlight on page load
+  document.addEventListener("DOMContentLoaded", function() {
+    // Set initial game flow state
+    gameFlowState = "enterEventCode";
+    
+    // Apply highlight immediately
+    setTimeout(function() {
+      updateGameFlowHighlight();
+    }, 100);
+  });
+</script>
 </body>
 </html>
