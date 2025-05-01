@@ -58,6 +58,16 @@ function updateDebugState() {
   if (stateElement) {
     stateElement.textContent = gameFlowState
   }
+
+  const debugBtcElement = document.getElementById("debugBtc")
+  if (debugBtcElement) {
+    debugBtcElement.textContent = btc
+  }
+
+  const debugCycleElement = document.getElementById("debugCycle")
+  if (debugCycleElement) {
+    debugCycleElement.textContent = cycle
+  }
 }
 
 // Debug function to help troubleshoot game flow
@@ -91,7 +101,7 @@ function updateStatusBars() {
   const inventoryCount = countInventory()
   document.getElementById("invCount").textContent = inventoryCount
 
-  // Update liquid BTC display
+  // Update liquid BTC display - Make sure this is working
   const liquidBtcElement = document.getElementById("liquid-btc")
   if (liquidBtcElement) {
     liquidBtcElement.textContent = btc
@@ -339,6 +349,12 @@ document.addEventListener("DOMContentLoaded", () => {
   populateTransactionTable()
   log("Welcome to Silk Ave. You start with 100 BTC. Good luck.")
 
+  // Initialize liquid BTC display
+  const liquidBtcElement = document.getElementById("liquid-btc")
+  if (liquidBtcElement) {
+    liquidBtcElement.textContent = btc
+  }
+
   // Add event listener for event code input
   document.getElementById("eventCode").addEventListener("input", function () {
     if (this.value.length === 3 && gameFlowState === "enterEventCode") {
@@ -439,7 +455,7 @@ function playSound(soundId) {
 
 // Update the highlighted element based on game flow state
 function updateGameFlowHighlight() {
-  console.log("Updating game flow highlight: " + gameFlowState)
+  console.log("Updating game flow highlight: " + gameFlowState + ", BTC: " + btc)
 
   // Remove highlight from all elements
   const allElements = document.querySelectorAll(".highlight-pulse")
@@ -570,6 +586,12 @@ function applyEvent() {
   updateStatusBars()
   updateInventoryDisplay()
   updateMarketTable()
+
+  // Force update of liquid BTC display
+  const liquidBtcElement = document.getElementById("liquid-btc")
+  if (liquidBtcElement) {
+    liquidBtcElement.textContent = btc
+  }
 }
 
 // Check if a card is negative
@@ -1041,6 +1063,14 @@ Choose your response:`,
 
   updateStatusBars()
   updateInventoryDisplay()
+  updateMarketTable()
+
+  // Force update of liquid BTC display
+  const liquidBtcElement = document.getElementById("liquid-btc")
+  if (liquidBtcElement) {
+    liquidBtcElement.textContent = btc
+  }
+
   return message
 }
 

@@ -61,10 +61,14 @@
     .card-result {
       margin-top: 0.5rem;
       font-weight: bold;
+      min-height: 2rem;
+      background-color: rgba(0, 20, 0, 0.3);
+      padding: 0.5rem;
+      border: 1px dashed #0f0;
     }
     .event-section {
       border: 1px solid #0f0;
-      padding: 1rem;
+      padding: 0.7rem;
       margin-bottom: 1rem;
     }
     .event-title {
@@ -304,9 +308,10 @@
 
   .liquid-btc-container {
     display: inline-block;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: 1px solid #0f0;
-    border-radius: 4px;
+    background-color: rgba(0, 20, 0, 0.5);
+    border: 2px solid #0f0;
+    padding: 8px;
+    border-radius: 6px;
     color: #0f0;
     font-weight: bold;
     animation: subtle-pulse 3s infinite;
@@ -467,7 +472,11 @@
   </div>
 
   <div id="gameHint" class="game-hint">Enter a 3-digit event card code</div>
-  <div id="debugState" style="text-align: center; font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; display: none;">Current state: <span id="currentState">enterEventCode</span></div>
+  <div id="debugState" style="text-align: center; font-size: 0.8rem; color: #666; margin-bottom: 0.5rem; display: none;">
+  Current state: <span id="currentState">enterEventCode</span> | 
+  BTC: <span id="debugBtc">100</span> |
+  Cycle: <span id="debugCycle">1</span>
+</div>
 
   <div id="eventCodeSection" class="event-section">
     <h3 class="event-title">Event Card</h3>
@@ -669,9 +678,9 @@
     <button id="advanceCycleBtn" onclick="advanceCycle()">Advance to Next Cycle</button>
   </div>
 
-  <div class="liquid-btc-container">
+  <div class="liquid-btc-container" style="background-color: rgba(0, 20, 0, 0.5); border: 2px solid #0f0; padding: 8px; border-radius: 6px;">
     <span class="liquid-btc-label">Liquid BTC:</span>
-    <span class="liquid-btc-value" id="liquid-btc">0</span>
+    <span class="liquid-btc-value" id="liquid-btc">100</span>
   </div>
 
   <div id="inventoryStatus" class="inventory-status"></div>
