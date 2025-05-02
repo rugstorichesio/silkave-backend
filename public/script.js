@@ -36,6 +36,15 @@ const gameHistory = []
 let ignoreNextNegative = false // For card 022 - Silk Security Patch
 const sortMethod = "default" // For inventory sorting
 
+// Use the window object to access the modal functions
+function showConfirm(title, message, okText = "OK", cancelText = "Cancel") {
+  return window.showConfirm(title, message, okText, cancelText)
+}
+
+function showPrompt(title, message) {
+  return window.showPrompt(title, message)
+}
+
 // Game flow state tracking
 let gameFlowState = "enterEventCode"
 
@@ -2112,6 +2121,3 @@ function generateGameHash() {
   // Convert to hex and ensure it's positive
   return Math.abs(hash).toString(16).padStart(8, "0")
 }
-
-// Import showConfirm and showPrompt from modal.js
-import { showConfirm, showPrompt } from "./modal.js"
