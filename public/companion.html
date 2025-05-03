@@ -671,6 +671,7 @@
         </td>
         <td>
           <input type="number" id="sell-lsd" min="0" style="width: 50px">
+          <input type="number" id="sell-lsd" min="0" style="width: 50px">
           <button class="max-button" onclick="setMaxSell('lsd')">Max</button>
         </td>
       </tr>
@@ -789,16 +790,51 @@
   <script src="modal.js"></script>
   <script src="script.js"></script>
 <script>
-  // Force immediate highlight on page load
-  document.addEventListener("DOMContentLoaded", function() {
-    // Set initial game flow state
-    gameFlowState = "enterEventCode";
+// Force immediate highlight on page load
+document.addEventListener("DOMContentLoaded", function() {
+  // Set initial game flow state
+  gameFlowState = "enterEventCode";
+  
+  // Apply highlight immediately
+  setTimeout(function() {
+    updateGameFlowHighlight();
+  }, 100);
+  
+  // Add extra CSS to ensure card result is always visible
+  const style = document.createElement("style");
+  style.textContent = `
+    #cardDiceResult {
+      display: block !important;
+      min-height: 1.5rem !important;
+      font-weight: bold !important;
+      color: #0f0 !important;
+      font-size: 1.1rem !important;
+      padding: 0.5rem !important;
+      margin-top: 0.5rem !important;
+      text-shadow: 0 0 3px #0f0 !important;
+    }
     
-    // Apply highlight immediately
-    setTimeout(function() {
-      updateGameFlowHighlight();
-    }, 100);
-  });
+    .card-result {
+      display: block !important;
+      min-height: 2.5rem !important;
+      white-space: pre-line !important;
+      margin-top: 1rem !important;
+      background-color: rgba(0, 20, 0, 0.3) !important;
+      padding: 0.5rem !important;
+      border: 1px dashed #0f0 !important;
+      box-shadow: 0 0 5px rgba(0, 255, 0, 0.2) !important;
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Add a debug function to monitor card results
+  window.debugCardResult = function() {
+    const cardResult = document.getElementById("cardDiceResult");
+    console.log("Card Result Element:", cardResult);
+    console.log("Card Result Content:", cardResult.innerHTML);
+    console.log("Card Result Style:", window.getComputedStyle(cardResult));
+  };
+});
 </script>
 </body>
 </html>

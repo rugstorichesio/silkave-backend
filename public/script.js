@@ -568,7 +568,9 @@ function highlightElement(elementId) {
   }
 }
 
-// Event card application
+// Find the applyEvent function and update it to ensure the card result is displayed properly
+// Replace the applyEvent function with this updated version:
+
 function applyEvent() {
   debugGameFlow("Applying event")
   playSound("bleep")
@@ -605,24 +607,41 @@ function applyEvent() {
 
   // If not a roll card, apply effect immediately
   if (!isRollCard) {
-    // Check if we should ignore this negative effect
-    if (ignoreNextNegative && isNegativeCard(eventCode)) {
-      ignoreNextNegative = false
-      const result = "Negative effect ignored due to Silk Security Patch"
-      cardDiceResult.innerHTML = "✓ Outcome: " + result
-      log(`-- ${result}`)
-    } else {
-      const result = runCardEffect(eventCode, null)
-      // Only update if we got a direct result (not a promise)
-      if (result && !result.includes("Waiting")) {
+    try {
+      // Check if we should ignore this negative effect
+      if (ignoreNextNegative && isNegativeCard(eventCode)) {
+        ignoreNextNegative = false
+        const result = "Negative effect ignored due to Silk Security Patch"
         cardDiceResult.innerHTML = "✓ Outcome: " + result
-      }
-      log(`-- Card ${eventCode}: ${result}`)
-    }
+        log(`-- ${result}`)
+      } else {
+        // Run the card effect and get the result
+        const result = runCardEffect(eventCode, null)
 
-    // Update game flow state if we're not waiting for user input
-    if (!cardDiceResult.innerHTML.includes("Waiting")) {
-      gameFlowState = "rollMarket"
+        console.log("Card effect result:", result) // Debug log
+
+        // Always display the result for non-roll cards
+        if (result) {
+          if (result.includes("Waiting")) {
+            cardDiceResult.innerHTML = result
+          } else {
+            cardDiceResult.innerHTML = "✓ Outcome: " + result
+          }
+          log(`-- Card ${eventCode}: ${result}`)
+        } else {
+          cardDiceResult.innerHTML = "✓ Card applied but no specific outcome"
+          log(`-- Card ${eventCode} applied`)
+        }
+      }
+
+      // Update game flow state if we're not waiting for user input
+      if (!cardDiceResult.innerHTML.includes("Waiting")) {
+        gameFlowState = "rollMarket"
+      }
+    } catch (error) {
+      console.error("Error applying card effect:", error)
+      cardDiceResult.innerHTML = "⚠️ Error applying card effect"
+      log(`-- Error applying card ${eventCode}: ${error.message}`)
     }
   } else {
     // For roll cards, just indicate that a roll is needed
@@ -762,6 +781,7 @@ function runCardEffect(code, roll) {
 
     case "005": // MARKET CRASH
       currentPrices = halvePrices()
+      updateMarketTable() // Make sure to update the market table
       message = "BTC value halves this round"
       break
 
@@ -817,7 +837,7 @@ Choose your response:`,
       break
 
     case "010": // PHANTOM NODE FAILURE
-      btc = Math.max(0, btc - 15)
+      btc = Math.max(0, btc - 15) // Should be 15 BTC, not 30
       message = "Lose 15 BTC"
       break
 
@@ -881,6 +901,7 @@ Choose your response:`,
     case "016": // LUCKY FLIP
       // Double the value of all inventory items
       currentPrices = doublePrices()
+      updateMarketTable() // Make sure to update the market table
       message = "Doubled your inventory's market value this round"
       break
 
@@ -1124,7 +1145,11 @@ Choose your response:`,
       break
 
     default:
-      message = "Invalid card code"
+      if (code >= "001" && code <= "040") {
+        message = `Event ${code} applied - check card for effect`
+      } else {
+        message = "Invalid card code"
+      }
   }
 
   updateStatusBars()
