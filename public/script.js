@@ -169,10 +169,19 @@ function doublePrices() {
   return newPrices
 }
 
+// Replace the showConfirm function with our custom modal implementation
 function showConfirm(title, message, confirmText, cancelText) {
   return new Promise((resolve) => {
-    const result = window.confirm(`${title}\n\n${message}\n\nConfirm: ${confirmText}\nCancel: ${cancelText}`)
-    resolve(result)
+    // Use our custom modal instead of browser confirm
+    window.showConfirm(title, message, confirmText, cancelText).then((result) => resolve(result))
+  })
+}
+
+// Replace the showPrompt function with our custom modal implementation
+function showPrompt(title, message) {
+  return new Promise((resolve) => {
+    // Use our custom modal instead of browser prompt
+    window.showPrompt(title, message).then((result) => resolve(result))
   })
 }
 
@@ -218,13 +227,6 @@ function wipeHalfInventory() {
   }
 
   updateInventoryDisplay()
-}
-
-function showPrompt(title, message) {
-  return new Promise((resolve) => {
-    const result = window.prompt(`${title}\n\n${message}`, "")
-    resolve(result)
-  })
 }
 
 // Initialize the game when the page loads
