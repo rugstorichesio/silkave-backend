@@ -55,7 +55,7 @@ function showInvalidAccessMessage() {
 
   // Array of thematic error messages
   const errorMessages = [
-    "ACCESS DENIED: Nice try, script kiddie. Our zero-day exploits detected your pathetic attempt to hack the leaderboard. Play the game like everyone else.",
+    "ACCESS DENIED: Nice try, web infant. Our zero-day exploits detected your pathetic attempt to hack the leaderboard. Play the game like everyone else.",
 
     "SECURITY BREACH DETECTED: Your IP has been logged and forwarded to the darknet authorities. Or you could just play the game legitimately...",
 

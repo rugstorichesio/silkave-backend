@@ -559,6 +559,7 @@ function applyEvent() {
     } else {
       const result = runCardEffect(eventCode, null)
       document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + result
+      debugPrices() // Add this line to debug prices
     }
 
     // Update game flow state
@@ -675,12 +676,25 @@ function runCardEffect(code, roll) {
       break
 
     case "005": // MARKET CRASH
+      // First check if we already have prices
+      if (Object.keys(currentPrices).length === 0) {
+        // If no prices yet, we need to roll the market first, then halve
+        rollMarket()
+        log("-- Market rolled before applying crash effect")
+      }
+
+      // Now halve all prices
       currentPrices = halvePrices()
+
       // Mark all items as having special prices
       for (const item of items) {
         specialPriceItems[item] = true
       }
-      message = "BTC value halves this round"
+
+      // Update the market table to show the halved prices
+      updateMarketTable()
+
+      message = "Market crash! All prices halved this round"
       break
 
     case "006": // DOG BITES USB
@@ -1169,7 +1183,10 @@ function rollMarket() {
   for (const item of items) {
     // Skip items with special prices from events
     if (specialPriceItems[item]) {
+      // Make sure we preserve the special price
       currentPrices[item] = oldPrices[item] || priceMatrix[item][0]
+      // Log that we're preserving a special price
+      console.log(`Preserving special price for ${itemNames[item]}: ${currentPrices[item]} BTC`)
       continue
     }
 
@@ -1829,4 +1846,11 @@ function buyGlock() {
 
   updateStatusBars()
   updateInventoryDisplay()
+}
+
+// Add a debug function to help troubleshoot
+// Add this function at the end of the file:
+function debugPrices() {
+  console.log("Current Prices:", JSON.stringify(currentPrices))
+  console.log("Special Price Items:", JSON.stringify(specialPriceItems))
 }
