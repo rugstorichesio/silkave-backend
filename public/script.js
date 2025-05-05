@@ -360,6 +360,23 @@ function updateGameFlowHighlight() {
   }
 }
 
+// Add this function after the updateGameFlowHighlight function
+function scrollToTop() {
+  // Smooth scroll to top
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  })
+
+  // Also focus on the event code input to make it easier for the user
+  setTimeout(() => {
+    const eventCodeInput = document.getElementById("eventCode")
+    if (eventCodeInput) {
+      eventCodeInput.focus()
+    }
+  }, 500) // Short delay to ensure scroll completes first
+}
+
 // Show a hint message
 function showHint(message) {
   const hintElement = document.getElementById("gameHint")
@@ -1352,6 +1369,7 @@ function advanceCycle() {
   const oldCycle = cycle
   cycle = cycle + 1
   console.log(`CYCLE ADVANCE: Incremented from ${oldCycle} to ${cycle}`)
+  scrollToTop()
 
   // Reset event effects
   resetEventEffects()
