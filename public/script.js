@@ -169,19 +169,138 @@ function doublePrices() {
   return newPrices
 }
 
-// Replace the showConfirm function with our custom modal implementation
+// Replace the showConfirm function with a direct call to the custom modal
 function showConfirm(title, message, confirmText, cancelText) {
+  // Create a new promise that will be resolved when the user makes a choice
   return new Promise((resolve) => {
-    // Use our custom modal instead of browser confirm
-    window.showConfirm(title, message, confirmText, cancelText).then((result) => resolve(result))
+    // Create overlay
+    const overlay = document.createElement("div")
+    overlay.className = "modal-overlay"
+
+    // Create container
+    const container = document.createElement("div")
+    container.className = "modal-container"
+
+    // Create header
+    const header = document.createElement("div")
+    header.className = "modal-header"
+    header.textContent = title
+
+    // Create content
+    const content = document.createElement("div")
+    content.className = "modal-content"
+    content.textContent = message
+
+    // Create buttons container
+    const buttons = document.createElement("div")
+    buttons.className = "modal-buttons"
+
+    // Add OK button
+    const okButton = document.createElement("button")
+    okButton.className = "modal-button"
+    okButton.textContent = confirmText || "OK"
+    okButton.addEventListener("click", () => {
+      document.body.removeChild(overlay)
+      resolve(true)
+    })
+
+    // Add Cancel button
+    const cancelButton = document.createElement("button")
+    cancelButton.className = "modal-button"
+    cancelButton.textContent = cancelText || "Cancel"
+    cancelButton.addEventListener("click", () => {
+      document.body.removeChild(overlay)
+      resolve(false)
+    })
+
+    // Assemble the modal
+    buttons.appendChild(okButton)
+    buttons.appendChild(cancelButton)
+    container.appendChild(header)
+    container.appendChild(content)
+    container.appendChild(buttons)
+    overlay.appendChild(container)
+
+    // Add to document
+    document.body.appendChild(overlay)
+
+    // Play sound
+    playSound("bleep")
   })
 }
 
-// Replace the showPrompt function with our custom modal implementation
+// Replace the showPrompt function with a direct implementation
 function showPrompt(title, message) {
+  // Create a new promise that will be resolved when the user makes a choice
   return new Promise((resolve) => {
-    // Use our custom modal instead of browser prompt
-    window.showPrompt(title, message).then((result) => resolve(result))
+    let inputValue = ""
+
+    // Create overlay
+    const overlay = document.createElement("div")
+    overlay.className = "modal-overlay"
+
+    // Create container
+    const container = document.createElement("div")
+    container.className = "modal-container"
+
+    // Create header
+    const header = document.createElement("div")
+    header.className = "modal-header"
+    header.textContent = title
+
+    // Create content
+    const content = document.createElement("div")
+    content.className = "modal-content"
+    content.textContent = message
+
+    // Create input field
+    const input = document.createElement("input")
+    input.type = "text"
+    input.className = "modal-input"
+    input.placeholder = "Enter your response..."
+    input.addEventListener("input", (e) => {
+      inputValue = e.target.value
+    })
+
+    // Create buttons container
+    const buttons = document.createElement("div")
+    buttons.className = "modal-buttons"
+
+    // Add OK button
+    const okButton = document.createElement("button")
+    okButton.className = "modal-button"
+    okButton.textContent = "OK"
+    okButton.addEventListener("click", () => {
+      document.body.removeChild(overlay)
+      resolve(inputValue)
+    })
+
+    // Add Cancel button
+    const cancelButton = document.createElement("button")
+    cancelButton.className = "modal-button"
+    cancelButton.textContent = "Cancel"
+    cancelButton.addEventListener("click", () => {
+      document.body.removeChild(overlay)
+      resolve(null)
+    })
+
+    // Assemble the modal
+    buttons.appendChild(okButton)
+    buttons.appendChild(cancelButton)
+    container.appendChild(header)
+    container.appendChild(content)
+    container.appendChild(input)
+    container.appendChild(buttons)
+    overlay.appendChild(container)
+
+    // Add to document
+    document.body.appendChild(overlay)
+
+    // Focus the input after a short delay
+    setTimeout(() => input.focus(), 100)
+
+    // Play sound
+    playSound("bleep")
   })
 }
 
