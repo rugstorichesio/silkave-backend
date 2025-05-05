@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   
     // Try to fetch from the backend with a timeout
-    const fetchPromise = fetch("https://silkave-leaderboard.onrender.com/scores")
+    const fetchPromise = fetch("/api/scores")
   
     // Set a timeout of 10 seconds
     const timeoutPromise = new Promise((_, reject) => {
@@ -135,9 +135,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Add a refresh button
         const scoreList = document.getElementById("scoreList")
         scoreList.innerHTML = `
-      <li class="error-message">Failed to connect to leaderboard server: ${error.message}</li>
-      <li><button onclick="fetchScores()" class="refresh-button">Try Again</button></li>
-    `
+        <li class="error-message">Failed to connect to leaderboard server: ${error.message}</li>
+        <li><button onclick="fetchScores()" class="refresh-button">Try Again</button></li>
+      `
   
         // Display sample data as fallback
         displaySampleScores()
@@ -226,54 +226,4 @@ document.addEventListener("DOMContentLoaded", () => {
       scoreList.appendChild(item)
     })
   }
-  
-  // Add CSS for better styling
-  function addLeaderboardStyles() {
-    const style = document.createElement("style")
-    style.textContent = `
-      .score-item {
-        animation: fadeIn 0.5s ease-in-out forwards;
-        opacity: 0;
-      }
-      
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      
-      .loading-dots {
-        display: inline-block;
-        min-width: 20px;
-      }
-      
-      .sample-data-note {
-        color: #0f0;
-        margin-bottom: 10px;
-        font-style: italic;
-      }
-      
-      .sample-data {
-        opacity: 0.8;
-      }
-      
-      .status-success {
-        color: #0f0;
-        font-size: 0.9rem;
-        text-shadow: 0 0 3px #0f0;
-      }
-      
-      .status-error {
-        color: #ff6666;
-        font-size: 0.9rem;
-        text-shadow: 0 0 3px #ff6666;
-      }
-    `
-    document.head.appendChild(style)
-  }
-  
-  // Add the styles when the script loads
-  addLeaderboardStyles()
-  
-  // Refresh scores every 60 seconds
-  setInterval(fetchScores, 60000)
   
