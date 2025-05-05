@@ -990,6 +990,17 @@ function updateMarketTable() {
 // Find the populateTransactionTable function and replace it with this improved version:
 function populateTransactionTable() {
   const tableBody = document.querySelector("#transactionTable tbody")
+}
+
+row.appendChild(priceCell)
+
+tableBody.appendChild(row)
+}
+}
+\
+// Find the populateTransactionTable function and replace it with this improved version:
+function populateTransactionTable() {
+  const tableBody = document.querySelector("#transactionTable tbody")
   tableBody.innerHTML = ""
 
   for (const item of items) {
@@ -1259,9 +1270,52 @@ function executeTransactions() {
   updateGameFlowHighlight()
 }
 
-// Advance to the next cycle
+// Find the advanceCycle function and replace it with this corrected version:
+
 function advanceCycle() {
   playSound("bleep")
+
+  if (cycle >= 10) {
+    // This is the final round - cash out and end game
+    const cashOutResult = cashOutInventory()
+
+    log("-- GAME OVER! You've gone dark with your earnings.")
+
+    // Generate a game verification hash
+    const gameHash = generateGameHash()
+
+    // Create game data for submission
+    const gameData = {
+      btc: btc,
+      glock: glock,
+      gameHistory: gameHistory,
+      hash: gameHash,
+    }
+
+    // Encode game data for URL
+    const encodedGameData = btoa(JSON.stringify(gameData))
+
+    // Show game over message with final results
+    let cashOutDetails = ""
+    if (cashOutResult && cashOutResult.itemsSold > 0) {
+      cashOutDetails = `\nCashed out: ${cashOutResult.soldItems.join(", ")}`
+    }
+
+    // Use custom confirm instead of browser confirm
+    showConfirm(
+      "GAME OVER",
+      `You've gone dark with your earnings.\n\nFinal score: ${btc} BTC with${glock ? "" : "out"} a Glock.${cashOutDetails}\n\nSubmit your score to the leaderboard?`,
+      "Submit Score",
+      "Stay Here",
+    ).then((result) => {
+      if (result) {
+        // Redirect to submit page with verified game data
+        window.location.href = `submit.html?gameData=${encodedGameData}`
+      }
+    })
+
+    return
+  }
 
   // Reset event code
   document.getElementById("eventCode").value = ""
@@ -1280,21 +1334,6 @@ function advanceCycle() {
   // Reset any previous event effects
   resetEventEffects()
 
-  // Update game flow state
-  gameFlowState = "enterEventCode"
-
-  // Update the highlighted element
-  updateGameFlowHighlight()
-
-  // Roll market prices
-  rollMarket()
-
-  // Update market table
-  updateMarketTable()
-
-  // Repopulate transaction table
-  populateTransactionTable()
-
   // Increment cycle
   cycle++
 
@@ -1305,6 +1344,79 @@ function advanceCycle() {
   }
 
   log(`-- Advanced to cycle ${cycle}.`)
+
+  // Update game flow state
+  gameFlowState = "enterEventCode"
+
+  // Update the highlighted element
+  updateGameFlowHighlight()
+
+  // Update status bars
+  updateStatusBars()
+
+  // Roll market prices
+  rollMarket()
+
+  // Update market table
+  updateMarketTable()
+
+  // Repopulate transaction table
+  populateTransactionTable()
+}
+
+// Add the missing cashOutInventory function
+function cashOutInventory() {
+  let totalEarnings = 0
+  let itemsSold = 0
+  const soldItems = []
+
+  for (const item in inventory) {
+    if (inventory.hasOwnProperty(item) && inventory[item].length > 0) {
+      const itemCount = inventory[item].length
+      const itemPrice = currentPrices[item] || 1 // Use current price or default to 1
+      const earnings = itemCount * itemPrice
+
+      totalEarnings += earnings
+      itemsSold += itemCount
+      soldItems.push(`${itemCount} ${itemNames[item]}`)
+
+      // Clear the inventory for this item
+      inventory[item] = []
+
+      log(`-- Cashed out ${itemCount} ${itemNames[item]} for ${earnings} BTC.`)
+    }
+  }
+
+  // Update BTC
+  btc += totalEarnings
+
+  updateInventoryDisplay()
+  updateStatusBars()
+
+  return { itemsSold, soldItems, totalEarnings }
+}
+
+// Add the missing generateGameHash function
+function generateGameHash() {
+  // Create a simple hash based on game state
+  const gameState = {
+    btc: btc,
+    glock: glock,
+    cycle: cycle,
+    inventory: JSON.stringify(inventory),
+  }
+
+  // Convert to string and generate a simple hash
+  const gameStateStr = JSON.stringify(gameState)
+  let hash = 0
+  for (let i = 0; i < gameStateStr.length; i++) {
+    const char = gameStateStr.charCodeAt(i)
+    hash = (hash << 5) - hash + char
+    hash = hash & hash // Convert to 32bit integer
+  }
+
+  // Convert to hex string and ensure it's positive
+  return Math.abs(hash).toString(16).substring(0, 8)
 }
 
 // Sell all items at half price
