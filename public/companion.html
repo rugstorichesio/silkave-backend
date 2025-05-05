@@ -212,7 +212,6 @@
     <button onclick="resetGame()">Reset Game</button>
   </div>
   <script>
-    // Add this at the end of your script, after the relevant functions are defined
     document.addEventListener('DOMContentLoaded', () => {
       loadGameState();
       updateUI();
@@ -220,7 +219,6 @@
       updateGameFlowHighlight();
     });
 
-    // Function to scroll to the top of the page
     function scrollToTopFunc() {
       window.scrollTo({
         top: 0,
@@ -228,30 +226,25 @@
       });
     }
 
-    // Function to set the max buy quantity
     function setMaxBuy(item) {
       const price = currentPrices[item];
       const maxQuantity = Math.floor(btc / price);
       document.getElementById(`buy-${item}-qty`).value = maxQuantity;
     }
 
-    // Function to set the max sell quantity
     function setMaxSell(item) {
       document.getElementById(`sell-${item}-qty`).value = inventory[item] || 0;
     }
 
-    // Function to update the highlighted element based on the game flow state
     function updateGameFlowHighlight() {
       const eventCodeInput = document.getElementById('eventCode');
       const applyEventButton = document.querySelector('.input-group button');
       const advanceCycleButton = document.getElementById('advanceCycleBtn');
 
-      // Remove existing highlight class
       [eventCodeInput, applyEventButton, advanceCycleButton].forEach(el => {
         if (el) el.classList.remove('game-flow-highlight');
       });
 
-      // Apply highlight based on game flow state
       if (gameFlowState === 'enterEventCode') {
         if (eventCodeInput) eventCodeInput.classList.add('game-flow-highlight');
         if (applyEventButton) applyEventButton.classList.add('game-flow-highlight');
@@ -260,9 +253,7 @@
       }
     }
 
-    // Add this at the beginning of the file, after the existing CSS definitions
     document.addEventListener("DOMContentLoaded", () => {
-      // Add CSS to ensure card result is always visible
       const style = document.createElement("style");
       style.textContent = `
         .card-result {
@@ -279,7 +270,6 @@
       `;
       document.head.appendChild(style);
 
-      // Fix duplicate input in the LSD row
       const sellLsdCell = document.querySelector('td:has(#sell-lsd)');
       if (sellLsdCell && sellLsdCell.querySelectorAll('input').length > 1) {
         sellLsdCell.innerHTML = `
@@ -288,7 +278,6 @@
         `;
       }
 
-      // Add debug functions
       window.debugCardResult = function() {
         const cardResult = document.getElementById("cardDiceResult");
         console.log("Card Result Element:", cardResult);
@@ -303,10 +292,9 @@
       };
 
       window.initPrices = function() {
-        // Initialize prices if they're not set yet
         if (Object.keys(currentPrices).length === 0) {
           for (const item of items) {
-            currentPrices[item] = priceMatrix[item][2]; // Use middle value as default
+            currentPrices[item] = priceMatrix[item][2];
           }
           console.log("Prices initialized:", currentPrices);
         }
