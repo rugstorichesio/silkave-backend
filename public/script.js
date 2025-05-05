@@ -937,65 +937,81 @@ runCardEffect = (code, roll) => {
   let message = ""
 
   try {
-    switch (code) {
-      case "005": // MARKET CRASH
-        console.log("Running MARKET CRASH effect")
-        console.log("Current prices before:", JSON.stringify(currentPrices))
-
-        // Initialize prices if they're not set yet
-        if (Object.keys(currentPrices).length === 0) {
-          for (const item of items) {
-            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
-          }
-        }
-
-        // Halve all prices
+    // Check for infinite recursion with card 006
+    if (code === "006") {
+      console.log("Handling card 006 - Market Crash")
+      // Initialize prices if they're not set yet
+      if (Object.keys(currentPrices).length === 0) {
         for (const item of items) {
-          if (currentPrices[item]) {
-            currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
-          }
+          currentPrices[item] = priceMatrix[item][2] // Use middle value as default
         }
+      }
 
-        console.log("New prices after halving:", JSON.stringify(currentPrices))
-
-        // Update the market table
-        updateMarketTable()
-        message = "BTC value halves this round"
-        break
-
-      case "010": // PHANTOM NODE FAILURE
-        btc = Math.max(0, btc - 15)
-        message = "Lose 15 BTC"
-        break
-
-      case "016": // LUCKY FLIP
-        console.log("Running LUCKY FLIP effect")
-        console.log("Current prices before:", JSON.stringify(currentPrices))
-
-        // Initialize prices if they're not set yet
-        if (Object.keys(currentPrices).length === 0) {
-          for (const item of items) {
-            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
-          }
+      // Halve all prices
+      for (const item of items) {
+        if (currentPrices[item]) {
+          currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
         }
+      }
 
-        // Double all prices
+      // Update the market table
+      updateMarketTable()
+      message = "Market crash! All prices halved"
+    } else if (code === "005") {
+      // MARKET CRASH
+      console.log("Running MARKET CRASH effect")
+      console.log("Current prices before:", JSON.stringify(currentPrices))
+
+      // Initialize prices if they're not set yet
+      if (Object.keys(currentPrices).length === 0) {
         for (const item of items) {
-          if (currentPrices[item]) {
-            currentPrices[item] = currentPrices[item] * 2
-          }
+          currentPrices[item] = priceMatrix[item][2] // Use middle value as default
         }
+      }
 
-        console.log("New prices after doubling:", JSON.stringify(currentPrices))
+      // Halve all prices
+      for (const item of items) {
+        if (currentPrices[item]) {
+          currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
+        }
+      }
 
-        // Update the market table
-        updateMarketTable()
-        message = "Doubled your inventory's market value this round"
-        break
+      console.log("New prices after halving:", JSON.stringify(currentPrices))
 
-      default:
-        // Call the original function for all other cases
-        return originalRunCardEffect(code, roll)
+      // Update the market table
+      updateMarketTable()
+      message = "BTC value halves this round"
+    } else if (code === "010") {
+      // PHANTOM NODE FAILURE
+      btc = Math.max(0, btc - 15)
+      message = "Lose 15 BTC"
+    } else if (code === "016") {
+      // LUCKY FLIP
+      console.log("Running LUCKY FLIP effect")
+      console.log("Current prices before:", JSON.stringify(currentPrices))
+
+      // Initialize prices if they're not set yet
+      if (Object.keys(currentPrices).length === 0) {
+        for (const item of items) {
+          currentPrices[item] = priceMatrix[item][2] // Use middle value as default
+        }
+      }
+
+      // Double all prices
+      for (const item of items) {
+        if (currentPrices[item]) {
+          currentPrices[item] = currentPrices[item] * 2
+        }
+      }
+
+      console.log("New prices after doubling:", JSON.stringify(currentPrices))
+
+      // Update the market table
+      updateMarketTable()
+      message = "Doubled your inventory's market value this round"
+    } else {
+      // Call the original function for all other cases
+      return originalRunCardEffect(code, roll)
     }
 
     updateStatusBars()
