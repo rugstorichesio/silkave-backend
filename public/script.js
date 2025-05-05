@@ -41,7 +41,27 @@ const priceMatrix = {
 
 // Mock functions to resolve undeclared variable errors
 function updateStatusBars() {
-  console.log("updateStatusBars called")
+  // Update the status bars at the top and bottom
+  document.getElementById("cycle").textContent = cycle
+  document.getElementById("cycleBottom").textContent = cycle
+  document.getElementById("btc").textContent = btc
+  document.getElementById("btcBottom").textContent = btc
+  document.getElementById("glock").textContent = glock ? "Yes" : "No"
+  document.getElementById("glockBottom").textContent = glock ? "Yes" : "No"
+
+  // Count inventory items
+  let totalItems = 0
+  for (const item in inventory) {
+    if (inventory.hasOwnProperty(item)) {
+      totalItems += inventory[item].length
+    }
+  }
+
+  document.getElementById("invCount").textContent = totalItems
+  document.getElementById("invCountBottom").textContent = totalItems
+
+  // Update the liquid BTC display
+  document.getElementById("liquidBtc").textContent = btc
 }
 
 function updateInventoryDisplay() {
