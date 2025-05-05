@@ -18,9 +18,9 @@ let isAdvancing = false // Flag to prevent multiple advances
 // Add this after the other global variables
 const specialPriceItems = {} // Track items with special prices from events
 
-// Replace the sound system code at the top of the file with this more thematic version:
+// Replace the entire sound system implementation at the top of the file with this more compatible version:
 
-// Sound system using Web Audio API
+// Sound system using Web Audio API with better browser compatibility
 const AudioContext = window.AudioContext || window.webkitAudioContext
 let audioContext
 
@@ -44,27 +44,26 @@ function playSound(soundType = "click") {
       initAudio()
     }
 
-    if (!audioContext) {
-      console.error("No audio context available")
+    if (!audioContext || audioContext.state === "suspended") {
+      console.log("Audio context is not available or is suspended. Resuming...")
+      if (audioContext) {
+        audioContext.resume().catch((err) => console.error("Failed to resume audio context:", err))
+      }
       return Promise.resolve(false)
     }
+
+    console.log(`Attempting to play sound: ${soundType}`)
 
     // Create oscillator and gain nodes
     const oscillator = audioContext.createOscillator()
     const gainNode = audioContext.createGain()
 
-    // For some effects, add a filter for more cyberpunk feel
-    const filter = audioContext.createBiquadFilter()
-    filter.type = "lowpass"
-
     // Map sound type to appropriate parameters
     switch (soundType) {
       case "bleep": // Terminal beep sound
         oscillator.type = "square"
-        oscillator.frequency.setValueAtTime(880, audioContext.currentTime)
-        oscillator.frequency.exponentialRampToValueAtTime(440, audioContext.currentTime + 0.1)
-        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2)
+        oscillator.frequency.value = 660
+        gainNode.gain.value = 0.1
 
         // Connect nodes: oscillator -> gain -> destination
         oscillator.connect(gainNode)
@@ -72,14 +71,19 @@ function playSound(soundType = "click") {
 
         // Start and stop
         oscillator.start()
-        setTimeout(() => oscillator.stop(), 200)
+        setTimeout(() => {
+          try {
+            oscillator.stop()
+          } catch (e) {
+            console.log("Oscillator already stopped")
+          }
+        }, 150)
         break
 
       case "click": // Data packet transmission sound
-        oscillator.type = "sawtooth"
-        oscillator.frequency.setValueAtTime(1200, audioContext.currentTime)
-        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05)
+        oscillator.type = "sine"
+        oscillator.frequency.value = 1000
+        gainNode.gain.value = 0.05
 
         // Connect nodes
         oscillator.connect(gainNode)
@@ -87,80 +91,77 @@ function playSound(soundType = "click") {
 
         // Start and stop
         oscillator.start()
-        setTimeout(() => oscillator.stop(), 50)
+        setTimeout(() => {
+          try {
+            oscillator.stop()
+          } catch (e) {
+            console.log("Oscillator already stopped")
+          }
+        }, 30)
         break
 
       case "error": // System error sound
-        // Create two oscillators for a more complex sound
-        const osc1 = audioContext.createOscillator()
-        const osc2 = audioContext.createOscillator()
-
-        osc1.type = "sawtooth"
-        osc2.type = "square"
-
-        osc1.frequency.setValueAtTime(220, audioContext.currentTime)
-        osc2.frequency.setValueAtTime(233, audioContext.currentTime) // Slightly detuned for dissonance
-
-        // Connect both oscillators to the gain node
-        osc1.connect(gainNode)
-        osc2.connect(gainNode)
-        gainNode.connect(audioContext.destination)
-
-        // Set volume envelope
-        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
-
-        // Start and stop both oscillators
-        osc1.start()
-        osc2.start()
-        setTimeout(() => {
-          osc1.stop()
-          osc2.stop()
-        }, 300)
-        break
-
-      case "success": // Transaction complete sound
-        // Create a sequence of ascending tones
-        const now = audioContext.currentTime
-        oscillator.type = "triangle"
-
-        // Set up filter for a more electronic sound
-        filter.frequency.setValueAtTime(1500, now)
-        filter.Q.setValueAtTime(8, now)
-
-        // Create frequency sequence
-        oscillator.frequency.setValueAtTime(440, now)
-        oscillator.frequency.setValueAtTime(554, now + 0.1)
-        oscillator.frequency.setValueAtTime(659, now + 0.2)
-
-        // Set volume envelope
-        gainNode.gain.setValueAtTime(0.15, now)
-        gainNode.gain.setValueAtTime(0.15, now + 0.2)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.3)
-
-        // Connect with filter: oscillator -> filter -> gain -> destination
-        oscillator.connect(filter)
-        filter.connect(gainNode)
-        gainNode.connect(audioContext.destination)
-
-        // Start and stop
-        oscillator.start()
-        setTimeout(() => oscillator.stop(), 300)
-        break
-
-      default: // Default to click sound
-        oscillator.type = "sine"
-        oscillator.frequency.setValueAtTime(800, audioContext.currentTime)
-        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
+        oscillator.type = "sawtooth"
+        oscillator.frequency.value = 220
+        gainNode.gain.value = 0.1
 
         oscillator.connect(gainNode)
         gainNode.connect(audioContext.destination)
 
         oscillator.start()
-        setTimeout(() => oscillator.stop(), 100)
+        setTimeout(() => {
+          try {
+            oscillator.stop()
+          } catch (e) {
+            console.log("Oscillator already stopped")
+          }
+        }, 200)
+        break
+
+      case "success": // Transaction complete sound
+        oscillator.type = "triangle"
+        oscillator.frequency.value = 440
+        gainNode.gain.value = 0.1
+
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        oscillator.start()
+        setTimeout(() => {
+          try {
+            oscillator.frequency.value = 660
+          } catch (e) {
+            console.log("Could not change frequency")
+          }
+        }, 100)
+        setTimeout(() => {
+          try {
+            oscillator.stop()
+          } catch (e) {
+            console.log("Oscillator already stopped")
+          }
+        }, 200)
+        break
+
+      default: // Default to click sound
+        oscillator.type = "sine"
+        oscillator.frequency.value = 800
+        gainNode.gain.value = 0.05
+
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        oscillator.start()
+        setTimeout(() => {
+          try {
+            oscillator.stop()
+          } catch (e) {
+            console.log("Oscillator already stopped")
+          }
+        }, 50)
     }
 
+    console.log(`Sound played: ${soundType}`)
     return Promise.resolve(true)
   } catch (e) {
     console.error("Failed to play sound:", e)
@@ -175,18 +176,64 @@ function testSound() {
   // Initialize audio on first interaction
   initAudio()
 
-  // Play different sounds with delays between them
-  setTimeout(() => playSound("click"), 0)
-  setTimeout(() => playSound("bleep"), 400)
-  setTimeout(() => playSound("success"), 800)
-  setTimeout(() => playSound("error"), 1200)
+  // Make sure audio context is resumed
+  if (audioContext && audioContext.state === "suspended") {
+    audioContext.resume().catch((err) => console.error("Failed to resume audio context:", err))
+  }
+
+  // Play a simple beep as a fallback if the other sounds fail
+  const simpleBeep = () => {
+    try {
+      if (!audioContext || audioContext.state !== "running") {
+        console.log("Audio context not available for simple beep")
+        return
+      }
+
+      const osc = audioContext.createOscillator()
+      const gain = audioContext.createGain()
+
+      osc.type = "sine"
+      osc.frequency.value = 440
+      gain.gain.value = 0.1
+
+      osc.connect(gain)
+      gain.connect(audioContext.destination)
+
+      osc.start()
+      setTimeout(() => osc.stop(), 200)
+
+      console.log("Simple beep played")
+    } catch (e) {
+      console.error("Even simple beep failed:", e)
+    }
+  }
+
+  // Try to play the sequence, with fallback to simple beep
+  simpleBeep()
+
+  // Log that we attempted to play sounds
+  console.log("Sound test complete - check console for errors")
 }
 
 // Initialize audio on first user interaction
 document.addEventListener(
   "click",
   function initSound() {
+    console.log("First user interaction - initializing audio")
     initAudio()
+
+    // Try to resume audio context if it's suspended
+    if (audioContext && audioContext.state === "suspended") {
+      audioContext
+        .resume()
+        .then(() => {
+          console.log("AudioContext resumed successfully")
+        })
+        .catch((err) => {
+          console.error("Failed to resume AudioContext:", err)
+        })
+    }
+
     // Remove this listener after first click
     document.removeEventListener("click", initSound)
   },
