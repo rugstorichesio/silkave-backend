@@ -1259,6 +1259,9 @@ function executeTransactions() {
 function advanceCycle() {
   playSound("bleep")
 
+  // Debug log to track function execution
+  console.log("advanceCycle function called. Current cycle:", cycle)
+
   // Log the action
   log(`-- Advancing to next cycle...`)
 
@@ -1304,8 +1307,9 @@ function advanceCycle() {
     return
   }
 
-  // Increment cycle
-  cycle++
+  // Increment cycle - ONLY INCREMENT ONCE
+  cycle = cycle + 1
+  console.log("Cycle incremented to:", cycle)
 
   // Reset event effects
   resetEventEffects()

@@ -690,6 +690,31 @@
     if (inventoryStatus && inventoryStatus.textContent === "") {
       inventoryStatus.textContent = "Current Inventory:\nEmpty";
     }
+    
+    // Add debounce to the advance cycle button to prevent double-clicks
+    const advanceButton = document.getElementById("advanceCycleBtn");
+    if (advanceButton) {
+      let isProcessing = false;
+      advanceButton.addEventListener("click", function(e) {
+        if (isProcessing) {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log("Prevented double-click on advance cycle button");
+          return false;
+        }
+        
+        isProcessing = true;
+        console.log("Advance cycle button clicked");
+        
+        // Call the advanceCycle function
+        advanceCycle();
+        
+        // Reset after a short delay
+        setTimeout(() => {
+          isProcessing = false;
+        }, 1000);
+      });
+    }
   });
 </script>
 </body>
