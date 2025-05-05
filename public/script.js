@@ -1,31 +1,104 @@
-// Add this near the top of the file, after the variable declarations
-// Fallback sound function
+// Replace the playSound function at the top with this improved version
 function playSound(soundId) {
   try {
     // Try to play the sound with the given ID
     const sound = document.getElementById(soundId)
     if (sound) {
+      // Reset the sound to the beginning
       sound.currentTime = 0
-      sound.play().catch((e) => {
-        console.log(`Sound play failed (${soundId}):`, e)
-        // If that fails, try the bleep sound
-        const bleep = document.getElementById("bleep")
-        if (bleep && soundId !== "bleep") {
-          bleep.currentTime = 0
-          bleep.play().catch((e) => console.log("Fallback bleep failed:", e))
-        }
-      })
-    } else {
-      // If sound element doesn't exist, try the bleep sound
-      const bleep = document.getElementById("bleep")
-      if (bleep) {
-        bleep.currentTime = 0
-        bleep.play().catch((e) => console.log("Fallback bleep failed:", e))
+
+      console.log(`Attempting to play sound: ${soundId}, Source: ${sound.src}`)
+
+      // Create a promise to track if the sound played successfully
+      const playPromise = sound.play()
+
+      // Handle the promise to catch any errors
+      if (playPromise !== undefined) {
+        playPromise.catch((e) => {
+          console.log(`Sound play failed (${soundId}):`, e)
+
+          // Try different paths if the original fails
+          const possiblePaths = [
+            `sounds/${soundId}.wav`,
+            `public/sounds/${soundId}.wav`,
+            `/public/sounds/${soundId}.wav`,
+            `/sounds/${soundId}.wav`,
+          ]
+
+          console.log(`Trying alternative paths for ${soundId}...`)
+
+          // Try each path until one works
+          tryNextPath(sound, possiblePaths, 0)
+        })
       }
+    } else {
+      console.log(`Sound element not found: ${soundId}`)
+
+      // If the element doesn't exist, try to create it
+      createAndPlaySound(soundId)
     }
   } catch (e) {
     console.error("Error playing sound:", e)
   }
+}
+
+// Add this helper function to try multiple paths
+function tryNextPath(soundElement, paths, index) {
+  if (index >= paths.length) {
+    console.log("All alternative paths failed")
+    return
+  }
+
+  const path = paths[index]
+  console.log(`Trying path: ${path}`)
+
+  // Change the source
+  soundElement.src = path
+
+  // Try playing again after changing the source
+  setTimeout(() => {
+    soundElement
+      .play()
+      .then(() => {
+        console.log(`Success with path: ${path}`)
+      })
+      .catch((e) => {
+        console.log(`Failed with path: ${path}`, e)
+        // Try the next path
+        tryNextPath(soundElement, paths, index + 1)
+      })
+  }, 100)
+}
+
+// Add this helper function to create a sound element if it doesn't exist
+function createAndPlaySound(soundId) {
+  console.log(`Creating new audio element for ${soundId}`)
+
+  const newSound = document.createElement("audio")
+  newSound.id = soundId
+
+  // Try different paths
+  const possiblePaths = [
+    `sounds/${soundId}.wav`,
+    `public/sounds/${soundId}.wav`,
+    `/public/sounds/${soundId}.wav`,
+    `/sounds/${soundId}.wav`,
+  ]
+
+  newSound.src = possiblePaths[0] // Start with first path
+  newSound.preload = "auto"
+
+  // Add to document
+  document.body.appendChild(newSound)
+
+  // Try to play
+  setTimeout(() => {
+    newSound.play().catch((e) => {
+      console.log(`Failed to play new sound element: ${e}`)
+      // Try alternative paths
+      tryNextPath(newSound, possiblePaths, 1)
+    })
+  }, 100)
 }
 
 // Silk Ave - Game Companion Script
@@ -1034,7 +1107,7 @@ function runCardEffect(code, roll) {
     case "028": // FAMILY EMERGENCY
       showConfirm(
         "FAMILY EMERGENCY",
-        `Your sister's in trouble. Pay off her debt or skip this cycle to help her.\n\nYour current BTC: ${btc}\n\nOption 1: Lose 30 BTC (${btc - 30} BTC remaining)\nOption 2: Skip this turn (can't buy or sell)`,
+        `Your sister's in trouble. Pay off her debt or skip this cycle to help her.\n\nYour current BTC: ${btc}\n\nOption 1: Lose 30 BTC (${btc - 30} BTC remaining)\nOption 2: Skip this cycle to help her.\n\nYour current BTC: ${btc}\n\nOption 1: Lose 30 BTC (${btc - 30} BTC remaining)\nOption 2: Skip this turn (can't buy or sell)`,
         "Lose 30 BTC",
         "Skip Turn",
       ).then((result) => {
