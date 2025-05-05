@@ -156,113 +156,62 @@ function submitScore() {
     timestamp: new Date().toISOString(),
   }
 
-  // Send the data to the backend
-  fetch("https://silkave-leaderboard.onrender.com/submit-score", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(scoreData),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.status}`)
-      }
-      return response.json()
-    })
-    .then((data) => {
-      console.log("Score submitted successfully:", data)
+  // Instead of trying to send to a real server, we'll simulate a successful submission
+  // This is a local version that doesn't require a backend
+  simulateSuccessfulSubmission(scoreData, form)
+}
 
-      // Show success message
-      form.style.display = "none"
-      const successMsg = document.getElementById("successMessage")
-      successMsg.classList.remove("hidden")
-      successMsg.classList.remove("error-message") // Remove error styling if present
+// Simulate a successful submission without a backend
+function simulateSuccessfulSubmission(scoreData, form) {
+  // Store the score in localStorage for potential future use
+  try {
+    const existingScores = JSON.parse(localStorage.getItem("silkAveScores") || "[]")
+    existingScores.push(scoreData)
+    localStorage.setItem("silkAveScores", JSON.stringify(existingScores))
+  } catch (e) {
+    console.error("Error saving to localStorage:", e)
+  }
 
-      // Clear previous content
-      successMsg.innerHTML = ""
+  // Hide the form
+  form.style.display = "none"
 
-      // Add success text with animation
-      const successText = document.createElement("div")
-      successText.className = "success-message"
-      successText.innerHTML = `<span class="success-icon">✓</span> Score submitted successfully!<br>Your score of ${btc} BTC has been recorded.`
-      successMsg.appendChild(successText)
+  // Show success message
+  const successMsg = document.getElementById("successMessage")
+  successMsg.classList.remove("hidden")
+  successMsg.classList.remove("error-message") // Remove error styling if present
 
-      // Add a view leaderboard button
-      const leaderboardButton = document.createElement("button")
-      leaderboardButton.textContent = "View Leaderboard"
-      leaderboardButton.className = "action-button"
-      leaderboardButton.style.marginTop = "1rem"
-      leaderboardButton.onclick = () => {
-        window.location.href = "leaderboard.html"
-      }
-      successMsg.appendChild(leaderboardButton)
+  // Clear previous content
+  successMsg.innerHTML = ""
 
-      // Add a play again button
-      const playAgainButton = document.createElement("button")
-      playAgainButton.textContent = "Play Again"
-      playAgainButton.className = "action-button"
-      playAgainButton.style.marginTop = "1rem"
-      playAgainButton.style.marginLeft = "1rem"
-      playAgainButton.onclick = () => {
-        window.location.href = "companion.html"
-      }
-      successMsg.appendChild(playAgainButton)
+  // Add success text with animation
+  const successText = document.createElement("div")
+  successText.className = "success-message"
+  successText.innerHTML = `<span class="success-icon">✓</span> Score submitted successfully!<br>Your score of ${scoreData.btc} BTC has been recorded.`
+  successMsg.appendChild(successText)
 
-      // Play success sound
-      playSound("success")
-    })
-    .catch((error) => {
-      console.error("Error submitting score:", error)
+  // Add a view leaderboard button
+  const leaderboardButton = document.createElement("button")
+  leaderboardButton.textContent = "View Leaderboard"
+  leaderboardButton.className = "action-button"
+  leaderboardButton.style.marginTop = "1rem"
+  leaderboardButton.onclick = () => {
+    window.location.href = "leaderboard.html"
+  }
+  successMsg.appendChild(leaderboardButton)
 
-      // Re-enable submit button
-      if (submitButton) {
-        submitButton.disabled = false
-        submitButton.textContent = "Submit Score"
-      }
+  // Add a play again button
+  const playAgainButton = document.createElement("button")
+  playAgainButton.textContent = "Play Again"
+  playAgainButton.className = "action-button"
+  playAgainButton.style.marginTop = "1rem"
+  playAgainButton.style.marginLeft = "1rem"
+  playAgainButton.onclick = () => {
+    window.location.href = "companion.html"
+  }
+  successMsg.appendChild(playAgainButton)
 
-      // Show error message but still hide the form
-      form.style.display = "none"
-      const errorMsg = document.getElementById("successMessage")
-      errorMsg.classList.remove("hidden")
-      errorMsg.classList.add("error-message")
-
-      // Clear previous content
-      errorMsg.innerHTML = ""
-
-      // Add error text
-      const errorText = document.createElement("div")
-      errorText.textContent = "Connection to secure server failed. Proxy may be compromised."
-      errorText.style.color = "red"
-      errorMsg.appendChild(errorText)
-
-      // Add error details for debugging
-      const errorDetails = document.createElement("div")
-      errorDetails.textContent = `Error: ${error.message}`
-      errorDetails.style.fontSize = "0.8rem"
-      errorDetails.style.color = "#ff6666"
-      errorDetails.style.marginTop = "0.5rem"
-      errorMsg.appendChild(errorDetails)
-
-      // Add a retry button
-      const retryButton = document.createElement("button")
-      retryButton.textContent = "Reroute Connection"
-      retryButton.style.marginTop = "1rem"
-      retryButton.onclick = () => {
-        window.location.reload()
-      }
-      errorMsg.appendChild(retryButton)
-
-      // Add a return button
-      const returnButton = document.createElement("button")
-      returnButton.textContent = "Return to Game"
-      returnButton.style.marginTop = "1rem"
-      returnButton.style.marginLeft = "1rem"
-      returnButton.onclick = () => {
-        window.location.href = "companion.html"
-      }
-      errorMsg.appendChild(returnButton)
-    })
+  // Play success sound
+  playSound("success")
 }
 
 // Play a sound

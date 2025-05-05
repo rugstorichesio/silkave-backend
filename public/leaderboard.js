@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("lastUpdated").textContent = now.toLocaleString()
   }
   
-  // Fetch scores from the backend
+  // Fetch scores from localStorage or display sample data
   function fetchScores() {
     // Show loading state
     const scoreList = document.getElementById("scoreList")
@@ -33,115 +33,89 @@ document.addEventListener("DOMContentLoaded", () => {
       animateLoadingDots()
     }
   
-    // Try to fetch from the backend with a timeout
-    const fetchPromise = fetch("https://silkave-leaderboard.onrender.com/scores")
+    // Try to get scores from localStorage first
+    try {
+      const localScores = JSON.parse(localStorage.getItem("silkAveScores") || "[]")
   
-    // Set a timeout of 10 seconds
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error("Request timed out")), 10000)
+      if (localScores && localScores.length > 0) {
+        displayScores(localScores)
+        return
+      }
+    } catch (e) {
+      console.error("Error reading from localStorage:", e)
+    }
+  
+    // If no local scores, display sample data
+    displaySampleScores()
+  }
+  
+  // Display scores from data
+  function displayScores(data) {
+    const scoreList = document.getElementById("scoreList")
+    scoreList.innerHTML = ""
+  
+    // Sort scores by BTC (highest first)
+    data.sort((a, b) => b.btc - a.btc)
+  
+    // Display scores
+    data.forEach((entry, index) => {
+      const item = document.createElement("li")
+      item.className = "score-item"
+  
+      // Create main score content
+      const scoreContent = document.createElement("div")
+      scoreContent.className = "score-content"
+  
+      // Format the main score entry
+      let scoreText = `<strong>${index + 1}.</strong> ${entry.alias} – ${entry.btc} BTC`
+      if (entry.glock === "Yes") {
+        scoreText += " – with Glock"
+      }
+      scoreContent.innerHTML = scoreText
+  
+      // Create game hash element
+      const hashSpan = document.createElement("span")
+      hashSpan.className = "game-hash"
+      if (entry.hash) {
+        hashSpan.textContent = `[Game #${entry.hash.substring(0, 6)}]`
+      }
+  
+      // Create date element
+      const dateSpan = document.createElement("span")
+      dateSpan.className = "score-date"
+      if (entry.timestamp) {
+        const date = new Date(entry.timestamp)
+        dateSpan.textContent = date.toLocaleDateString()
+      }
+  
+      // Add all elements to the list item
+      item.appendChild(scoreContent)
+      item.appendChild(hashSpan)
+      item.appendChild(dateSpan)
+  
+      // Highlight top 3
+      if (index < 3) {
+        item.classList.add("top-score")
+      }
+  
+      // Add animation delay for staggered appearance
+      item.style.animationDelay = `${index * 0.1}s`
+  
+      scoreList.appendChild(item)
     })
   
-    // Race between fetch and timeout
-    Promise.race([fetchPromise, timeoutPromise])
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`)
-        }
-        return response.json()
-      })
-      .then((data) => {
-        // Clear loading message
-        scoreList.innerHTML = ""
+    // Show success message
+    const statusElement = document.getElementById("leaderboardStatus")
+    if (statusElement) {
+      statusElement.textContent = `Successfully loaded ${data.length} scores`
+      statusElement.className = "status-success"
   
-        // Check if we have scores
-        if (!data || data.length === 0) {
-          scoreList.innerHTML = "<li class='no-scores score-item'>No scores yet. Be the first.</li>"
-          return
-        }
-  
-        // Sort scores by BTC (highest first)
-        data.sort((a, b) => b.btc - a.btc)
-  
-        // Display scores
-        data.forEach((entry, index) => {
-          const item = document.createElement("li")
-          item.className = "score-item"
-  
-          // Create main score content
-          const scoreContent = document.createElement("div")
-          scoreContent.className = "score-content"
-  
-          // Format the main score entry
-          let scoreText = `<strong>${index + 1}.</strong> ${entry.alias} – ${entry.btc} BTC`
-          if (entry.glock === "Yes") {
-            scoreText += " – with Glock"
-          }
-          scoreContent.innerHTML = scoreText
-  
-          // Create game hash element
-          const hashSpan = document.createElement("span")
-          hashSpan.className = "game-hash"
-          if (entry.hash) {
-            hashSpan.textContent = `[Game #${entry.hash.substring(0, 6)}]`
-          }
-  
-          // Create date element
-          const dateSpan = document.createElement("span")
-          dateSpan.className = "score-date"
-          if (entry.timestamp) {
-            const date = new Date(entry.timestamp)
-            dateSpan.textContent = date.toLocaleDateString()
-          }
-  
-          // Add all elements to the list item
-          item.appendChild(scoreContent)
-          item.appendChild(hashSpan)
-          item.appendChild(dateSpan)
-  
-          // Highlight top 3
-          if (index < 3) {
-            item.classList.add("top-score")
-          }
-  
-          // Add animation delay for staggered appearance
-          item.style.animationDelay = `${index * 0.1}s`
-  
-          scoreList.appendChild(item)
-        })
-  
-        // Show success message
-        const statusElement = document.getElementById("leaderboardStatus")
-        if (statusElement) {
-          statusElement.textContent = `Successfully loaded ${data.length} scores`
-          statusElement.className = "status-success"
-  
-          // Hide status after 3 seconds
-          setTimeout(() => {
-            statusElement.textContent = ""
-            statusElement.className = ""
-          }, 3000)
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching scores:", error)
-  
-        // Show error status with more details
-        const statusElement = document.getElementById("leaderboardStatus")
-        if (statusElement) {
-          statusElement.textContent = `Error loading scores: ${error.message}`
-          statusElement.className = "status-error"
-        }
-  
-        // Add a refresh button
-        const scoreList = document.getElementById("scoreList")
-        scoreList.innerHTML = `
-      <li class="error-message">Failed to connect to leaderboard server: ${error.message}</li>
-      <li><button onclick="fetchScores()" class="refresh-button">Try Again</button></li>
-    `
-  
-        // Display sample data as fallback
-        displaySampleScores()
-      })
+      // Hide status after 3 seconds
+      setTimeout(() => {
+        statusElement.textContent = ""
+        statusElement.className = ""
+      }, 3000)
+    }
   }
   
   // Animate loading dots
@@ -273,7 +247,4 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Add the styles when the script loads
   addLeaderboardStyles()
-  
-  // Refresh scores every 60 seconds
-  setInterval(fetchScores, 60000)
   
