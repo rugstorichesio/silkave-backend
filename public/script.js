@@ -241,43 +241,60 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize the market table
   updateMarketTable()
 
-  // Add direct event listener for the advance cycle button
+  // CRITICAL: Remove all existing event listeners from the advance cycle button
   const advanceButton = document.getElementById("advanceCycleBtn")
   if (advanceButton) {
-    // Remove any existing event listeners to prevent duplicates
+    // Clone and replace to remove all event listeners
     const newAdvanceButton = advanceButton.cloneNode(true)
     advanceButton.parentNode.replaceChild(newAdvanceButton, advanceButton)
 
-    // Add the event listener to the new button
+    // Add a single, robust event listener
     newAdvanceButton.addEventListener("click", (e) => {
       e.preventDefault()
-      if (!isAdvancing) {
-        isAdvancing = true
-        advanceCycle()
-        // Reset the flag after a delay
-        setTimeout(() => {
-          isAdvancing = false
-        }, 1000)
-      }
+      e.stopPropagation()
+      console.log("BUTTON CLICK: Advance cycle button clicked")
+
+      // Call the advanceCycle function directly
+      advanceCycle()
     })
+
+    console.log("EVENT SETUP: Added single event listener to advance button")
   }
 
   // Add event listener for the sell everything button
   const sellAllButton = document.getElementById("sellAllBtn")
   if (sellAllButton) {
-    sellAllButton.addEventListener("click", sellEverything)
+    const newSellAllButton = sellAllButton.cloneNode(true)
+    sellAllButton.parentNode.replaceChild(newSellAllButton, sellAllButton)
+    newSellAllButton.addEventListener("click", sellEverything)
   }
 
   // Add event listener for event code input
-  document.getElementById("eventCode").addEventListener("input", function () {
-    if (this.value.length === 3 && gameFlowState === "enterEventCode") {
-      gameFlowState = "applyEvent"
-      updateGameFlowHighlight()
-    }
-  })
+  const eventCodeInput = document.getElementById("eventCode")
+  if (eventCodeInput) {
+    const newEventCodeInput = eventCodeInput.cloneNode(true)
+    eventCodeInput.parentNode.replaceChild(newEventCodeInput, eventCodeInput)
+    newEventCodeInput.addEventListener("input", function () {
+      if (this.value.length === 3 && gameFlowState === "enterEventCode") {
+        gameFlowState = "applyEvent"
+        updateGameFlowHighlight()
+      }
+    })
+  }
 
   // Start the guided highlighting
   updateGameFlowHighlight()
+
+  // Add a global click handler to log all button clicks for debugging
+  document.addEventListener("click", (e) => {
+    if (e.target.tagName === "BUTTON") {
+      console.log(`BUTTON CLICK: ${e.target.textContent || e.target.id || "unknown button"}`)
+    }
+  })
+
+  // Initialize the game state
+  console.log(`GAME INIT: Starting at cycle ${cycle}`)
+  isAdvancing = false
 })
 
 // Play a sound
@@ -1271,24 +1288,32 @@ function executeTransactions() {
 // Find the advanceCycle function and replace it with this corrected version:
 
 function advanceCycle() {
+  // Prevent multiple rapid clicks
+  if (isAdvancing) {
+    console.log("BLOCKED: Advance cycle already in progress")
+    return false
+  }
+
+  // Set the flag to prevent multiple calls
+  isAdvancing = true
+
+  // Debug logging
+  console.log(`CYCLE ADVANCE: Starting from cycle ${cycle}`)
+
+  // Play sound effect
   playSound("bleep")
 
-  // Debug log to track function execution
-  console.log("advanceCycle function called. Current cycle:", cycle)
-
   // Log the action
-  log(`-- Advancing to next cycle...`)
+  log(`-- Preparing to advance from cycle ${cycle}...`)
 
+  // Check if this is the final cycle
   if (cycle >= 10) {
-    // This is the final round - cash out and end game
+    // Final round - cash out and end game
     const cashOutResult = cashOutInventory()
-
     log("-- GAME OVER! You've gone dark with your earnings.")
 
-    // Generate a game verification hash
+    // Generate game hash and prepare data
     const gameHash = generateGameHash()
-
-    // Create game data for submission
     const gameData = {
       btc: btc,
       glock: glock,
@@ -1299,13 +1324,13 @@ function advanceCycle() {
     // Encode game data for URL
     const encodedGameData = btoa(JSON.stringify(gameData))
 
-    // Show game over message with final results
+    // Prepare end game message
     let cashOutDetails = ""
     if (cashOutResult && cashOutResult.itemsSold > 0) {
       cashOutDetails = `\nCashed out: ${cashOutResult.soldItems.join(", ")}`
     }
 
-    // Use custom confirm instead of browser confirm
+    // Show game over dialog
     showConfirm(
       "GAME OVER",
       `You've gone dark with your earnings.\n\nFinal score: ${btc} BTC with${glock ? "" : "out"} a Glock.${cashOutDetails}\n\nSubmit your score to the leaderboard?`,
@@ -1316,19 +1341,22 @@ function advanceCycle() {
         // Redirect to submit page with verified game data
         window.location.href = `submit.html?gameData=${encodedGameData}`
       }
+      // Reset the advancing flag
+      isAdvancing = false
     })
 
-    return
+    return false
   }
 
-  // Increment cycle - ONLY INCREMENT ONCE
+  // Increment cycle counter - ONLY ONCE
+  const oldCycle = cycle
   cycle = cycle + 1
-  console.log("Cycle incremented to:", cycle)
+  console.log(`CYCLE ADVANCE: Incremented from ${oldCycle} to ${cycle}`)
 
   // Reset event effects
   resetEventEffects()
 
-  // Reset event code and roll button
+  // Reset event code and related UI
   eventCode = ""
   isRollCard = false
   document.getElementById("eventCode").value = ""
@@ -1351,18 +1379,25 @@ function advanceCycle() {
     advanceButton.textContent = "Cash Out and Go Dark"
   }
 
+  // Log the cycle advancement
   log(`-- Advanced to Cycle ${cycle}/10`)
 
   // Update status bars
   updateStatusBars()
 
-  // Update game flow state - CRITICAL: Set to enterEventCode to wait for user input
+  // CRITICAL: Set game flow state to wait for user input
   gameFlowState = "enterEventCode"
 
   // Update the highlighted element
   updateGameFlowHighlight()
 
-  // DO NOT automatically roll market prices or do anything else that would advance the game flow
+  // Reset the advancing flag after a delay
+  setTimeout(() => {
+    isAdvancing = false
+    console.log(`CYCLE ADVANCE: Reset isAdvancing flag, current cycle is ${cycle}`)
+  }, 1000)
+
+  return true
 }
 
 // Add the missing cashOutInventory function
