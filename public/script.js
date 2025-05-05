@@ -1,9 +1,8 @@
 // Silk Ave - Game Companion Script
 
-// Add this at the beginning of the file, after the existing CSS definitions
 document.addEventListener("DOMContentLoaded", () => {
   // Add CSS to ensure card result is always visible
-  const style = document.createElement("style")
+  const style = document.createElement("style");
   style.textContent = `
     .card-result {
       display: block !important;
@@ -16,1925 +15,432 @@ document.addEventListener("DOMContentLoaded", () => {
       min-height: 1.5rem !important;
       font-weight: bold !important;
     }
-  `
-  document.head.appendChild(style)
-})
+  `;
+  document.head.appendChild(style);
+});
 
 // Game state variables
-let btc = 100
-let glock = false
-let cycle = 1
-const inventory = {}
-let currentPrices = {}
-let eventCode = ""
-let isRollCard = false
-let blockBuying = false
-let blockSelling = false
-let bannedItem = null
-const inventoryLimit = 20
-const gameHistory = []
-let ignoreNextNegative = false // For card 022 - Silk Security Patch
-const sortMethod = "default" // For inventory sorting
+let btc = 100;
+let glock = false;
+let cycle = 1;
+const inventory = {};
+let currentPrices = {
+  weed: 15,
+  lsd: 75,
+  coke: 150,
+  shrooms: 30,
+  molly: 60,
+  ketamine: 100,
+  opiates: 200,
+  spice: 5,
+};
+let eventCode = "";
+let isRollCard = false;
+let blockBuying = false;
+let blockSelling = false;
+let bannedItem = null;
+const inventoryLimit = 20;
+const gameHistory = [];
+let ignoreNextNegative = false; // For card 022 - Silk Security Patch
+const sortMethod = "default"; // For inventory sorting
 
 // Use the window object to access the modal functions
 function showConfirm(title, message, okText = "OK", cancelText = "Cancel") {
-  return window.showConfirm(title, message, okText, cancelText)
+  return window.showConfirm(title, message, okText, cancelText);
 }
 
 function showPrompt(title, message) {
-  return window.showPrompt(title, message)
+  return window.showPrompt(title, message);
 }
 
 // Game flow state tracking
-let gameFlowState = "enterEventCode"
+let gameFlowState = "enterEventCode";
 
-// Item definitions
-const items = ["lsd", "weed", "cocaine", "mdma", "passports", "accounts", "ccs", "files"]
-const itemNames = {
-  lsd: "LSD",
-  weed: "Weed",
-  cocaine: "Cocaine",
-  mdma: "MDMA",
-  passports: "Forged Passports",
-  accounts: "Hacked Accounts",
-  ccs: "Skimmed Credit Cards",
-  files: "Leaked Intel",
-}
-
-// Price matrix for each item (dice roll 1-6)
-const priceMatrix = {
-  lsd: [1, 1, 2, 3, 4, 5],
-  weed: [1, 2, 3, 3, 4, 5],
-  cocaine: [4, 5, 6, 7, 8, 9],
-  mdma: [3, 4, 5, 6, 7, 8],
-  passports: [2, 3, 4, 5, 6, 7],
-  accounts: [3, 4, 5, 6, 7, 8],
-  ccs: [2, 3, 5, 6, 7, 9],
-  files: [4, 5, 6, 7, 8, 10],
-}
-
-// Debug toggle function
-function toggleDebug() {
-  const debugElement = document.getElementById("debugState")
-  if (debugElement) {
-    debugElement.style.display = debugElement.style.display === "none" ? "block" : "none"
-  }
-}
-
-// Update the current state display
-function updateDebugState() {
-  const stateElement = document.getElementById("currentState")
-  if (stateElement) {
-    stateElement.textContent = gameFlowState
+// Function to handle event card logic
+function applyEvent(eventCode) {
+  const event = events[eventCode];
+  if (!event) {
+    showModal("Error", "Invalid event code.");
+    return;
   }
 
-  const debugBtcElement = document.getElementById("debugBtc")
-  if (debugBtcElement) {
-    debugBtcElement.textContent = btc
-  }
+  log(`Applying event: <span class="math-inline">\{event\.title\} \(</span>{eventCode})`);
+  document.getElementById("eventCode").value = ""; // Clear the input field
 
-  const debugCycleElement = document.getElementById("debugCycle")
-  if (debugCycleElement) {
-    debugCycleElement.textContent = cycle
-  }
-}
+  switch (event.effectType) {
+    case "ROLL":
+      isRollCard = true;
+      displayRollModal(event);
+      break;
+    case "FORCED":
+      isRollCard = false;
+      handleForcedEvent(event);
+      break;
+    case "MARKET":
+      isRollCard = false;
+      log(`-- Market event: ${event.title}`);
+      document.getElementById("marketDiceResult").textContent = event.effect;
 
-// Debug function to help troubleshoot game flow
-function debugGameFlow(message) {
-  console.log(`[GAME FLOW] ${message} (State: ${gameFlowState})`)
-  updateGameFlowHighlight()
-}
-
-// Find the mock implementations for showConfirm and showPrompt
-// Replace these functions with the proper modal implementations
-
-// Replace these mock implementations:
-/*function showConfirm(title, message, confirmText, cancelText) {
-  return new Promise((resolve) => {
-    const confirmed = window.confirm(`${title}\n\n${message}\n\nConfirm: ${confirmText}\nCancel: ${cancelText}`)
-    resolve(confirmed)
-  })
-}
-
-function showPrompt(title, message) {
-  return new Promise((resolve) => {
-    const result = window.prompt(`${title}\n\n${message}`)
-    resolve(result)
-  })
-}*/
-
-// With these proper implementations that use the modal.js functions:
-// Use the custom modal implementation from modal.js
-// Use the custom modal implementation from modal.js
-
-// Update status bars with current game state
-function updateStatusBars() {
-  document.getElementById("btc").textContent = btc
-  document.getElementById("glock").textContent = glock ? "Yes" : "No"
-  document.getElementById("cycle").textContent = cycle
-
-  const inventoryCount = countInventory()
-  document.getElementById("invCount").textContent = inventoryCount
-
-  // Update liquid BTC display - Make sure this is working
-  const liquidBtcElement = document.getElementById("liquid-btc")
-  if (liquidBtcElement) {
-    liquidBtcElement.textContent = btc
-  }
-
-  // Update total inventory value
-  updateTotalInventoryValue()
-}
-
-// Update inventory display with color coding and profit indicators
-function updateInventoryDisplay() {
-  const inventoryStatus = document.getElementById("inventoryStatus")
-  if (!inventoryStatus) return
-
-  let inventoryText = "Current Inventory:\n"
-  let totalItems = 0
-  let totalValue = 0
-
-  // Create an array of items for sorting
-  const inventoryItems = []
-  for (const item of items) {
-    const itemInventory = inventory[item] || []
-    if (itemInventory.length > 0) {
-      // Calculate average purchase price
-      const totalCost = itemInventory.reduce((sum, price) => sum + price, 0)
-      const avgPrice = (totalCost / itemInventory.length).toFixed(1)
-      const currentPrice = currentPrices[item] || 0
-      const profit = currentPrice - Number.parseFloat(avgPrice)
-      const itemValue = itemInventory.length * currentPrice
-
-      inventoryItems.push({
-        name: itemNames[item],
-        key: item,
-        count: itemInventory.length,
-        avgPrice: Number.parseFloat(avgPrice),
-        currentPrice: currentPrice,
-        profit: profit,
-        value: itemValue,
-        prices: itemInventory,
-      })
-
-      totalItems += itemInventory.length
-      totalValue += itemValue
-    }
-  }
-
-  // Build inventory text
-  for (const item of inventoryItems) {
-    // Show item count and purchase prices with profit indicator
-    let profitIndicator = ""
-    let profitColor = ""
-
-    if (item.profit > 0) {
-      profitIndicator = `+${item.profit.toFixed(1)} BTC profit`
-      profitColor = "color: #00ff00;" // Bright green
-    } else if (item.profit < 0) {
-      profitIndicator = `${item.profit.toFixed(1)} BTC loss`
-      profitColor = "color: #ff6666;" // Red
-    }
-
-    inventoryText += `${item.name}: <span style="color: #0f0; font-weight: bold;">${item.count}</span> (bought @ ${item.avgPrice} BTC each) <span style="${profitColor}">${profitIndicator}</span>`
-
-    // Add individual prices if there are few items
-    if (item.count <= 5) {
-      inventoryText += ` [${item.prices.join(", ")} BTC]`
-    }
-
-    inventoryText += "\n"
-  }
-
-  if (totalItems === 0) {
-    inventoryText += "Empty"
-  } else {
-    // Add total inventory value
-    inventoryText += `\nTotal inventory value: <span style="color: #0f0; font-weight: bold;">${totalValue} BTC</span>`
-  }
-
-  inventoryStatus.innerHTML = inventoryText
-
-  // Update the owned quantities in the transaction table
-  for (const item of items) {
-    const ownedElement = document.getElementById(`owned-${item}`)
-    if (ownedElement) {
-      const itemCount = (inventory[item] || []).length
-      ownedElement.textContent = itemCount
-
-      // Color coding for quantities
-      if (itemCount > 5) {
-        ownedElement.style.color = "#00ff00" // Bright green for large quantities
-        ownedElement.style.fontWeight = "bold"
-      } else if (itemCount > 0) {
-        ownedElement.style.color = "#0f0" // Normal green
-        ownedElement.style.fontWeight = "bold"
-      } else {
-        ownedElement.style.color = "" // Default color
-        ownedElement.style.fontWeight = ""
+      // Handle different MARKET events
+      if (eventCode === "005") {
+        // Market Crash - Halve prices
+        for (const item in currentPrices) {
+          currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2));
+        }
+        document.getElementById("cardDiceResult").textContent = "BTC value halves this round";
+      } else if (eventCode === "025") {
+        // Supply Chain Collapse - Double prices
+        for (const item in currentPrices) {
+          currentPrices[item] = Math.min(10000, Math.ceil(currentPrices[item] * 2)); //Added upper limit to prevent overflow
+        }
+        document.getElementById("cardDiceResult").textContent = "BTC value doubles this round";
+      } else if (eventCode === "026") {
+        // Product Ban - Ban one item
+        const items = Object.keys(currentPrices);
+        const bannedIndex = Math.floor(Math.random() * items.length);
+        bannedItem = items[bannedIndex];
+        document.getElementById("cardDiceResult").textContent = `${bannedItem.toUpperCase()} banned this round!`;
       }
-    }
-  }
-}
-
-// Log a message to the game log
-function log(message) {
-  const logElement = document.getElementById("log")
-  if (logElement) {
-    const timestamp = new Date().toLocaleTimeString()
-    logElement.innerHTML += `[${timestamp}] ${message}<br>`
-    logElement.scrollTop = logElement.scrollHeight
-  }
-}
-
-// Clear inventory
-function clearInventory() {
-  for (const item of items) {
-    inventory[item] = []
-  }
-  updateInventoryDisplay()
-}
-
-// Halve prices
-function halvePrices() {
-  // If prices aren't set yet, initialize them
-  if (Object.keys(currentPrices).length === 0) {
-    for (const item of items) {
-      currentPrices[item] = priceMatrix[item][2] // Use middle value as default
-    }
-  }
-
-  const newPrices = {}
-  for (const item in currentPrices) {
-    if (currentPrices.hasOwnProperty(item)) {
-      newPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
-    }
-  }
-  return newPrices
-}
-
-// Double prices
-function doublePrices() {
-  // If prices aren't set yet, initialize them
-  if (Object.keys(currentPrices).length === 0) {
-    for (const item of items) {
-      currentPrices[item] = priceMatrix[item][2] // Use middle value as default
-    }
-  }
-
-  const newPrices = {}
-  for (const item in currentPrices) {
-    if (currentPrices.hasOwnProperty(item)) {
-      newPrices[item] = currentPrices[item] * 2
-    }
-  }
-  return newPrices
-}
-
-// Count total inventory items
-function countInventory() {
-  let total = 0
-  for (const item in inventory) {
-    if (inventory.hasOwnProperty(item)) {
-      total += inventory[item].length
-    }
-  }
-  return total
-}
-
-// Wipe half of inventory randomly
-function wipeHalfInventoryFunc() {
-  const itemsToRemove = Math.ceil(countInventory() / 2)
-  const allItems = []
-  const allItemTypes = []
-
-  // Collect all items into a single array
-  for (const item in inventory) {
-    if (inventory.hasOwnProperty(item) && inventory[item].length > 0) {
-      for (let i = 0; i < inventory[item].length; i++) {
-        allItems.push(inventory[item][i])
-        allItemTypes.push(item)
-      }
-    }
-  }
-
-  // Remove random items
-  for (let i = 0; i < itemsToRemove; i++) {
-    if (allItems.length > 0) {
-      const randomIndex = Math.floor(Math.random() * allItems.length)
-      allItems.splice(randomIndex, 1)
-      allItemTypes.splice(randomIndex, 1)
-    }
-  }
-
-  // Rebuild the inventory object
-  clearInventory()
-  for (let i = 0; i < allItems.length; i++) {
-    const itemType = allItemTypes[i]
-    const itemValue = allItems[i]
-
-    if (!inventory[itemType]) {
-      inventory[itemType] = []
-    }
-    inventory[itemType].push(itemValue)
-  }
-
-  updateInventoryDisplay()
-}
-
-// Cash out inventory at end of game
-function cashOutInventory() {
-  let totalEarnings = 0
-  const soldItems = []
-
-  for (const item in inventory) {
-    if (inventory.hasOwnProperty(item)) {
-      const itemCount = inventory[item].length
-      if (itemCount === 0) continue
-
-      const itemPrice = currentPrices[item] || 1 // Use current price or default to 1
-      const earnings = itemCount * itemPrice
-
-      totalEarnings += earnings
-      soldItems.push(`${itemCount} ${itemNames[item]} for ${earnings} BTC`)
-
-      // Clear the inventory for this item
-      inventory[item] = []
-
-      log(`-- Cashed out ${itemCount} ${itemNames[item]} for ${earnings} BTC.`)
-    }
-  }
-
-  // Update BTC
-  btc += totalEarnings
-
-  updateInventoryDisplay()
-  updateStatusBars()
-
-  return {
-    itemsSold: soldItems.length,
-    soldItems: soldItems,
-    totalEarnings: totalEarnings,
-  }
-}
-
-// Scroll to top of page
-function scrollToTopFunc() {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth", // For a smooth scrolling effect
-  })
-}
-
-// Initialize the game when the page loads
-document.addEventListener("DOMContentLoaded", () => {
-  // Set initial game state
-  gameFlowState = "enterEventCode"
-
-  updateStatusBars()
-  updateInventoryDisplay()
-  updateMarketTable()
-  populateTransactionTable()
-  log("Welcome to Silk Ave. You start with 100 BTC. Good luck.")
-
-  // Initialize liquid BTC display
-  const liquidBtcElement = document.getElementById("liquid-btc")
-  if (liquidBtcElement) {
-    liquidBtcElement.textContent = btc
-  }
-
-  // Add event listener for event code input
-  document.getElementById("eventCode").addEventListener("input", function () {
-    if (this.value.length === 3 && gameFlowState === "enterEventCode") {
-      gameFlowState = "applyEvent"
-      updateGameFlowHighlight()
-    }
-  })
-
-  // Start the guided highlighting immediately
-  updateGameFlowHighlight()
-
-  // Play bleep sound when buttons are clicked
-  try {
-    const buttons = document.querySelectorAll("button")
-    buttons.forEach((button) => {
-      button.addEventListener("click", () => {
-        playSound("bleep")
-      })
-    })
-  } catch (e) {
-    console.error("Error setting up sound:", e)
-  }
-
-  // Set initial button text based on cycle
-  const advanceButton = document.getElementById("advanceCycleBtn")
-  if (advanceButton) {
-    if (cycle === 10) {
-      advanceButton.textContent = "Cash Out and Go Dark"
-    }
-  }
-})
-
-// Add sorting options UI to the inventory display
-// Add this function after the setupSortingOptions function
-
-// Add sorting options to the inventory display
-// Remove this function entirely
-/*function setupSortingOptions() {
-  // Create sorting options container if it doesn't exist
-  let sortingContainer = document.getElementById("sortingOptions")
-  if (!sortingContainer) {
-    const inventoryStatus = document.getElementById("inventoryStatus")
-    if (!inventoryStatus) return
-
-    sortingContainer = document.createElement("div")
-    sortingContainer.id = "sortingOptions"
-    sortingContainer.style.marginBottom = "10px"
-    sortingContainer.style.textAlign = "right"
-
-    // Create sort label
-    const sortLabel = document.createElement("span")
-    sortLabel.textContent = "Sort by: "
-    sortingContainer.appendChild(sortLabel)
-
-    // Create sort select
-    const sortSelect = document.createElement("select")
-    sortSelect.id = "sortInventory"
-
-    const sortOptions = [
-      { value: "default", text: "Default" },
-      { value: "alphabetical", text: "Name" },
-      { value: "quantity", text: "Quantity" },
-      { value: "value", text: "Value" },
-      { value: "profit", text: "Profit" },
-    ]
-
-    sortOptions.forEach((option) => {
-      const optionElement = document.createElement("option")
-      optionElement.value = option.value
-      optionElement.textContent = option.text
-      sortSelect.appendChild(optionElement)
-    })
-
-    sortSelect.addEventListener("change", function () {
-      sortMethod = this.value
-      updateInventoryDisplay()
-    })
-
-    sortingContainer.appendChild(sortSelect)
-
-    // Insert sorting options before inventory status content
-    inventoryStatus.parentNode.insertBefore(sortingContainer, inventoryStatus)
-  }
-}*/
-
-// Play a sound
-function playSound(soundId) {
-  try {
-    const sound = document.getElementById(soundId)
-    if (sound) {
-      sound.currentTime = 0
-      sound.play().catch((e) => console.log("Audio play failed:", e))
-    }
-  } catch (e) {
-    console.error("Error playing sound:", e)
-  }
-}
-
-// Update the highlighted element based on game flow state
-function updateGameFlowHighlight() {
-  console.log("Updating game flow highlight: " + gameFlowState + ", BTC: " + btc)
-
-  // Remove highlight from all elements
-  const allElements = document.querySelectorAll(".highlight-pulse")
-  allElements.forEach((el) => {
-    el.classList.remove("highlight-pulse")
-  })
-
-  // Add highlight based on current state
-  switch (gameFlowState) {
-    case "enterEventCode":
-      highlightElement("eventCodeSection")
-      showHint("Enter a 3-digit event card code")
-      break
-    case "applyEvent":
-      highlightElement("applyEventBtn")
-      showHint("Apply the event card")
-      break
-    case "rollCard":
-      highlightElement("rollCardBtn")
-      showHint("Roll the dice for this card")
-      break
-    case "rollMarket":
-      highlightElement("rollMarketBtn")
-      showHint("Roll the market prices")
-      break
-    case "selectBurner":
-      highlightElement("burnerDealSection")
-      showHint("Select an item for burner deal (optional)")
-      break
-    case "applyBurner":
-      highlightElement("applyBurnerBtn")
-      showHint("Apply the burner deal")
-      break
-    case "executeTransactions":
-      // Highlight both the transaction section and execute button
-      highlightElement("transactionSection")
-      highlightElement("executeTransactionsBtn")
-      showHint("Enter buy/sell quantities and execute transactions")
-      break
-    case "advanceCycle":
-      highlightElement("advanceCycleBtn")
-      showHint(cycle === 10 ? "Cash out and complete the game" : "Advance to the next cycle")
-      break
+      break;
+    case "CHOICE":
+      isRollCard = false;
+      displayChoiceModal(event);
+      break;
     default:
-      hideHint()
-      break
+      log(`Unknown effect type: ${event.effectType}`);
   }
-
-  // Update debug display
-  updateDebugState()
+  updateUI();
+  saveGameState();
 }
 
-// Show a hint message
-function showHint(message) {
-  const hintElement = document.getElementById("gameHint")
-  if (hintElement) {
-    hintElement.textContent = message
-    hintElement.style.display = "block"
-  }
-}
-
-// Hide the hint message
-function hideHint() {
-  const hintElement = document.getElementById("gameHint")
-  if (hintElement) {
-    hintElement.style.display = "none"
-  }
-}
-
-// Highlight an element with a pulsing effect
-function highlightElement(elementId) {
-  const element = document.getElementById(elementId)
-  if (element) {
-    element.classList.add("highlight-pulse")
-  }
-}
-
-// Find the applyEvent function and update it to ensure the card result is displayed properly
-// Replace the applyEvent function with this updated version:
-
-function applyEvent() {
-  debugGameFlow("Applying event")
-  playSound("bleep")
-
-  eventCode = document.getElementById("eventCode").value.trim()
-
-  // Debug logging
-  console.log("Applying event code:", eventCode)
-
-  // Validate event code
-  if (!eventCode) {
-    log("-- Please enter a valid event code.")
-    return
-  }
-
-  // Reset any previous event effects
-  resetEventEffects()
-
-  // Check if it's a roll card
-  isRollCard = ["004", "009", "011", "012", "017", "020", "029", "036", "037"].includes(eventCode)
-
-  // Reset the roll button state
-  const rollButton = document.getElementById("rollCardBtn")
-  if (rollButton) {
-    rollButton.disabled = false
-    rollButton.style.opacity = "1"
-    rollButton.style.cursor = "pointer"
-    rollButton.style.display = isRollCard ? "inline-block" : "none"
-  }
-
-  // Clear previous result
-  const cardDiceResult = document.getElementById("cardDiceResult")
-  cardDiceResult.innerHTML = ""
-  cardDiceResult.style.display = "block"
-
-  log(`-- Event code ${eventCode} applied.`)
-
-  // If not a roll card, apply effect immediately
-  if (!isRollCard) {
-    try {
-      // Initialize prices if they're not set yet
-      if (Object.keys(currentPrices).length === 0) {
-        // Set default prices for all items
-        for (const item of items) {
-          currentPrices[item] = priceMatrix[item][2] // Use middle value as default
-        }
-        console.log("Initialized default prices:", currentPrices)
-      }
-
-      // Check if we should ignore this negative effect
-      if (ignoreNextNegative && isNegativeCard(eventCode)) {
-        ignoreNextNegative = false
-        const result = "Negative effect ignored due to Silk Security Patch"
-        cardDiceResult.innerHTML = "✓ Outcome: " + result
-        log(`-- ${result}`)
-      } else {
-        // Run the card effect and get the result
-        const result = runCardEffect(eventCode, null)
-
-        console.log("Card effect result:", result) // Debug log
-
-        // Always display the result for non-roll cards
-        if (result) {
-          if (result.includes("Waiting")) {
-            cardDiceResult.innerHTML = result
-          } else {
-            cardDiceResult.innerHTML = "✓ Outcome: " + result
-          }
-          log(`-- Card ${eventCode}: ${result}`)
-        } else {
-          cardDiceResult.innerHTML = "✓ Card applied but no specific outcome"
-          log(`-- Card ${eventCode} applied`)
-        }
-      }
-
-      // Update game flow state if we're not waiting for user input
-      if (!cardDiceResult.innerHTML.includes("Waiting")) {
-        gameFlowState = "rollMarket"
-      }
-    } catch (error) {
-      console.error("Error applying card effect:", error)
-      cardDiceResult.innerHTML = "⚠️ Error applying card effect: " + error.message
-      log(`-- Error applying card ${eventCode}: ${error.message}`)
-    }
+// Function to handle roll results
+function handleRollResult(event, roll) {
+  const outcome = event.outcomes.find((o) => roll >= o.minRoll && roll <= o.maxRoll);
+  if (outcome) {
+    displayOutcomeModal(event.title, outcome.result);
+    applyOutcomeEffect(outcome.effect);
   } else {
-    // For roll cards, just indicate that a roll is needed
-    cardDiceResult.innerHTML = "🎲 Roll required for this card"
-
-    // Update game flow state
-    gameFlowState = "rollCard"
-  }
-
-  // Update the highlighted element
-  updateGameFlowHighlight()
-
-  // Update status bars and inventory display to reflect changes
-  updateStatusBars()
-  updateInventoryDisplay()
-  updateMarketTable()
-
-  // Force update of liquid BTC display
-  const liquidBtcElement = document.getElementById("liquid-btc")
-  if (liquidBtcElement) {
-    liquidBtcElement.textContent = btc
+    displayOutcomeModal(event.title, "No outcome matched the roll.");
   }
 }
 
-// Check if a card is negative
-function isNegativeCard(code) {
-  const negativeCards = [
-    "001",
-    "003",
-    "004",
-    "005",
-    "006",
-    "008",
-    "010",
-    "011",
-    "015",
-    "017",
-    "018",
-    "019",
-    "021",
-    "023",
-    "024",
-    "026",
-    "028",
-    "032",
-    "033",
-    "034",
-  ]
-  return negativeCards.includes(code)
-}
+// Function to apply the effects of an event
+function applyOutcomeEffect(effect) {
+  // Use regular expressions to extract effect type, amount, and item
+  const regex = /(\w+)([+-])?(\d+)?\s?(.*)?/;
+  const matches = effect.match(regex);
 
-// Roll dice for card effect
-function rollCardDice() {
-  debugGameFlow("Rolling card dice")
-  playSound("bleep")
-
-  if (!isRollCard || eventCode === "") return
-
-  // Disable the roll button to prevent multiple rolls
-  const rollButton = document.getElementById("rollCardBtn")
-  if (rollButton) {
-    rollButton.disabled = true
-    rollButton.style.opacity = "0.5"
-    rollButton.style.cursor = "not-allowed"
+  if (!matches) {
+    log(`Error: Could not parse effect string: ${effect}`);
+    return;
   }
 
-  const result = Math.ceil(Math.random() * 6)
-  const cardDiceResult = document.getElementById("cardDiceResult")
+  const type = matches[1];
+  const sign = matches[2]; // "+" or "-" (optional)
+  const amount = matches[3] ? parseInt(matches[3], 10) : 0;
+  const item = matches[4] ? matches[4].trim() : "";
 
-  // Clear previous content
-  cardDiceResult.innerHTML = `🎲 You rolled: ${result}`
-  cardDiceResult.style.display = "block"
-
-  // Check if we should ignore this negative effect
-  if (ignoreNextNegative && isNegativeCard(eventCode)) {
-    ignoreNextNegative = false
-    const outcome = "Negative effect ignored due to Silk Security Patch"
-    cardDiceResult.innerHTML += `<br>✓ Outcome: ${outcome}`
-    log(`-- ${outcome}`)
-  } else {
-    const outcome = runCardEffect(eventCode, result)
-    cardDiceResult.innerHTML += `<br>✓ Outcome: ${outcome}`
-    log(`-- Card ${eventCode}: ${outcome}`)
-  }
-
-  // Update game flow state
-  gameFlowState = "rollMarket"
-
-  // Update the highlighted element
-  updateGameFlowHighlight()
-}
-
-// Reset event effects
-function resetEventEffects() {
-  blockBuying = false
-  blockSelling = false
-  bannedItem = null
-}
-
-// Run card effect based on code and roll
-function runCardEffect(code, roll) {
-  console.log(`Running card effect for code ${code} with roll ${roll}`)
-  let message = ""
-
-  try {
-    switch (code) {
-      case "005": // MARKET CRASH
-        console.log("Running MARKET CRASH effect")
-        console.log("Current prices before:", JSON.stringify(currentPrices))
-
-        // Initialize prices if they're not set yet
-        if (Object.keys(currentPrices).length === 0) {
-          for (const item of items) {
-            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
-          }
-        }
-
-        // Halve all prices
-        for (const item of items) {
-          if (currentPrices[item]) {
-            currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
-          }
-        }
-
-        console.log("New prices after halving:", JSON.stringify(currentPrices))
-
-        // Update the market table
-        updateMarketTable()
-        message = "BTC value halves this round"
-        break
-
-      case "010": // PHANTOM NODE FAILURE
-        btc = Math.max(0, btc - 15)
-        message = "Lose 15 BTC"
-        break
-
-      case "016": // LUCKY FLIP
-        console.log("Running LUCKY FLIP effect")
-        console.log("Current prices before:", JSON.stringify(currentPrices))
-
-        // Initialize prices if they're not set yet
-        if (Object.keys(currentPrices).length === 0) {
-          for (const item of items) {
-            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
-          }
-        }
-
-        // Double all prices
-        for (const item of items) {
-          if (currentPrices[item]) {
-            currentPrices[item] = currentPrices[item] * 2
-          }
-        }
-
-        console.log("New prices after doubling:", JSON.stringify(currentPrices))
-
-        // Update the market table
-        updateMarketTable()
-        message = "Doubled your inventory's market value this round"
-        break
-
-      default:
-        // Call the original function for all other cases
-        return originalRunCardEffect(code, roll)
-    }
-
-    updateStatusBars()
-    updateInventoryDisplay()
-    updateMarketTable()
-
-    // Force update of liquid BTC display
-    const liquidBtcElement = document.getElementById("liquid-btc")
-    if (liquidBtcElement) {
-      liquidBtcElement.textContent = btc
-    }
-
-    return message
-  } catch (error) {
-    console.error(`Error in runCardEffect for code ${code}:`, error)
-    return `Error: ${error.message}`
-  }
-}
-
-// Store the original function to call for other cases
-const originalRunCardEffect = runCardEffect
-
-// Override the function with our fixed version
-runCardEffect = (code, roll) => {
-  console.log(`Running card effect for code ${code} with roll ${roll}`)
-  let message = ""
-
-  try {
-    switch (code) {
-      case "005": // MARKET CRASH
-        console.log("Running MARKET CRASH effect")
-        console.log("Current prices before:", JSON.stringify(currentPrices))
-
-        // Initialize prices if they're not set yet
-        if (Object.keys(currentPrices).length === 0) {
-          for (const item of items) {
-            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
-          }
-        }
-
-        // Halve all prices
-        for (const item of items) {
-          if (currentPrices[item]) {
-            currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
-          }
-        }
-
-        console.log("New prices after halving:", JSON.stringify(currentPrices))
-
-        // Update the market table
-        updateMarketTable()
-        message = "BTC value halves this round"
-        break
-
-      case "010": // PHANTOM NODE FAILURE
-        btc = Math.max(0, btc - 15)
-        message = "Lose 15 BTC"
-        break
-
-      case "016": // LUCKY FLIP
-        console.log("Running LUCKY FLIP effect")
-        console.log("Current prices before:", JSON.stringify(currentPrices))
-
-        // Initialize prices if they're not set yet
-        if (Object.keys(currentPrices).length === 0) {
-          for (const item of items) {
-            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
-          }
-        }
-
-        // Double all prices
-        for (const item of items) {
-          if (currentPrices[item]) {
-            currentPrices[item] = currentPrices[item] * 2
-          }
-        }
-
-        console.log("New prices after doubling:", JSON.stringify(currentPrices))
-
-        // Update the market table
-        updateMarketTable()
-        message = "Doubled your inventory's market value this round"
-        break
-
-      default:
-        // Call the original function for all other cases
-        return originalRunCardEffect(code, roll)
-    }
-
-    updateStatusBars()
-    updateInventoryDisplay()
-    updateMarketTable()
-
-    // Force update of liquid BTC display
-    const liquidBtcElement = document.getElementById("liquid-btc")
-    if (liquidBtcElement) {
-      liquidBtcElement.textContent = btc
-    }
-
-    return message
-  } catch (error) {
-    console.error(`Error in runCardEffect for code ${code}:`, error)
-    return `Error: ${error.message}`
-  }
-}
-
-// Helper function for random item grants
-function grantRandomItems(count) {
-  let added = 0
-  let autoSold = 0
-  let btcEarned = 0
-  const itemsAdded = []
-  const itemsSold = []
-
-  // Check current inventory space
-  const currentCount = countInventory()
-  const spaceLeft = inventoryLimit - currentCount
-
-  // Determine how many items can be added and how many need to be auto-sold
-  const itemsToAdd = Math.min(count, spaceLeft)
-  const itemsToSell = count - itemsToAdd
-
-  // Add items to inventory if there's space
-  for (let i = 0; i < itemsToAdd; i++) {
-    const randomItem = items[Math.floor(Math.random() * items.length)]
-    if (!inventory[randomItem]) inventory[randomItem] = []
-    inventory[randomItem].push(currentPrices[randomItem] || 5) // Use current price or default to 5
-    itemsAdded.push(itemNames[randomItem])
-    added++
-  }
-
-  // Auto-sell items if inventory is full
-  for (let i = 0; i < itemsToSell; i++) {
-    const randomItem = items[Math.floor(Math.random() * items.length)]
-    const itemPrice = currentPrices[randomItem] || 5
-    const sellPrice = Math.floor(itemPrice * 0.75) // 75% of market value
-    btcEarned += sellPrice
-    itemsSold.push(`${itemNames[randomItem]} for ${sellPrice} BTC`)
-    autoSold++
-  }
-
-  // Update BTC if any items were auto-sold
-  if (autoSold > 0) {
-    btc += btcEarned
-  }
-
-  updateInventoryDisplay()
-  updateStatusBars()
-
-  // Return appropriate message based on what happened
-  if (added > 0 && autoSold > 0) {
-    log(`-- Added ${added} items to inventory, auto-fenced ${autoSold} items for ${btcEarned} BTC (inventory full)`)
-    return `Added: ${itemsAdded.join(", ")}. Inventory full! ${autoSold} items auto-fenced for ${btcEarned} BTC (75% value)`
-  } else if (added > 0) {
-    return `${itemsAdded.join(", ")}`
-  } else if (autoSold > 0) {
-    log(`-- Inventory full! Auto-fenced ${autoSold} items for ${btcEarned} BTC (75% value)`)
-    return `Inventory full! All items auto-fenced for ${btcEarned} BTC (75% value)`
-  }
-
-  return "No items added"
-}
-
-// Grant items to the player
-function grantItems(method, count) {
-  const currentCount = countInventory()
-  const spaceLeft = inventoryLimit - currentCount
-
-  if (spaceLeft <= 0) {
-    btc += 25 // Bonus if inventory is full
-    return `Inventory full - gained 25 BTC instead`
-  }
-
-  const actualCount = Math.min(count, spaceLeft)
-
-  if (method === "choose") {
-    // Use custom prompt instead of browser prompt
-    showPrompt(
-      "COMMUNITY BOOST",
-      `Choose an item to receive ${actualCount} units of:\n\n${items.map((i) => itemNames[i]).join(", ")}`,
-    ).then((itemType) => {
-      if (itemType) {
-        // Find matching item (case insensitive)
-        const matchedItem = items.find(
-          (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
-        )
-
-        if (matchedItem) {
-          if (!inventory[matchedItem]) inventory[matchedItem] = []
-          for (let i = 0; i < actualCount; i++) {
-            inventory[matchedItem].push(currentPrices[matchedItem] || 5) // Use current price or default to 5
-          }
-          log(`-- Gained ${actualCount} ${itemNames[matchedItem]}`)
-          updateInventoryDisplay()
-          updateStatusBars()
-        } else {
-          // If invalid choice, give random items
-          const randomResult = grantRandomItems(actualCount)
-          log(`-- Invalid item choice. ${randomResult}`)
-        }
+  switch (type) {
+    case "btc":
+      if (sign === "-") {
+        btc -= amount;
+        log(`BTC decreased by ${amount}.`);
       } else {
-        // If canceled, give random items
-        const randomResult = grantRandomItems(actualCount)
-        log(`-- ${randomResult}`)
+        btc += amount;
+        log(`BTC increased by ${amount}.`);
       }
-    })
+      break;
+    case "gain":
+      inventory[item] = (inventory[item] || 0) + amount;
+      log(`Gained ${amount} ${item}.`);
+      break;
+    case "lose":
+      inventory[item] = Math.max(0, (inventory[item] || 0) - amount);
+      log(`Lost ${amount} ${item}.`);
+      break;
+    case "glock":
+      glock = sign === "+";
+      log(glock ? "Glock acquired." : "Glock lost.");
+      break;
+    case "blockbuy":
+      blockBuying = sign === "+";
+      log(blockBuying ? "Buying blocked." : "Buying unblocked.");
+      break;
+    case "blocksell":
+      blockSelling = sign === "+";
+      log(blockSelling ? "Selling blocked." : "Selling unblocked.");
+      break;
+    case "ban":
+      bannedItem = item;
+      log(`${item} banned.`);
+      break;
+    case "unban":
+      bannedItem = null;
+      log("Ban lifted.");
+      break;
+    default:
+      log(`Unknown outcome effect: ${effect}`);
+  }
+  updateUI();
+  saveGameState();
+}
 
-    return "Waiting for your item selection..."
-  } else {
-    return grantRandomItems(actualCount)
+// Function to handle forced events
+function handleForcedEvent(event) {
+  displayOutcomeModal(event.title, event.effect);
+  applyOutcomeEffect(event.effect);
+}
+
+// Function to handle choice selections
+function handleChoiceSelection(event, choiceIndex) {
+  const choice = event.choices[choiceIndex];
+  if (choice) {
+    displayOutcomeModal(event.title, choice.result);
+    applyOutcomeEffect(choice.effect);
   }
 }
 
-// Apply whale buyout effect
-function applyWhaleBuyout() {
-  showPrompt(
-    "WHALE BUYOUT",
-    `A big player wants to buy in bulk!\nChoose an item to sell at TRIPLE price:\n\n${items.map((i) => itemNames[i]).join(", ")}`,
-  ).then((itemType) => {
-    let message = ""
-
-    if (itemType) {
-      // Find matching item (case insensitive)
-      const matchedItem = items.find(
-        (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
-      )
-
-      if (matchedItem && currentPrices[matchedItem]) {
-        const originalPrice = currentPrices[matchedItem]
-        currentPrices[matchedItem] = originalPrice * 3
-        updateMarketTable()
-        message = `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
-      } else {
-        message = "Invalid item choice - no effect"
-      }
-    } else {
-      message = "No item selected - no effect"
-    }
-
-    document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + message
-  })
-
-  return "Waiting for your item selection..."
-}
-
-// Roll market prices
-function rollMarket() {
-  debugGameFlow("Rolling market prices")
-  playSound("bleep")
-
-  // Disable the roll market button to prevent multiple rolls
-  const rollMarketButton = document.getElementById("rollMarketBtn")
-  if (rollMarketButton) {
-    rollMarketButton.disabled = false
-    rollMarketButton.style.opacity = "0.5"
-    rollMarketButton.style.cursor = "not-allowed"
+// Function to buy items
+function buyItem(item, quantity) {
+  quantity = parseInt(quantity);
+  if (isNaN(quantity) || quantity <= 0) {
+    showModal("Error", "Invalid quantity.");
+    return;
   }
-
-  // Reset prices from any previous effects
-  currentPrices = {}
-
-  // Roll for each item
-  for (const item of items) {
-    const roll = Math.ceil(Math.random() * 6) - 1 // 0-5 index
-    currentPrices[item] = priceMatrix[item][roll]
-  }
-
-  // Update market table
-  updateMarketTable()
-
-  // Show roll result
-  const diceResult = Math.ceil(Math.random() * 6)
-  document.getElementById("marketDiceResult").textContent = `🎲 You rolled: ${diceResult}`
-
-  log("-- Market prices updated.")
-
-  // Apply burner deal if one is selected
-  const burnerItem = document.getElementById("burnerDeal").value
-  if (burnerItem) {
-    applyBurnerDeal()
-  }
-
-  // Update game flow state
-  gameFlowState = "selectBurner"
-
-  // Update the highlighted element
-  updateGameFlowHighlight()
-}
-
-// Apply burner deal
-function applyBurnerDeal() {
-  debugGameFlow("Applying burner deal")
-  playSound("bleep")
-
-  const burnerItem = document.getElementById("burnerDeal").value
-
-  if (!burnerItem) {
-    log("-- Please select an item for the burner deal.")
-    return
-  }
-
-  if (!currentPrices[burnerItem]) {
-    log("-- Cannot apply burner deal. Roll market prices first.")
-    return
-  }
-
-  // Store original price before discount
-  const originalPrice = currentPrices[burnerItem]
-
-  // Burner deals are half price
-  currentPrices[burnerItem] = Math.max(1, Math.floor(originalPrice / 2))
-
-  // Update the market table to reflect the new price
-  updateMarketTable()
-
-  log(`-- Burner deal applied: ${itemNames[burnerItem]} at ${currentPrices[burnerItem]} BTC (was ${originalPrice} BTC)`)
-
-  // Update game flow state
-  gameFlowState = "executeTransactions"
-
-  // Update the highlighted element
-  updateGameFlowHighlight()
-}
-
-// Update market table with current prices
-function updateMarketTable() {
-  // First, make sure we have a market table to update
-  const marketTable = document.getElementById("marketTable")
-  if (!marketTable) {
-    console.error("Market table not found")
-    return
-  }
-
-  // Get the current burner deal
-  const burnerItem = document.getElementById("burnerDeal").value
-
-  // Update each row in the table
-  for (const item of items) {
-    // Find the row for this item
-    const rows = marketTable.querySelectorAll("tbody tr")
-    let row = null
-
-    for (let i = 0; i < rows.length; i++) {
-      const cells = rows[i].querySelectorAll("td")
-      if (cells.length > 0 && cells[0].textContent.includes(itemNames[item])) {
-        row = rows[i]
-        break
-      }
-    }
-
-    if (!row) {
-      console.warn(`Row for ${itemNames[item]} not found`)
-      continue
-    }
-
-    // Get the cells in this row
-    const cells = row.querySelectorAll("td")
-    if (cells.length < 2) {
-      console.warn(`Not enough cells in row for ${itemNames[item]}`)
-      continue
-    }
-
-    const nameCell = cells[0]
-    const priceCell = cells[1]
-
-    // Clear any previous burner deal styling
-    nameCell.classList.remove("burner-deal-item")
-
-    // Apply burner deal styling if this is the burner item
-    if (item === burnerItem) {
-      nameCell.classList.add("burner-deal-item")
-    }
-
-    // Update the price cell
-    if (priceCell) {
-      priceCell.textContent = currentPrices[item] ? `${currentPrices[item]} BTC` : "—"
-
-      // Highlight profitable items
-      if (inventory[item] && inventory[item].length > 0) {
-        const avgCost = inventory[item].reduce((sum, price) => sum + price, 0) / inventory[item].length
-        if (currentPrices[item] > avgCost) {
-          priceCell.style.color = "#0f0" // Green for profit
-          priceCell.style.fontWeight = "bold"
-        } else if (currentPrices[item] < avgCost) {
-          priceCell.style.color = "#ff6666" // Red for loss
-        } else {
-          priceCell.style.color = "" // Reset color
-          priceCell.style.fontWeight = "" // Reset font weight
-        }
-      }
-    }
-
-    // Apply banned item styling
-    if (item === bannedItem) {
-      nameCell.style.textDecoration = "line-through"
-      nameCell.style.color = "red"
-    } else {
-      nameCell.style.textDecoration = ""
-      nameCell.style.color = ""
-    }
-  }
-}
-
-// Populate transaction table
-function populateTransactionTable() {
-  const tableBody = document.querySelector("#transactionTable tbody")
-  if (!tableBody) return
-
-  tableBody.innerHTML = ""
-
-  for (const item of items) {
-    const row = document.createElement("tr")
-
-    // Item name cell
-    const nameCell = document.createElement("td")
-    nameCell.textContent = itemNames[item]
-    nameCell.style.textAlign = "left"
-    nameCell.style.paddingLeft = "10px"
-    row.appendChild(nameCell)
-
-    // Owned quantity cell
-    const ownedCell = document.createElement("td")
-    ownedCell.id = `owned-${item}`
-    ownedCell.textContent = (inventory[item] || []).length
-    ownedCell.style.textAlign = "center"
-
-    // Highlight if player owns any
-    if ((inventory[item] || []).length > 0) {
-      ownedCell.style.color = "#0f0"
-      ownedCell.style.fontWeight = "bold"
-    }
-
-    row.appendChild(ownedCell)
-
-    // Buy cell
-    const buyCell = document.createElement("td")
-    const buyInput = document.createElement("input")
-    buyInput.type = "number"
-    buyInput.min = "0"
-    buyInput.id = `buy-${item}`
-    buyInput.className = "buy-input"
-    buyInput.style.width = "50px"
-    buyCell.appendChild(buyInput)
-
-    // Add max buy button with more visible styling
-    const maxBuyBtn = document.createElement("button")
-    maxBuyBtn.textContent = "Max"
-    maxBuyBtn.className = "max-button"
-    maxBuyBtn.style.marginLeft = "5px"
-    maxBuyBtn.style.padding = "2px 5px"
-    maxBuyBtn.style.fontSize = "0.8rem"
-    maxBuyBtn.style.backgroundColor = "#000"
-    maxBuyBtn.style.color = "#0f0"
-    maxBuyBtn.style.border = "1px solid #0f0"
-    maxBuyBtn.style.cursor = "pointer"
-    maxBuyBtn.onclick = (e) => {
-      e.preventDefault()
-      setMaxBuy(item)
-      playSound("bleep")
-    }
-    buyCell.appendChild(maxBuyBtn)
-    row.appendChild(buyCell)
-
-    // Sell cell
-    const sellCell = document.createElement("td")
-    const sellInput = document.createElement("input")
-    sellInput.type = "number"
-    sellInput.min = "0"
-    sellInput.id = `sell-${item}`
-    sellInput.className = "sell-input"
-    sellInput.style.width = "50px"
-    sellCell.appendChild(sellInput)
-
-    // Add max sell button with more visible styling
-    const maxSellBtn = document.createElement("button")
-    maxSellBtn.textContent = "Max"
-    maxSellBtn.className = "max-button"
-    maxSellBtn.style.marginLeft = "5px"
-    maxSellBtn.style.padding = "2px 5px"
-    maxSellBtn.style.fontSize = "0.8rem"
-    maxSellBtn.style.backgroundColor = "#000"
-    maxSellBtn.style.color = "#0f0"
-    maxSellBtn.style.border = "1px solid #0f0"
-    maxSellBtn.style.cursor = "pointer"
-    maxSellBtn.onclick = (e) => {
-      e.preventDefault()
-      setMaxSell(item)
-      playSound("bleep")
-    }
-    sellCell.appendChild(maxSellBtn)
-    row.appendChild(sellCell)
-
-    tableBody.appendChild(row)
-  }
-
-  // Force a refresh of the table
-  tableBody.style.display = "none"
-  setTimeout(() => {
-    tableBody.style.display = ""
-  }, 10)
-}
-
-// Set maximum buy amount for an item
-function setMaxBuy(item) {
   if (blockBuying) {
-    log("-- Cannot buy this round due to event effect.")
-    return
+    showModal("Notice", "Buying is currently blocked.");
+    return;
   }
-
-  if (!currentPrices[item]) {
-    log("-- Cannot determine max buy. Roll market prices first.")
-    return
+  if (bannedItem === item) {
+    showModal("Notice", `${item} is currently banned.`);
+    return;
   }
-
-  // Calculate available inventory space
-  const currentInventoryCount = countInventory()
-  const spaceLeft = inventoryLimit - currentInventoryCount
-
-  if (spaceLeft <= 0) {
-    log("-- Inventory is full. Cannot buy more items.")
-    return
-  }
-
-  // Calculate how many items can be afforded with current BTC
-  const itemPrice = currentPrices[item]
-  const affordableCount = Math.floor(btc / itemPrice)
-
-  // The max buy is the minimum of space left and affordable count
-  const maxBuy = Math.min(spaceLeft, affordableCount)
-
-  // Set the input value
-  const buyInput = document.getElementById(`buy-${item}`)
-  if (buyInput) {
-    buyInput.value = maxBuy
-  }
-
-  if (maxBuy === 0) {
-    log(`-- Cannot afford any ${itemNames[item]} at current price (${itemPrice} BTC).`)
-  } else if (maxBuy < affordableCount) {
-    log(`-- Can buy up to ${maxBuy} ${itemNames[item]} (limited by inventory space).`)
+  const price = currentPrices[item];
+  const cost = price * quantity;
+  if (btc >= cost) {
+    const currentInventory = Object.values(inventory).reduce((sum, q) => sum + q, 0);
+    if (currentInventory + quantity <= inventoryLimit) {
+      btc -= cost;
+      inventory[item] = (inventory[item] || 0) + quantity;
+      log(`Bought ${quantity} ${item} for ${cost} BTC.`);
+      updateUI();
+      saveGameState();
+      document.getElementById(`buy-${item}-qty`).value = ""; // Clear input
+    } else {
+      showModal("Notice", "Inventory full (max 20 items).");
+    }
   } else {
-    log(`-- Can buy up to ${maxBuy} ${itemNames[item]} for ${maxBuy * itemPrice} BTC.`)
+    showModal("Notice", "Not enough BTC.");
   }
 }
 
-// Set maximum sell amount for an item
-function setMaxSell(item) {
+// Function to sell items
+function sellItem(item, quantity) {
+  quantity = parseInt(quantity);
+  if (isNaN(quantity) || quantity <= 0) {
+    showModal("Error", "Invalid quantity.");
+    return;
+  }
   if (blockSelling) {
-    log("-- Cannot sell this round due to event effect.")
-    return
+    showModal("Notice", "Selling is currently blocked.");
+    return;
   }
-
-  const itemInventory = inventory[item] || []
-  const count = itemInventory.length
-
-  if (count === 0) {
-    log(`-- No ${itemNames[item]} in inventory to sell.`)
-    return
+  if (!inventory[item] || inventory[item] < quantity) {
+    showModal("Notice", `Not enough ${item} to sell.`);
+    return;
   }
-
-  // Set the input value to the number of items in inventory
-  const sellInput = document.getElementById(`sell-${item}`)
-  if (sellInput) {
-    sellInput.value = count
+  const price = currentPrices[item];
+  const profit = price * quantity;
+  btc += profit;
+  inventory[item] -= quantity;
+  if (inventory[item] === 0) {
+    delete inventory[item];
   }
-
-  // Calculate potential earnings
-  const potentialEarnings = count * (currentPrices[item] || 1)
-  log(`-- Set to sell all ${count} ${itemNames[item]} for ${potentialEarnings} BTC.`)
+  log(`Sold ${quantity} ${item} for ${profit} BTC.`);
+  updateUI();
+  saveGameState();
+  document.getElementById(`sell-${item}-qty`).value = ""; // Clear input
 }
 
-// Execute buy/sell transactions
-function executeTransactions() {
-  debugGameFlow("Executing transactions")
-  playSound("bleep")
-
-  if (blockBuying && blockSelling) {
-    log("-- Cannot buy or sell this round due to event effect.")
-    return
-  }
-
-  let totalBought = 0
-  let totalSold = 0
-  let btcSpent = 0
-  let btcEarned = 0
-
-  // Process sells first (to free up inventory space)
-  if (!blockSelling) {
-    for (const item of items) {
-      if (item === bannedItem) continue
-
-      const sellInput = document.getElementById(`sell-${item}`)
-      if (!sellInput) continue
-
-      const sellAmount = Number.parseInt(sellInput.value) || 0
-
-      if (sellAmount > 0) {
-        const itemInventory = inventory[item] || []
-        if (sellAmount > itemInventory.length) {
-          log(`-- Error: Cannot sell ${sellAmount} ${itemNames[item]}. You only have ${itemInventory.length}.`)
-          continue
-        }
-
-        // Remove items from inventory and add BTC
-        const itemsToSell = Math.min(sellAmount, itemInventory.length)
-        const earnings = itemsToSell * (currentPrices[item] || 1)
-
-        // Remove the items from inventory
-        inventory[item] = itemInventory.slice(0, itemInventory.length - itemsToSell)
-
-        btcEarned += earnings
-        totalSold += itemsToSell
-
-        log(`-- Sold ${itemsToSell} ${itemNames[item]} for ${earnings} BTC.`)
-
-        // Reset input
-        sellInput.value = ""
-      }
-    }
-  }
-
-  // Update BTC after selling
-  btc += btcEarned
-
-  // Process buys
-  if (!blockBuying) {
-    for (const item of items) {
-      if (item === bannedItem) continue
-
-      const buyInput = document.getElementById(`buy-${item}`)
-      if (!buyInput) continue
-
-      const buyAmount = Number.parseInt(buyInput.value) || 0
-
-      if (buyAmount > 0) {
-        const cost = buyAmount * (currentPrices[item] || 1)
-
-        // Check if player has enough BTC
-        if (cost > btc) {
-          log(`-- Error: Cannot afford ${buyAmount} ${itemNames[item]}.`)
-          continue
-        }
-
-        // Check if there is enough space in inventory
-        const currentInventoryCount = countInventory()
-        const spaceLeft = inventoryLimit - currentInventoryCount
-
-        if (buyAmount > spaceLeft) {
-          log(`-- Error: Not enough space in inventory to buy ${buyAmount} ${itemNames[item]}.`)
-          continue
-        }
-
-        // Add items to inventory and subtract BTC
-        if (!inventory[item]) {
-          inventory[item] = []
-        }
-
-        for (let i = 0; i < buyAmount; i++) {
-          inventory[item].push(currentPrices[item] || 1)
-        }
-
-        btc -= cost
-        btcSpent += cost
-        totalBought += buyAmount
-
-        log(`-- Bought ${buyAmount} ${itemNames[item]} for ${cost} BTC.`)
-
-        // Reset input
-        buyInput.value = ""
-      }
-    }
-  }
-
-  // Log transaction summary
-  if (totalBought > 0 || totalSold > 0) {
-    log(
-      `-- Transaction summary: Bought ${totalBought} items for ${btcSpent} BTC, Sold ${totalSold} items for ${btcEarned} BTC.`,
-    )
-  } else {
-    log("-- No transactions executed.")
-  }
-
-  updateInventoryDisplay()
-  updateStatusBars()
-  updateMarketTable()
-
-  // Update game flow state
-  gameFlowState = "advanceCycle"
-
-  // Update the highlighted element
-  updateGameFlowHighlight()
-}
-
-// Buy items function
-function buyItems() {
-  // Check if buying is blocked
-  if (blockBuying) {
-    log("-- Cannot buy this round due to event effect.")
-    return
-  }
-
-  let totalBought = 0
-  let btcSpent = 0
-
-  // Process buys
-  for (const item of items) {
-    if (item === bannedItem) continue
-
-    const buyInput = document.getElementById(`buy-${item}`)
-    if (!buyInput) continue
-
-    const buyAmount = Number.parseInt(buyInput.value) || 0
-
-    if (buyAmount > 0) {
-      const cost = buyAmount * (currentPrices[item] || 1)
-
-      // Check if player has enough BTC
-      if (cost > btc) {
-        log(`-- Error: Cannot afford ${buyAmount} ${itemNames[item]}.`)
-        continue
-      }
-
-      // Check if there is enough space in inventory
-      const currentInventoryCount = countInventory()
-      const spaceLeft = inventoryLimit - currentInventoryCount
-
-      if (buyAmount > spaceLeft) {
-        log(`-- Error: Not enough space in inventory to buy ${buyAmount} ${itemNames[item]}.`)
-        continue
-      }
-
-      // Add items to inventory and subtract BTC
-      if (!inventory[item]) {
-        inventory[item] = []
-      }
-
-      for (let i = 0; i < buyAmount; i++) {
-        inventory[item].push(currentPrices[item] || 1)
-      }
-
-      btc -= cost
-      btcSpent += cost
-      totalBought += buyAmount
-
-      log(`-- Bought ${buyAmount} ${itemNames[item]} for ${cost} BTC.`)
-
-      // Reset input
-      buyInput.value = ""
-    }
-  }
-
-  // Log transaction summary
-  if (totalBought > 0) {
-    log(`-- Transaction summary: Bought ${totalBought} items for ${btcSpent} BTC.`)
-  } else {
-    log("-- No items bought.")
-  }
-
-  updateInventoryDisplay()
-  updateStatusBars()
-
-  // Update game flow state
-  gameFlowState = "advanceCycle"
-
-  // Update the highlighted element
-  updateGameFlowHighlight()
-}
-
-// Sell items function
-function sellItems() {
-  // Check if selling is blocked
-  if (blockSelling) {
-    log("-- Cannot sell this round due to event effect.")
-    return
-  }
-
-  let totalSold = 0
-  let btcEarned = 0
-
-  // Process sells
-  for (const item of items) {
-    if (item === bannedItem) continue
-
-    const sellInput = document.getElementById(`sell-${item}`)
-    if (!sellInput) continue
-
-    const sellAmount = Number.parseInt(sellInput.value) || 0
-
-    if (sellAmount > 0) {
-      const itemInventory = inventory[item] || []
-      if (sellAmount > itemInventory.length) {
-        log(`-- Error: Cannot sell ${sellAmount} ${itemNames[item]}. You only have ${itemInventory.length}.`)
-        continue
-      }
-
-      // Remove items from inventory and add BTC
-      const itemsToSell = Math.min(sellAmount, itemInventory.length)
-      const earnings = itemsToSell * (currentPrices[item] || 1)
-
-      // Remove the items from inventory
-      inventory[item] = itemInventory.slice(0, itemInventory.length - itemsToSell)
-
-      btc += earnings
-      btcEarned += earnings
-      totalSold += itemsToSell
-
-      log(`-- Sold ${itemsToSell} ${itemNames[item]} for ${earnings} BTC.`)
-
-      // Reset input
-      sellInput.value = ""
-    }
-  }
-
-  // Log transaction summary
-  if (totalSold > 0) {
-    log(`-- Transaction summary: Sold ${totalSold} items for ${btcEarned} BTC.`)
-  } else {
-    log("-- No items sold.")
-  }
-
-  updateInventoryDisplay()
-  updateStatusBars()
-
-  // Update game flow state
-  gameFlowState = "advanceCycle"
-
-  // Update the highlighted element
-  updateGameFlowHighlight()
-}
-
-// Buy a Glock
-function buyGlock() {
-  playSound("bleep")
-
-  if (glock) {
-    log("-- You already have a Glock.")
-    return
-  }
-
-  if (btc < 20) {
-    log("-- Not enough BTC to buy a Glock. You need 20 BTC.")
-    return
-  }
-
-  btc -= 20
-  glock = true
-  log("-- Bought a Glock for 20 BTC.")
-
-  updateStatusBars()
-  updateInventoryDisplay()
-}
-
-// Sell all items at half price
-function sellAllAtHalf() {
-  let totalEarnings = 0
-  let itemsSold = 0
-
-  for (const item in inventory) {
-    if (inventory.hasOwnProperty(item)) {
-      const itemCount = inventory[item].length
-      const itemPrice = currentPrices[item] || 1 // Use current price or default to 1
-      const sellPrice = Math.floor(itemPrice * 0.5) // Half price
-      const earnings = itemCount * sellPrice
-
-      totalEarnings += earnings
-      itemsSold += itemCount
-
-      // Clear the inventory for this item
-      inventory[item] = []
-
-      log(`-- Sold ${itemCount} ${itemNames[item]} at half price for ${earnings} BTC.`)
-    }
-  }
-
-  // Update BTC
-  btc += totalEarnings
-
-  updateInventoryDisplay()
-  updateStatusBars()
-
-  return `Sold all ${itemsSold} items at half price for ${totalEarnings} BTC.`
-}
-
-// Sell everything at current prices
-function sellEverything() {
-  debugGameFlow("Selling everything")
-  playSound("bleep")
-
-  if (blockSelling) {
-    log("-- Cannot sell this round due to event effect.")
-    return
-  }
-
-  let totalEarnings = 0
-  let itemsSold = 0
-
-  for (const item in inventory) {
-    if (inventory.hasOwnProperty(item)) {
-      const itemCount = inventory[item].length
-      if (itemCount === 0) continue
-
-      const itemPrice = currentPrices[item] || 1 // Use current price or default to 1
-      const earnings = itemCount * itemPrice
-
-      totalEarnings += earnings
-      itemsSold += itemCount
-
-      // Clear the inventory for this item
-      inventory[item] = []
-
-      log(`-- Sold ${itemCount} ${itemNames[item]} for ${earnings} BTC.`)
-    }
-  }
-
-  // Update BTC
-  btc += totalEarnings
-
-  updateInventoryDisplay()
-  updateStatusBars()
-
-  if (itemsSold > 0) {
-    log(`-- Sold all ${itemsSold} items for ${totalEarnings} BTC.`)
-  } else {
-    log("-- No items to sell.")
-  }
-
-  // Update game flow state
-  gameFlowState = "advanceCycle"
-
-  // Update the highlighted element
-  updateGameFlowHighlight()
-
-  return `Sold all ${itemsSold} items for ${totalEarnings} BTC.`
-}
-
-// Update total inventory value
-function updateTotalInventoryValue() {
-  // Calculate total inventory value
-  let totalValue = 0
-  let totalCost = 0
-
-  for (const item in inventory) {
-    if (inventory.hasOwnProperty(item)) {
-      const itemCount = inventory[item].length
-      const itemPrice = currentPrices[item] || 0
-      const itemValue = itemCount * itemPrice
-      totalValue += itemValue
-
-      // Calculate original cost
-      const originalCost = inventory[item].reduce((sum, price) => sum + price, 0)
-      totalCost += originalCost
-    }
-  }
-
-  // Calculate profit/loss
-  const profit = totalValue - totalCost
-  const profitPercent = totalCost > 0 ? (profit / totalCost) * 100 : 0
-
-  // Update the liquid BTC display
-  const liquidBtcElement = document.getElementById("liquid-btc")
-  if (liquidBtcElement) {
-    liquidBtcElement.textContent = btc
-  }
-
-  // Add total value to inventory display
-  const inventoryStatus = document.getElementById("inventoryStatus")
-  if (inventoryStatus && inventoryStatus.innerHTML && !inventoryStatus.innerHTML.includes("Empty")) {
-    // Only add if inventory is not empty and doesn't already have the total value
-    if (!document.getElementById("total-inventory-value")) {
-      const totalValueDiv = document.createElement("div")
-      totalValueDiv.id = "total-inventory-value-container"
-      totalValueDiv.style.marginTop = "10px"
-      totalValueDiv.style.borderTop = "1px dotted #0f0"
-      totalValueDiv.style.paddingTop = "5px"
-
-      let valueText = `Total inventory value: <span id="total-inventory-value" style="color: #0f0; font-weight: bold;">${totalValue.toFixed(1)}</span> BTC`
-
-      // Add profit/loss indicator
-      if (profit !== 0 && !isNaN(profit)) {
-        const profitColor = profit > 0 ? "#0f0" : "#ff6666"
-        const profitSign = profit > 0 ? "+" : ""
-        valueText += ` <span style="color: ${profitColor}">(${profitSign}${profit.toFixed(1)} BTC, ${profitSign}${profitPercent.toFixed(0)}%)</span>`
-      }
-
-      totalValueDiv.innerHTML = valueText
-      inventoryStatus.appendChild(totalValueDiv)
-    }
-  }
-}
-
-// Cash out inventory at end of game
+// Function to advance to the next cycle
 function advanceCycle() {
-  debugGameFlow("Advancing cycle")
-  playSound("bleep")
-
-  if (cycle >= 10) {
-    // This is the final round - cash out and end game
-    const cashOutResult = cashOutInventory()
-
-    log("-- GAME OVER! You've gone dark with your earnings.")
-
-    // Generate a game verification hash
-    const gameHash = generateGameHash()
-
-    // Create game data for submission
-    const gameData = {
-      btc: btc,
-      glock: glock,
-      gameHistory: gameHistory,
-      hash: gameHash,
-    }
-
-    // Encode game data for URL
-    const encodedGameData = btoa(JSON.stringify(gameData))
-
-    // Show game over message with final results
-    let cashOutDetails = ""
-    if (cashOutResult.itemsSold > 0) {
-      cashOutDetails = `\nCashed out: ${cashOutResult.soldItems.join(", ")}`
-    }
-
-    // Use custom confirm instead of browser confirm
-    showConfirm(
-      "GAME OVER",
-      `You've gone dark with your earnings.\n\nFinal score: ${btc} BTC with${glock ? "" : "out"} a Glock.${cashOutDetails}\n\nSubmit your score to the leaderboard?`,
-      "Submit Score",
-      "Stay Here",
-    ).then((result) => {
-      if (result) {
-        // Redirect to submit page with verified game data
-        window.location.href = `submit.html?gameData=${encodedGameData}`
-      }
-    })
-
-    return
+  cycle++;
+  if (cycle > 10) {
+    endGame();
+    return;
   }
 
-  // Rest of the function remains the same
-  cycle++
-
-  // Reset event effects
-  resetEventEffects()
-
-  // Reset event code and roll button
-  eventCode = ""
-  isRollCard = false
-  document.getElementById("eventCode").value = ""
-  document.getElementById("rollCardBtn").style.display = "none"
-  document.getElementById("cardDiceResult").textContent = ""
-  document.getElementById("marketDiceResult").textContent = ""
+  // Clear any existing card result
+  document.getElementById("cardDiceResult").textContent = "";
+  document.getElementById("marketDiceResult").textContent = "";
 
   // Reset burner deal
-  document.getElementById("burnerDeal").value = ""
+  document.getElementById("burnerDeal").value = "";
 
   // Re-enable the roll market button for the next cycle
-  const rollMarketButton = document.getElementById("rollMarketBtn")
+  const rollMarketButton = document.getElementById("rollMarketBtn");
   if (rollMarketButton) {
-    rollMarketButton.disabled = false
-    rollMarketButton.style.opacity = "1"
-    rollMarketButton.style.cursor = "pointer"
+    rollMarketButton.disabled = false;
+    rollMarketButton.style.opacity = "1";
+    rollMarketButton.style.cursor = "pointer";
   }
 
-  log(`-- Advanced to Cycle ${cycle}/10`)
-  updateStatusBars()
+  log(`-- Advanced to Cycle ${cycle}/10`);
+  updateStatusBars();
 
   // Reset game flow state
-  gameFlowState = "enterEventCode"
+  gameFlowState = "enterEventCode";
 
   // Update the highlighted element
-  updateGameFlowHighlight()
+  updateGameFlowHighlight();
 
   // Update button text if this is the final cycle
-  const advanceButton = document.getElementById("advanceCycleBtn")
+  const advanceButton = document.getElementById("advanceCycleBtn");
   if (advanceButton) {
     if (cycle === 10) {
-      advanceButton.textContent = "Cash Out and Go Dark"
+      advanceButton.textContent = "Cash Out and Go Dark";
     } else {
-      advanceButton.textContent = "Advance to Next Cycle"
+      advanceButton.textContent = "Advance to Next Cycle";
     }
   }
 
   // Robust scroll to top implementation
-  scrollToTopFunc()
+  scrollToTopFunc();
 }
 
-// Generate a game hash for verification
-function generateGameHash() {
-  const gameData = {
+// Function to roll the dice
+function rollDice() {
+  return Math.floor(Math.random() * 6) + 1;
+}
+
+// Function to update market prices
+function updateMarketPrices() {
+  const marketModifier = rollDice();
+  document.getElementById("marketDiceResult").textContent = `Market Roll: ${marketModifier}`;
+  for (const item in currentPrices) {
+    const change = Math.floor(Math.random() * 11) - 5; // Random change between -5 and +5
+    currentPrices[item] = Math.max(1, currentPrices[item] + change);
+  }
+  updateUI();
+  saveGameState();
+}
+
+// Function to update the UI
+function updateUI() {
+  document.getElementById("btcBalance").textContent = btc;
+  document.getElementById("cycleNumber").textContent = cycle;
+  document.getElementById("inventoryDisplay").textContent =
+    Object.entries(inventory)
+      .map(([item, quantity]) => `${quantity} ${item}`)
+      .join(", ") || "Empty";
+
+  const marketTableBody = document.getElementById("marketPrices");
+  marketTableBody.innerHTML = ""; // Clear existing rows
+  for (const item in currentPrices) {
+    const row = marketTableBody.insertRow();
+    const itemCell = row.insertCell();
+    const priceCell = row.insertCell();
+    const buyCell = row.insertCell();
+    const sellCell = row.insertCell();
+
+    itemCell.textContent = item.toUpperCase();
+    priceCell.textContent = currentPrices[item];
+
+    const buyInput = document.createElement("input");
+    buyInput.type = "number";
+    buyInput.id = `buy-${item}-qty`;
+    buyInput.min = "1";
+    buyInput.value = "";
+    const buyButton = document.createElement("button");
+    buyButton.textContent = "Buy";
+    buyButton.addEventListener("click", () => buyItem(item, buyInput.value));
+    buyCell.appendChild(buyInput);
+    buyCell.appendChild(buyButton);
+
+    const sellInput = document.createElement("input");
+    sellInput.type = "number";
+    sellInput.id = `sell-${item}-qty`;
+    sellInput.min = "1";
+    sellInput.value = "";
+    const sellButton = document.createElement("button");
+    sellButton.textContent = "Sell";
+    sellButton.addEventListener("click", () => sellItem(item, sellInput.value));
+    sellCell.appendChild(sellInput);
+    sellCell.appendChild(sellButton);
+  }
+  updateStatusBars();
+}
+
+// Function to update status bars (BTC and Inventory)
+function updateStatusBars() {
+  const btcBar = document.getElementById("btcBar");
+  const invBar = document.getElementById("inventoryBar");
+
+  const btcPercentage = Math.min(btc / 500, 1) * 100; // Assuming 500 is the max BTC for the bar
+  const invPercentage = (Object.values(inventory).reduce((sum, q) => sum + q, 0) / inventoryLimit) * 100;
+
+  btcBar.style.width = `${btcPercentage}%`;
+  invBar.style.width = `${invPercentage}%`;
+}
+
+// Function to log messages to the game log
+function log(message) {
+  const logDiv = document.getElementById("gameLog");
+  const newMessage = document.createElement("p");
+  newMessage.textContent = `Cycle ${cycle}: ${message}`;
+  logDiv.appendChild(newMessage);
+  logDiv.scrollTop = logDiv.scrollHeight; // Auto-scroll to bottom
+}
+
+// Function to save the game state to localStorage
+function saveGameState() {
+  const gameState = {
     btc: btc,
     glock: glock,
     cycle: cycle,
-    inventory: JSON.stringify(inventory),
-  }
-
-  // Simple hash function
-  let hash = 0
-  const str = JSON.stringify(gameData)
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash = hash & hash // Convert to 32bit integer
-  }
-
-  // Convert to hex and ensure it's positive
-  return Math.abs(hash).toString(16).padStart(8, "0")
+    inventory: inventory,
+    currentPrices: currentPrices,
+    ignoreNextNegative: ignoreNextNegative,
+  };
+  localStorage.setItem("gameState", JSON.stringify(gameState));
 }
+
+// Function to load the game state from localStorage
+function loadGameState() {
+  const savedState = localStorage.getItem("gameState");
+  if (savedState) {
+    const gameState = JSON.parse(savedState);
+    btc = gameState.btc;
+    glock = gameState.glock;
+    cycle = gameState.cycle;
+    inventory = gameState.inventory;
+    currentPrices = gameState.currentPrices;
+    ignoreNextNegative = gameState.ignoreNextNegative;
+    log("Game state loaded.");
+  } else {
+    log("New game started.");
+  }
+  updateUI();
+  updateStatusBars();
+}
+
+// Function to reset the game
+function resetGame() {
+  showConfirm("Reset Game", "Are you sure you want to reset the game?", "Yes, Reset", "Cancel").then((confirmed) => {
+    if (confirmed) {
+      localStorage.removeItem("gameState");
+      btc = 100;
+      glock = false;
+      cycle = 1;
+      inventory = {};
+      currentPrices = {
+        weed: 15,
+        lsd: 75,
+        coke: 150,
+        shrooms: 30,
+        molly: 60,
+        ketamine: 100,
+        opiates: 200,
+        spice: 5,
+      };
+      eventCode
