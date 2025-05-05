@@ -1,3 +1,33 @@
+// Add this near the top of the file, after the variable declarations
+// Fallback sound function
+function playSound(soundId) {
+  try {
+    // Try to play the sound with the given ID
+    const sound = document.getElementById(soundId)
+    if (sound) {
+      sound.currentTime = 0
+      sound.play().catch((e) => {
+        console.log(`Sound play failed (${soundId}):`, e)
+        // If that fails, try the bleep sound
+        const bleep = document.getElementById("bleep")
+        if (bleep && soundId !== "bleep") {
+          bleep.currentTime = 0
+          bleep.play().catch((e) => console.log("Fallback bleep failed:", e))
+        }
+      })
+    } else {
+      // If sound element doesn't exist, try the bleep sound
+      const bleep = document.getElementById("bleep")
+      if (bleep) {
+        bleep.currentTime = 0
+        bleep.play().catch((e) => console.log("Fallback bleep failed:", e))
+      }
+    }
+  } catch (e) {
+    console.error("Error playing sound:", e)
+  }
+}
+
 // Silk Ave - Game Companion Script
 
 let btc = 100
@@ -422,17 +452,17 @@ document.addEventListener("DOMContentLoaded", () => {
 })
 
 // Play a sound
-function playSound(soundId) {
-  try {
-    const sound = document.getElementById(soundId)
-    if (sound) {
-      sound.currentTime = 0
-      sound.play().catch((e) => console.log("Audio play failed:", e))
-    }
-  } catch (e) {
-    console.error("Error playing sound:", e)
-  }
-}
+//function playSound(soundId) {
+//  try {
+//    const sound = document.getElementById(soundId)
+//    if (sound) {
+//      sound.currentTime = 0
+//      sound.play().catch((e) => console.log("Audio play failed:", e))
+//    }
+//  } catch (e) {
+//    console.error("Error playing sound:", e)
+//  }
+//}
 
 // Update the highlighted element based on game flow state
 function updateGameFlowHighlight() {
@@ -1175,23 +1205,14 @@ function grantItems(method, count) {
 function rollMarket() {
   playSound("bleep")
 
-  // Reset prices from any previous effects, but preserve special prices
-  const oldPrices = { ...currentPrices }
-  currentPrices = {}
+  // Reset special prices
+  specialPriceItems = {}
 
-  // Roll for each item
+  // Generate new prices for each item
   for (const item of items) {
-    // Skip items with special prices from events
-    if (specialPriceItems[item]) {
-      // Make sure we preserve the special price
-      currentPrices[item] = oldPrices[item] || priceMatrix[item][0]
-      // Log that we're preserving a special price
-      console.log(`Preserving special price for ${itemNames[item]}: ${currentPrices[item]} BTC`)
-      continue
-    }
-
-    const roll = Math.ceil(Math.random() * 6) - 1 // 0-5 index
+    const roll = Math.floor(Math.random() * 6) // 0-5 index
     currentPrices[item] = priceMatrix[item][roll]
+    console.log(`Set price for ${itemNames[item]}: ${currentPrices[item]} BTC`)
   }
 
   // Update market table
@@ -1203,17 +1224,14 @@ function rollMarket() {
 
   log("-- Market prices updated.")
 
-  // Apply burner deal if one is selected
-  const burnerItem = document.getElementById("burnerDeal").value
-  if (burnerItem) {
-    applyBurnerDeal()
-  }
-
   // Update game flow state
   gameFlowState = "selectBurner"
 
   // Update the highlighted element
   updateGameFlowHighlight()
+
+  // Debug log the prices
+  console.log("Current Prices:", JSON.stringify(currentPrices))
 }
 
 // Apply burner deal
@@ -1253,6 +1271,11 @@ function applyBurnerDeal() {
 // Update market table with current prices
 function updateMarketTable() {
   const tableBody = document.querySelector("#marketTable tbody")
+  if (!tableBody) {
+    console.error("Market table body not found")
+    return
+  }
+
   tableBody.innerHTML = ""
 
   // Get the current burner deal
@@ -1278,21 +1301,26 @@ function updateMarketTable() {
 
     // Price cell
     const priceCell = document.createElement("td")
-    priceCell.textContent = currentPrices[item] ? `${currentPrices[item]} BTC` : "—"
+    if (currentPrices[item]) {
+      priceCell.textContent = `${currentPrices[item]} BTC`
 
-    // Highlight profitable items
-    if (inventory[item] && inventory[item].length > 0) {
-      const avgCost = inventory[item].reduce((sum, price) => sum + price, 0) / inventory[item].length
-      if (currentPrices[item] > avgCost) {
-        priceCell.style.color = "#0f0" // Green for profit
-        priceCell.style.fontWeight = "bold"
+      // Highlight profitable items
+      if (inventory[item] && inventory[item].length > 0) {
+        const avgCost = inventory[item].reduce((sum, price) => sum + price, 0) / inventory[item].length
+        if (currentPrices[item] > avgCost) {
+          priceCell.style.color = "#0f0" // Green for profit
+          priceCell.style.fontWeight = "bold"
+        }
       }
+    } else {
+      priceCell.textContent = "—"
     }
 
     row.appendChild(priceCell)
-
     tableBody.appendChild(row)
   }
+
+  console.log("Market table updated with prices:", JSON.stringify(currentPrices))
 }
 
 // Find the populateTransactionTable function and replace it with this improved version:
