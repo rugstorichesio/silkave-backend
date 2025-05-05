@@ -416,12 +416,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
-  // Add sound effects to all buttons
+  // Add sound effects to all buttons with better error handling
   document.querySelectorAll("button").forEach((button) => {
     button.addEventListener("click", (e) => {
       // Don't interfere with other click handlers
       if (!e.defaultPrevented) {
-        playSound("bleep")
+        playSound("bleep").catch(() => {
+          // If all else fails, try a simple beep
+          playBeepSound()
+        })
       }
     })
   })
@@ -449,16 +452,105 @@ document.addEventListener("DOMContentLoaded", () => {
   isAdvancing = false
 })
 
-// Play a sound
+// Replace the playSound function with this improved version
 function playSound(soundId) {
+  console.log(`Attempting to play sound: ${soundId}`)
+
   try {
+    // Try the requested sound first
     const sound = document.getElementById(soundId)
     if (sound) {
       sound.currentTime = 0
-      sound.play().catch((e) => console.log("Audio play failed:", e))
+      sound.volume = 0.5 // Set volume to 50%
+
+      // Return the promise from play() so we can catch errors
+      return sound
+        .play()
+        .then(() => {
+          console.log(`Sound ${soundId} played successfully`)
+          return true
+        })
+        .catch((e) => {
+          console.error(`Error playing ${soundId}:`, e)
+          return tryFallbackSounds()
+        })
+    } else {
+      console.error(`Sound element ${soundId} not found`)
+      return tryFallbackSounds()
     }
   } catch (e) {
-    console.error("Error playing sound:", e)
+    console.error(`Exception playing ${soundId}:`, e)
+    return tryFallbackSounds()
+  }
+
+  // Try alternative sounds if the main one fails
+  function tryFallbackSounds() {
+    const fallbacks = ["click1", "click2", "click3"]
+
+    for (const fallbackId of fallbacks) {
+      try {
+        const fallbackSound = document.getElementById(fallbackId)
+        if (fallbackSound) {
+          fallbackSound.currentTime = 0
+          fallbackSound.volume = 0.5
+          return fallbackSound
+            .play()
+            .then(() => {
+              console.log(`Fallback sound ${fallbackId} played successfully`)
+              return true
+            })
+            .catch((e) => {
+              console.error(`Error playing fallback ${fallbackId}:`, e)
+              return false
+            })
+        }
+      } catch (e) {
+        console.error(`Exception playing fallback ${fallbackId}:`, e)
+      }
+    }
+
+    // If we get here, all sounds failed
+    console.error("All sound playback attempts failed")
+    return Promise.resolve(false)
+  }
+}
+
+// Add this function to play a sound directly using the Web Audio API
+// as a last resort if the audio elements aren't working
+function playBeepSound() {
+  try {
+    // Create audio context
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    const audioCtx = new AudioContext()
+
+    // Create oscillator
+    const oscillator = audioCtx.createOscillator()
+    const gainNode = audioCtx.createGain()
+
+    // Configure oscillator
+    oscillator.type = "sine"
+    oscillator.frequency.setValueAtTime(800, audioCtx.currentTime) // value in hertz
+
+    // Configure gain (volume)
+    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime)
+
+    // Connect nodes
+    oscillator.connect(gainNode)
+    gainNode.connect(audioCtx.destination)
+
+    // Play sound
+    oscillator.start()
+
+    // Stop after 100ms
+    setTimeout(() => {
+      oscillator.stop()
+    }, 100)
+
+    console.log("Played fallback beep sound")
+    return true
+  } catch (e) {
+    console.error("Failed to play beep sound:", e)
+    return false
   }
 }
 

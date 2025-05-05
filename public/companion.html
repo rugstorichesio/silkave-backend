@@ -444,6 +444,9 @@
   </div>
 
   <h1>Silk Ave Game Companion</h1>
+  <div style="text-align: center; margin-bottom: 10px;">
+    <button id="testSoundBtn" onclick="testSound()">Test Sound</button>
+  </div>
   <div>
     <h2>Cycle: <span id="cycle">1</span> / 10</h2>
     <h3>BTC: <span id="btc">100</span> | Glock: <span id="glock">No</span> | Inventory: <span id="invCount">0</span>/20</h3>
@@ -637,6 +640,10 @@
   <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
   <audio id="typing" src="https://assets.mixkit.co/sfx/preview/mixkit-keyboard-typing-1386.mp3" preload="auto" loop></audio>
   <audio id="crackles" src="https://assets.mixkit.co/sfx/preview/mixkit-radio-static-noise-2556.mp3" preload="auto" loop volume="0.3"></audio>
+  <!-- Alternative sounds -->
+  <audio id="click1" src="https://assets.mixkit.co/sfx/preview/mixkit-light-button-2580.mp3" preload="auto"></audio>
+  <audio id="click2" src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" preload="auto"></audio>
+  <audio id="click3" src="https://assets.mixkit.co/sfx/preview/mixkit-interface-click-1126.mp3" preload="auto"></audio>
 
   <!-- Scripts - Note the order is important -->
   <!-- Remove the reference to modal.js since we're now implementing the modals directly in script.js -->
@@ -697,6 +704,47 @@
     
     console.log("INIT: Companion page initialized");
   });
+</script>
+<script>
+  // Test sound function
+  function testSound() {
+    console.log("Testing sound...");
+    
+    // Try to play all sound options
+    const sounds = ["bleep", "click1", "click2", "click3"];
+    
+    sounds.forEach((soundId, index) => {
+      setTimeout(() => {
+        console.log(`Attempting to play sound: ${soundId}`);
+        const sound = document.getElementById(soundId);
+        if (sound) {
+          sound.currentTime = 0;
+          sound.volume = 0.5; // Set volume to 50%
+          sound.play()
+            .then(() => console.log(`Sound ${soundId} played successfully`))
+            .catch(e => console.error(`Error playing ${soundId}:`, e));
+        } else {
+          console.error(`Sound element ${soundId} not found`);
+        }
+      }, index * 500); // Play each sound with a delay
+    });
+  }
+  
+  // Initialize sound on first user interaction
+  document.addEventListener('click', function initSound() {
+    console.log("First user interaction - initializing audio");
+    const sound = document.getElementById('bleep');
+    if (sound) {
+      sound.volume = 0.5;
+      sound.play().then(() => {
+        console.log("Audio initialized successfully");
+      }).catch(e => {
+        console.error("Failed to initialize audio:", e);
+      });
+    }
+    // Remove this listener after first click
+    document.removeEventListener('click', initSound);
+  }, { once: true });
 </script>
 </body>
 </html>
