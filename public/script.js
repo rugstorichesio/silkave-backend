@@ -26,11 +26,27 @@ function initAudio() {
 
   try {
     // Create a new audio element
-    bleepSound = new Audio("sounds/bleep.wav")
+    bleepSound = new Audio()
+
+    // Try to load the sound file with better error handling
+    bleepSound.addEventListener("error", function (e) {
+      console.error("Error loading bleep.wav:", e)
+      console.error("Error code:", this.error ? this.error.code : "unknown")
+      console.error("Error message:", this.error ? this.error.message : "unknown")
+      console.log("Current src:", this.src)
+    })
+
+    // Set the source - try with and without the "sounds/" directory
+    try {
+      bleepSound.src = "bleep.wav"
+      console.log("Trying to load bleep.wav from root directory")
+    } catch (e) {
+      console.error("Error setting source:", e)
+    }
 
     // Set properties
     bleepSound.preload = "auto"
-    bleepSound.volume = 0.3 // Lower volume
+    bleepSound.volume = 0.5 // Medium volume
 
     console.log("Created audio element for bleep.wav")
   } catch (e) {
@@ -38,9 +54,11 @@ function initAudio() {
   }
 }
 
-// Play the bleep sound
+// Play the bleep sound with better error handling
 function playBleep() {
   try {
+    console.log("Attempting to play bleep sound")
+
     if (!bleepSound) {
       console.error("Bleep sound not initialized")
       return
@@ -49,19 +67,22 @@ function playBleep() {
     // Reset to beginning if already playing
     bleepSound.currentTime = 0
 
-    // Play the sound
-    const playPromise = bleepSound.play()
+    // Play the sound with explicit error handling
+    bleepSound
+      .play()
+      .then(() => {
+        console.log("Bleep sound played successfully")
+      })
+      .catch((error) => {
+        console.error("Error playing bleep sound:", error)
 
-    // Handle play promise
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          console.log("Bleep sound played")
-        })
-        .catch((error) => {
-          console.error("Error playing bleep sound:", error)
-        })
-    }
+        // Try reloading the sound from a different path if it fails
+        if (bleepSound.src.includes("bleep.wav")) {
+          console.log("Trying alternate path for bleep.wav")
+          bleepSound.src = "sounds/bleep.wav"
+          bleepSound.play().catch((e) => console.error("Alternate path also failed:", e))
+        }
+      })
   } catch (e) {
     console.error("Failed to play bleep sound:", e)
   }

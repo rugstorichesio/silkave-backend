@@ -634,7 +634,52 @@
     <a href="submit.html">Submit Score</a>
   </div>
 
+  <!-- Add a hidden audio element as a fallback -->
+  <audio id="bleepAudio" src="bleep.wav" preload="auto" style="display: none;"></audio>
+
   <!-- Scripts - Note the order is important -->
   <script src="script.js"></script>
+  <script>
+  // Fallback sound function in case the main one doesn't work
+  function playBleepFallback() {
+    try {
+      const audio = document.getElementById('bleepAudio');
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(e => console.error("Fallback audio failed:", e));
+      }
+    } catch (e) {
+      console.error("Fallback audio error:", e);
+    }
+  }
+  
+  // Add click handlers to specific buttons
+  document.addEventListener('DOMContentLoaded', function() {
+    // List of button IDs that should play the sound
+    const soundButtons = [
+      'applyEventBtn',
+      'applyBurnerBtn',
+      'executeTransactionsBtn',
+      'buyGlockBtn',
+      'sellAllBtn',
+      'advanceCycleBtn'
+    ];
+    
+    // Add click handlers to each button
+    soundButtons.forEach(id => {
+      const button = document.getElementById(id);
+      if (button) {
+        button.addEventListener('click', function() {
+          console.log(`Button clicked: ${id}`);
+          // Try both sound methods
+          playBleep();
+          setTimeout(playBleepFallback, 50); // Try fallback with slight delay
+        });
+      }
+    });
+    
+    console.log("Added sound handlers to buttons");
+  });
+</script>
 </body>
 </html>
