@@ -369,8 +369,66 @@ function scrollToTopFunc() {
   })
 }
 
+// Fix the audio play errors by adding a function to preload and check audio files
+// Add this function after the playSound function:
+
+function initializeAudio() {
+  // Get all audio elements
+  const audioElements = document.querySelectorAll("audio")
+
+  // Check each audio element
+  audioElements.forEach((audio) => {
+    // If the audio has no source or an invalid source
+    if (!audio.src || audio.src === "" || audio.src === "about:blank") {
+      console.warn(`Audio element ${audio.id} has no source`)
+
+      // Try to set a default source based on ID
+      if (audio.id === "bleep") {
+        audio.src = "https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"
+      } else if (audio.id === "success") {
+        audio.src = "https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"
+      }
+    }
+
+    // Add error handling
+    audio.onerror = () => {
+      console.warn(`Error loading audio: ${audio.id}`)
+    }
+  })
+
+  // Improve the playSound function to handle errors better
+  window.playSound = (soundId) => {
+    try {
+      const sound = document.getElementById(soundId)
+      if (sound) {
+        // Check if the sound has a valid source
+        if (!sound.src || sound.src === "" || sound.src === "about:blank") {
+          console.warn(`Sound ${soundId} has no source`)
+          return
+        }
+
+        sound.currentTime = 0
+        const playPromise = sound.play()
+
+        if (playPromise !== undefined) {
+          playPromise.catch((e) => {
+            console.warn(`Audio play failed for ${soundId}: ${e.message}`)
+          })
+        }
+      } else {
+        console.warn(`Sound element with ID ${soundId} not found`)
+      }
+    } catch (e) {
+      console.error(`Error playing sound ${soundId}:`, e)
+    }
+  }
+}
+
 // Initialize the game when the page loads
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize audio elements
+  initializeAudio()
+
   // Set initial game state
   gameFlowState = "enterEventCode"
 
@@ -1194,26 +1252,40 @@ function updateMarketTable() {
   // Get the current burner deal
   const burnerItem = document.getElementById("burnerDeal").value
 
-  // Update each row in the table
-  for (const item of items) {
-    // Find the row for this item
-    const rows = marketTable.querySelectorAll("tbody tr")
-    let row = null
+  // Get all rows in the table body
+  const rows = marketTable.querySelectorAll("tbody tr")
+  if (rows.length === 0) {
+    console.error("No rows found in market table")
+    return
+  }
 
-    for (let i = 0; i < rows.length; i++) {
-      const cells = rows[i].querySelectorAll("td")
-      if (cells.length > 0 && cells[0].textContent.includes(itemNames[item])) {
-        row = rows[i]
-        break
+  // Create a mapping of item names to row indices
+  const itemRowMap = {}
+  rows.forEach((row, index) => {
+    const cells = row.querySelectorAll("td")
+    if (cells.length > 0) {
+      const cellText = cells[0].textContent.trim().toLowerCase()
+      // Try to match item names
+      for (const item of items) {
+        if (cellText.includes(itemNames[item].toLowerCase())) {
+          itemRowMap[item] = index
+          break
+        }
       }
     }
+  })
 
-    if (!row) {
-      console.warn(`Row for ${itemNames[item]} not found`)
+  console.log("Item to row mapping:", itemRowMap)
+
+  // Update each row in the table
+  for (const item of items) {
+    // Check if we found a row for this item
+    if (itemRowMap[item] === undefined) {
+      console.warn(`Row for ${itemNames[item]} not found in market table`)
       continue
     }
 
-    // Get the cells in this row
+    const row = rows[itemRowMap[item]]
     const cells = row.querySelectorAll("td")
     if (cells.length < 2) {
       console.warn(`Not enough cells in row for ${itemNames[item]}`)
