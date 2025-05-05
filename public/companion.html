@@ -676,5 +676,21 @@
       });
     });
   </script>
+  <script>
+  // Initialize the game log and inventory display on page load
+  document.addEventListener("DOMContentLoaded", function() {
+    // Initialize the log with a welcome message
+    const logElement = document.getElementById("log");
+    if (logElement && logElement.textContent === "") {
+      logElement.textContent = "[" + new Date().toLocaleTimeString() + "] Welcome to Silk Ave. You start with 100 BTC. Good luck.";
+    }
+    
+    // Initialize the inventory display
+    const inventoryStatus = document.getElementById("inventoryStatus");
+    if (inventoryStatus && inventoryStatus.textContent === "") {
+      inventoryStatus.textContent = "Current Inventory:\nEmpty";
+    }
+  });
+</script>
 </body>
 </html>

@@ -229,11 +229,30 @@ function showPrompt(title, message) {
 // Initialize the game when the page loads
 document.addEventListener("DOMContentLoaded", () => {
   // Initialize the game log
-  log("Welcome to Silk Ave. You start with 100 BTC. Good luck.")
+  const logElement = document.getElementById("log")
+  if (logElement && logElement.textContent === "") {
+    log("Welcome to Silk Ave. You start with 100 BTC. Good luck.")
+  }
 
-  updateStatusBars()
+  // Initialize the inventory display
   updateInventoryDisplay()
+
+  // Initialize the market table
   updateMarketTable()
+
+  // Add direct event listener for the advance cycle button
+  const advanceButton = document.getElementById("advanceCycleBtn")
+  if (advanceButton) {
+    advanceButton.addEventListener("click", () => {
+      advanceCycle()
+    })
+  }
+
+  // Add event listener for the sell everything button
+  const sellAllButton = document.getElementById("sellAllBtn")
+  if (sellAllButton) {
+    sellAllButton.addEventListener("click", sellEverything)
+  }
 
   // Add event listener for event code input
   document.getElementById("eventCode").addEventListener("input", function () {
@@ -243,32 +262,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
-  // Add event listener for the sell everything button
-  const sellAllButton = document.getElementById("sellAllBtn")
-  if (sellAllButton) {
-    sellAllButton.addEventListener("click", sellEverything)
-  }
-
   // Start the guided highlighting
   updateGameFlowHighlight()
-
-  // Play bleep sound when buttons are clicked
-  try {
-    const buttons = document.querySelectorAll("button")
-    buttons.forEach((button) => {
-      button.addEventListener("click", () => {
-        playSound("bleep")
-      })
-    })
-  } catch (e) {
-    console.error("Error setting up sound:", e)
-  }
-
-  // Set initial button text based on cycle
-  const advanceButton = document.getElementById("advanceCycleBtn")
-  if (cycle === 10) {
-    advanceButton.textContent = "Cash Out and Go Dark"
-  }
 })
 
 // Play a sound
@@ -990,17 +985,6 @@ function updateMarketTable() {
 // Find the populateTransactionTable function and replace it with this improved version:
 function populateTransactionTable() {
   const tableBody = document.querySelector("#transactionTable tbody")
-}
-
-row.appendChild(priceCell)
-
-tableBody.appendChild(row)
-}
-}
-\
-// Find the populateTransactionTable function and replace it with this improved version:
-function populateTransactionTable() {
-  const tableBody = document.querySelector("#transactionTable tbody")
   tableBody.innerHTML = ""
 
   for (const item of items) {
@@ -1275,6 +1259,9 @@ function executeTransactions() {
 function advanceCycle() {
   playSound("bleep")
 
+  // Log the action
+  log(`-- Advancing to next cycle...`)
+
   if (cycle >= 10) {
     // This is the final round - cash out and end game
     const cashOutResult = cashOutInventory()
@@ -1317,8 +1304,17 @@ function advanceCycle() {
     return
   }
 
-  // Reset event code
+  // Increment cycle
+  cycle++
+
+  // Reset event effects
+  resetEventEffects()
+
+  // Reset event code and roll button
+  eventCode = ""
+  isRollCard = false
   document.getElementById("eventCode").value = ""
+  document.getElementById("rollCardBtn").style.display = "none"
   document.getElementById("cardDiceResult").textContent = ""
   document.getElementById("marketDiceResult").textContent = ""
 
@@ -1331,37 +1327,22 @@ function advanceCycle() {
   const sellInputs = document.querySelectorAll(".sell-input")
   sellInputs.forEach((input) => (input.value = ""))
 
-  // Reset any previous event effects
-  resetEventEffects()
-
-  // Increment cycle
-  cycle++
-
   // Update button text on last cycle
   const advanceButton = document.getElementById("advanceCycleBtn")
   if (cycle === 10) {
     advanceButton.textContent = "Cash Out and Go Dark"
   }
 
-  log(`-- Advanced to cycle ${cycle}.`)
+  log(`-- Advanced to Cycle ${cycle}/10`)
+
+  // Update status bars
+  updateStatusBars()
 
   // Update game flow state
   gameFlowState = "enterEventCode"
 
   // Update the highlighted element
   updateGameFlowHighlight()
-
-  // Update status bars
-  updateStatusBars()
-
-  // Roll market prices
-  rollMarket()
-
-  // Update market table
-  updateMarketTable()
-
-  // Repopulate transaction table
-  populateTransactionTable()
 }
 
 // Add the missing cashOutInventory function
