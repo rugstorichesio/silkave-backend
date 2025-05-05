@@ -17,114 +17,54 @@ const ignoreNextNegative = false // For card 022 - Silk Security Patch
 let isAdvancing = false // Flag to prevent multiple advances
 const specialPriceItems = {} // Track items with special prices from events
 
-// Sound system using pre-loaded audio files
-const soundFiles = {
-  bleep: "sounds/bleep.wav",
-  click: "sounds/bleep.wav", // Use bleep.wav for click sound too
-  error: "sounds/error.mp3",
-  success: "sounds/success.mp3",
-}
+// Simplified sound system - only using bleep.wav
+let bleepSound = null
 
-// Fallback sound URLs if local files aren't available
-const fallbackSounds = {
-  bleep: "https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3",
-  click: "https://assets.mixkit.co/sfx/preview/mixkit-mouse-click-close-1113.mp3",
-  error: "https://assets.mixkit.co/sfx/preview/mixkit-negative-guitar-tone-2324.mp3",
-  success: "https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3",
-}
-
-// Audio elements cache
-const audioElements = {}
-
-// Initialize audio elements
+// Initialize audio
 function initAudio() {
-  console.log("Initializing audio elements")
+  console.log("Initializing audio element for bleep.wav")
 
-  // Create audio elements for each sound type
-  for (const [soundType, soundPath] of Object.entries(soundFiles)) {
-    try {
-      // Create a new audio element
-      const audio = new Audio()
+  try {
+    // Create a new audio element
+    bleepSound = new Audio("sounds/bleep.wav")
 
-      // Try the local file first
-      audio.src = soundPath
+    // Set properties
+    bleepSound.preload = "auto"
+    bleepSound.volume = 0.3 // Lower volume
 
-      // Add error handler to fall back to remote URL if local file fails
-      audio.addEventListener("error", function () {
-        console.log(`Local sound file ${soundPath} failed to load, trying fallback`)
-        if (fallbackSounds[soundType]) {
-          this.src = fallbackSounds[soundType]
-        }
-      })
-
-      // Set other properties
-      audio.preload = "auto"
-      audio.volume = 0.3 // Lower volume
-
-      // Store in cache
-      audioElements[soundType] = audio
-
-      console.log(`Created audio element for ${soundType}`)
-    } catch (e) {
-      console.error(`Failed to create audio element for ${soundType}:`, e)
-    }
+    console.log("Created audio element for bleep.wav")
+  } catch (e) {
+    console.error("Failed to create audio element:", e)
   }
 }
 
-// Play a sound
-function playSound(soundType = "click") {
+// Play the bleep sound
+function playBleep() {
   try {
-    console.log(`Attempting to play sound: ${soundType}`)
-
-    // Get the audio element
-    const audio = audioElements[soundType]
-
-    if (!audio) {
-      console.error(`No audio element found for ${soundType}`)
-      return Promise.resolve(false)
+    if (!bleepSound) {
+      console.error("Bleep sound not initialized")
+      return
     }
 
-    // Reset the audio to the beginning if it's already playing
-    audio.currentTime = 0
+    // Reset to beginning if already playing
+    bleepSound.currentTime = 0
 
     // Play the sound
-    const playPromise = audio.play()
+    const playPromise = bleepSound.play()
 
     // Handle play promise
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          console.log(`Sound played: ${soundType}`)
+          console.log("Bleep sound played")
         })
         .catch((error) => {
-          console.error(`Error playing ${soundType}:`, error)
-
-          // Try playing a different sound as fallback
-          if (soundType !== "click" && audioElements["click"]) {
-            console.log("Trying fallback sound (click)")
-            audioElements["click"].currentTime = 0
-            audioElements["click"].play().catch((e) => console.error("Even fallback sound failed:", e))
-          }
+          console.error("Error playing bleep sound:", error)
         })
     }
-
-    return Promise.resolve(true)
   } catch (e) {
-    console.error("Failed to play sound:", e)
-    return Promise.resolve(false)
+    console.error("Failed to play bleep sound:", e)
   }
-}
-
-// Test sound function
-function testSound() {
-  console.log("Testing sounds...")
-
-  // Play each sound with a delay
-  setTimeout(() => playSound("bleep"), 0)
-  setTimeout(() => playSound("success"), 800)
-  setTimeout(() => playSound("error"), 1600)
-
-  console.log("Sound test initiated")
 }
 
 // Game flow state tracking
@@ -337,7 +277,7 @@ function showConfirm(title, message, confirmText, cancelText) {
     document.body.appendChild(overlay)
 
     // Play sound
-    playSound("bleep")
+    playBleep()
   })
 }
 
@@ -412,7 +352,7 @@ function showPrompt(title, message) {
     setTimeout(() => input.focus(), 100)
 
     // Play sound
-    playSound("bleep")
+    playBleep()
   })
 }
 
@@ -477,6 +417,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize the market table
   updateMarketTable()
 
+  // Remove the test sound button if it exists
+  const testSoundBtn = document.getElementById("testSoundBtn")
+  if (testSoundBtn && testSoundBtn.parentNode) {
+    testSoundBtn.parentNode.removeChild(testSoundBtn)
+  }
+
   // CRITICAL: Remove all existing event listeners from the advance cycle button
   const advanceButton = document.getElementById("advanceCycleBtn")
   if (advanceButton) {
@@ -489,6 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault()
       e.stopPropagation()
       console.log("BUTTON CLICK: Advance cycle button clicked")
+      playBleep() // Play sound
 
       // Call the advanceCycle function directly
       advanceCycle()
@@ -502,7 +449,54 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sellAllButton) {
     const newSellAllButton = sellAllButton.cloneNode(true)
     sellAllButton.parentNode.replaceChild(newSellAllButton, sellAllButton)
-    newSellAllButton.addEventListener("click", sellEverything)
+    newSellAllButton.addEventListener("click", (e) => {
+      playBleep() // Play sound
+      sellEverything()
+    })
+  }
+
+  // Add event listener for the buy glock button
+  const buyGlockButton = document.getElementById("buyGlockBtn")
+  if (buyGlockButton) {
+    const newBuyGlockButton = buyGlockButton.cloneNode(true)
+    buyGlockButton.parentNode.replaceChild(newBuyGlockButton, buyGlockButton)
+    newBuyGlockButton.addEventListener("click", (e) => {
+      playBleep() // Play sound
+      buyGlock()
+    })
+  }
+
+  // Add event listener for the execute transactions button
+  const executeTransactionsButton = document.getElementById("executeTransactionsBtn")
+  if (executeTransactionsButton) {
+    const newExecuteTransactionsButton = executeTransactionsButton.cloneNode(true)
+    executeTransactionsButton.parentNode.replaceChild(newExecuteTransactionsButton, executeTransactionsButton)
+    newExecuteTransactionsButton.addEventListener("click", (e) => {
+      playBleep() // Play sound
+      executeTransactions()
+    })
+  }
+
+  // Add event listener for the apply event button
+  const applyEventButton = document.getElementById("applyEventBtn")
+  if (applyEventButton) {
+    const newApplyEventButton = applyEventButton.cloneNode(true)
+    applyEventButton.parentNode.replaceChild(newApplyEventButton, applyEventButton)
+    newApplyEventButton.addEventListener("click", (e) => {
+      playBleep() // Play sound
+      applyEvent()
+    })
+  }
+
+  // Add event listener for the apply burner deal button
+  const applyBurnerButton = document.getElementById("applyBurnerBtn")
+  if (applyBurnerButton) {
+    const newApplyBurnerButton = applyBurnerButton.cloneNode(true)
+    applyBurnerButton.parentNode.replaceChild(newApplyBurnerButton, applyBurnerButton)
+    newApplyBurnerButton.addEventListener("click", (e) => {
+      playBleep() // Play sound
+      applyBurnerDeal()
+    })
   }
 
   // Add event listener for event code input
@@ -516,45 +510,18 @@ document.addEventListener("DOMContentLoaded", () => {
         updateGameFlowHighlight()
       }
     })
-  }
 
-  // Start the guided highlighting
-  updateGameFlowHighlight()
-
-  // Add a global click handler to log all button clicks for debugging
-  document.addEventListener("click", (e) => {
-    if (e.target.tagName === "BUTTON") {
-      console.log(`BUTTON CLICK: ${e.target.textContent || e.target.id || "unknown button"}`)
-    }
-  })
-
-  // Add sound effects to all buttons with better error handling
-  document.querySelectorAll("button").forEach((button) => {
-    button.addEventListener("click", (e) => {
-      // Don't interfere with other click handlers
-      if (!e.defaultPrevented) {
-        playSound("bleep")
-      }
-    })
-  })
-
-  // Also add sound effects to select elements when they change
-  document.querySelectorAll("select").forEach((select) => {
-    select.addEventListener("change", () => {
-      playSound("bleep")
-    })
-  })
-
-  // Add sound effects to the event code input when user presses Enter
-  const eventCodeInputEnter = document.getElementById("eventCode")
-  if (eventCodeInputEnter) {
-    eventCodeInputEnter.addEventListener("keypress", (e) => {
+    // Add Enter key handler
+    newEventCodeInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
-        playSound("bleep")
+        playBleep() // Play sound
         applyEvent()
       }
     })
   }
+
+  // Start the guided highlighting
+  updateGameFlowHighlight()
 
   // Initialize the game state
   console.log(`GAME INIT: Starting at cycle ${cycle}`)
@@ -567,3 +534,6 @@ function advanceCycle() {}
 function sellEverything() {}
 function updateGameFlowHighlight() {}
 function applyEvent() {}
+function applyBurnerDeal() {}
+function executeTransactions() {}
+function buyGlock() {}
