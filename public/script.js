@@ -1,8 +1,8 @@
 // Silk Ave - Game Companion Script
 
 // Game state variables
-const btc = 100
-const glock = false
+let btc = 100
+let glock = false
 const cycle = 1
 const inventory = {}
 const currentPrices = {}
@@ -549,12 +549,361 @@ document.addEventListener("DOMContentLoaded", () => {
   isAdvancing = false
 })
 
+// Add this function definition after the other placeholder functions at the bottom of the file
+
+function rollMarket() {
+  console.log("Rolling market prices")
+  playBleep()
+
+  // Generate random prices for each item
+  for (const item of items) {
+    if (priceMatrix[item]) {
+      const priceIndex = Math.floor(Math.random() * priceMatrix[item].length)
+      currentPrices[item] = priceMatrix[item][priceIndex]
+    }
+  }
+
+  // Apply any special price modifiers from events
+  for (const item in specialPriceItems) {
+    if (specialPriceItems.hasOwnProperty(item)) {
+      currentPrices[item] = specialPriceItems[item]
+    }
+  }
+
+  // Update the market table
+  updateMarketTable()
+
+  // Log the action
+  log("-- Market prices rolled")
+
+  // Update game flow state
+  gameFlowState = "selectBurnerDeal"
+  updateGameFlowHighlight()
+}
+
+// Add this function definition to actually update the market table
+function updateMarketTable() {
+  const tableBody = document.querySelector("#marketTable tbody")
+  if (!tableBody) return
+
+  // Clear existing rows
+  tableBody.innerHTML = ""
+
+  // Add a row for each item
+  for (const item of items) {
+    const row = document.createElement("tr")
+
+    // Item name cell
+    const nameCell = document.createElement("td")
+    nameCell.textContent = itemNames[item]
+    row.appendChild(nameCell)
+
+    // Price cell
+    const priceCell = document.createElement("td")
+    priceCell.textContent = currentPrices[item] || "?"
+
+    // Highlight special prices
+    if (specialPriceItems[item]) {
+      priceCell.style.color = "#ffff00"
+      priceCell.style.fontWeight = "bold"
+    }
+
+    // Highlight burner deal
+    const burnerDeal = document.getElementById("burnerDeal").value
+    if (burnerDeal === item) {
+      priceCell.classList.add("burner-deal-item")
+    }
+
+    row.appendChild(priceCell)
+
+    tableBody.appendChild(row)
+  }
+}
+
+// Add this function to handle the burner deal
+function applyBurnerDeal() {
+  console.log("Applying burner deal")
+  playBleep()
+
+  const burnerDeal = document.getElementById("burnerDeal").value
+
+  if (!burnerDeal) {
+    log("-- No burner deal selected")
+    return
+  }
+
+  if (currentPrices[burnerDeal]) {
+    // Store the original price in specialPriceItems
+    specialPriceItems[burnerDeal] = Math.max(1, Math.floor(currentPrices[burnerDeal] / 2))
+
+    // Update the market table
+    updateMarketTable()
+
+    log(`-- Burner deal: ${itemNames[burnerDeal]} at half price`)
+
+    // Update game flow state
+    gameFlowState = "executeTransactions"
+    updateGameFlowHighlight()
+  } else {
+    log("-- Invalid burner deal selection")
+  }
+}
+
+// Add this function to highlight the current game flow step
+function updateGameFlowHighlight() {
+  // Remove highlight from all elements
+  document.querySelectorAll(".highlight-pulse").forEach((el) => {
+    el.classList.remove("highlight-pulse")
+  })
+
+  // Add highlight based on current state
+  if (gameFlowState === "enterEventCode") {
+    document.getElementById("eventCode").classList.add("highlight-pulse")
+    document.getElementById("gameHint").textContent = "Enter a 3-digit event card code"
+  } else if (gameFlowState === "applyEvent") {
+    document.getElementById("applyEventBtn").classList.add("highlight-pulse")
+    document.getElementById("gameHint").textContent = "Apply the event card"
+  } else if (gameFlowState === "rollCard") {
+    document.getElementById("rollCardBtn").classList.add("highlight-pulse")
+    document.getElementById("gameHint").textContent = "Roll for card effect"
+  } else if (gameFlowState === "rollMarket") {
+    document.getElementById("rollMarketBtn").classList.add("highlight-pulse")
+    document.getElementById("gameHint").textContent = "Roll market prices"
+  } else if (gameFlowState === "selectBurnerDeal") {
+    document.getElementById("burnerDeal").classList.add("highlight-pulse")
+    document.getElementById("gameHint").textContent = "Select a burner deal (optional)"
+  } else if (gameFlowState === "executeTransactions") {
+    document.getElementById("executeTransactionsBtn").classList.add("highlight-pulse")
+    document.getElementById("gameHint").textContent = "Buy and sell items, then execute transactions"
+  } else if (gameFlowState === "advanceCycle") {
+    document.getElementById("advanceCycleBtn").classList.add("highlight-pulse")
+    document.getElementById("gameHint").textContent = "Advance to the next cycle"
+  }
+}
+
+// Add these functions to handle buying and selling
+function executeTransactions() {
+  console.log("Executing transactions")
+  playBleep()
+
+  // Process all buy orders
+  for (const item of items) {
+    const buyInput = document.getElementById(`buy-${item}`)
+    if (buyInput && buyInput.value) {
+      const quantity = Number.parseInt(buyInput.value, 10)
+      if (quantity > 0) {
+        buyItem(item, quantity)
+      }
+      buyInput.value = "" // Clear the input
+    }
+  }
+
+  // Process all sell orders
+  for (const item of items) {
+    const sellInput = document.getElementById(`sell-${item}`)
+    if (sellInput && sellInput.value) {
+      const quantity = Number.parseInt(sellInput.value, 10)
+      if (quantity > 0) {
+        sellItem(item, quantity)
+      }
+      sellInput.value = "" // Clear the input
+    }
+  }
+
+  // Update displays
+  updateStatusBars()
+  updateInventoryDisplay()
+
+  // Update game flow state
+  gameFlowState = "advanceCycle"
+  updateGameFlowHighlight()
+}
+
+// Helper function to buy items
+function buyItem(item, quantity) {
+  if (blockBuying) {
+    log(`-- Cannot buy ${itemNames[item]} - buying blocked`)
+    return
+  }
+
+  if (item === bannedItem) {
+    log(`-- Cannot buy ${itemNames[item]} - item banned`)
+    return
+  }
+
+  const price = currentPrices[item]
+  if (!price) {
+    log(`-- Cannot buy ${itemNames[item]} - no price available`)
+    return
+  }
+
+  const totalCost = price * quantity
+  if (totalCost > btc) {
+    log(`-- Cannot afford ${quantity} ${itemNames[item]} (${totalCost} BTC)`)
+    return
+  }
+
+  // Check inventory limit
+  const currentCount = countInventory()
+  if (currentCount + quantity > inventoryLimit) {
+    log(`-- Cannot buy ${quantity} ${itemNames[item]} - inventory limit reached`)
+    return
+  }
+
+  // Add to inventory
+  if (!inventory[item]) inventory[item] = []
+  for (let i = 0; i < quantity; i++) {
+    inventory[item].push(price)
+  }
+
+  // Deduct cost
+  btc -= totalCost
+
+  log(`-- Bought ${quantity} ${itemNames[item]} for ${totalCost} BTC`)
+}
+
+// Helper function to sell items
+function sellItem(item, quantity) {
+  if (blockSelling) {
+    log(`-- Cannot sell ${itemNames[item]} - selling blocked`)
+    return
+  }
+
+  if (item === bannedItem) {
+    log(`-- Cannot sell ${itemNames[item]} - item banned`)
+    return
+  }
+
+  const itemInventory = inventory[item] || []
+  if (itemInventory.length < quantity) {
+    log(`-- Not enough ${itemNames[item]} to sell (have ${itemInventory.length})`)
+    return
+  }
+
+  const price = currentPrices[item]
+  if (!price) {
+    log(`-- Cannot sell ${itemNames[item]} - no price available`)
+    return
+  }
+
+  // Remove from inventory (oldest items first)
+  const soldItems = itemInventory.splice(0, quantity)
+
+  // Calculate revenue
+  const revenue = price * quantity
+
+  // Add revenue
+  btc += revenue
+
+  // Calculate profit/loss
+  const cost = soldItems.reduce((sum, buyPrice) => sum + buyPrice, 0)
+  const profit = revenue - cost
+
+  if (profit >= 0) {
+    log(`-- Sold ${quantity} ${itemNames[item]} for ${revenue} BTC (profit: ${profit} BTC)`)
+  } else {
+    log(`-- Sold ${quantity} ${itemNames[item]} for ${revenue} BTC (loss: ${Math.abs(profit)} BTC)`)
+  }
+}
+
+// Function to sell everything
+function sellEverything() {
+  console.log("Selling everything")
+  playBleep()
+
+  let totalSold = 0
+  let totalRevenue = 0
+
+  for (const item of items) {
+    const itemInventory = inventory[item] || []
+    const quantity = itemInventory.length
+
+    if (quantity > 0 && currentPrices[item] && item !== bannedItem && !blockSelling) {
+      // Calculate revenue
+      const revenue = currentPrices[item] * quantity
+
+      // Add revenue
+      btc += revenue
+      totalRevenue += revenue
+
+      // Clear inventory
+      inventory[item] = []
+
+      totalSold += quantity
+      log(`-- Sold ${quantity} ${itemNames[item]} for ${revenue} BTC`)
+    }
+  }
+
+  if (totalSold === 0) {
+    log("-- Nothing to sell")
+  } else {
+    log(`-- Sold everything (${totalSold} items) for ${totalRevenue} BTC`)
+  }
+
+  // Update displays
+  updateStatusBars()
+  updateInventoryDisplay()
+}
+
+// Function to buy a Glock
+function buyGlock() {
+  console.log("Buying Glock")
+  playBleep()
+
+  if (glock) {
+    log("-- You already have a Glock")
+    return
+  }
+
+  const glockPrice = 20
+
+  if (btc < glockPrice) {
+    log(`-- Cannot afford Glock (${glockPrice} BTC)`)
+    return
+  }
+
+  // Buy the Glock
+  btc -= glockPrice
+  glock = true
+
+  log(`-- Bought Glock for ${glockPrice} BTC`)
+
+  // Update displays
+  updateStatusBars()
+}
+
+// Function to set max buy amount
+function setMaxBuy(item) {
+  if (blockBuying || item === bannedItem || !currentPrices[item]) return
+
+  const price = currentPrices[item]
+  const maxAffordable = Math.floor(btc / price)
+  const inventorySpace = inventoryLimit - countInventory()
+  const maxPossible = Math.min(maxAffordable, inventorySpace)
+
+  if (maxPossible > 0) {
+    document.getElementById(`buy-${item}`).value = maxPossible
+  }
+}
+
+// Function to set max sell amount
+function setMaxSell(item) {
+  if (blockSelling || item === bannedItem) return
+
+  const itemInventory = inventory[item] || []
+  const quantity = itemInventory.length
+
+  if (quantity > 0) {
+    document.getElementById(`sell-${item}`).value = quantity
+  }
+}
+
 // Declare the missing variables
-function updateMarketTable() {}
 function advanceCycle() {}
-function sellEverything() {}
-function updateGameFlowHighlight() {}
-function applyEvent() {}
-function applyBurnerDeal() {}
-function executeTransactions() {}
-function buyGlock() {}
+
+// Placeholder function for applyEvent
+function applyEvent() {
+  console.log("Applying event")
+  playBleep()
+  // Add your event logic here
+}
