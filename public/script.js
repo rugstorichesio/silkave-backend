@@ -687,16 +687,31 @@ function runCardEffect(code, roll) {
       break
 
     case "008": // RANSOM DEMAND
+      // Calculate what half inventory means
+      const totalItems = countInventory()
+      const halfItems = Math.ceil(totalItems / 2)
+
+      // Build inventory information string
+      let ransomInventoryInfo = "Your current inventory:\n"
+      let ransomHasItems = false
+
+      for (const item of items) {
+        const itemCount = (inventory[item] || []).length
+        if (itemCount > 0) {
+          ransomHasItems = true
+          ransomInventoryInfo += `- ${itemNames[item]}: ${itemCount}\n`
+        }
+      }
+
+      if (!ransomHasItems) {
+        ransomInventoryInfo += "- Empty\n"
+      }
+
       showConfirm(
         "RANSOM DEMAND",
-        `You've got locked out. Pay up or lose your stash.
-
-Your current BTC: ${btc}
-Your current inventory: ${countInventory()} items
-
-Choose your response:`,
+        `You've got locked out. Pay up or lose your stash.\n\n${ransomInventoryInfo}\n\nYour current BTC: ${btc}\n\nOption 1: Pay 30 BTC (${btc - 30} BTC remaining)\nOption 2: Lose half your inventory (${halfItems} items)`,
         "Pay 30 BTC",
-        `Lose Half Inventory (${Math.ceil(countInventory() / 2)} items)`,
+        `Lose Half Inventory (${halfItems} items)`,
       ).then((result) => {
         let outcome = ""
         if (result) {
@@ -754,12 +769,7 @@ Choose your response:`,
     case "013": // INSIDER TIP
       showConfirm(
         "INSIDER TIP",
-        `A rival drops a hint... or a trap?
-
-Your current BTC: ${btc}
-Glock status: ${glock ? "Already have one" : "Don't have one"}
-
-Choose your response:`,
+        `A rival drops a hint... or a trap?\n\nYour current BTC: ${btc}\nGlock status: ${glock ? "Already have one" : "Don't have one"}\n\nOption 1: ${glock ? "Pay 10 BTC for another Glock" : "Pay 10 BTC for Glock"} (${btc - 10} BTC remaining)\nOption 2: Gain 20 BTC (${btc + 20} BTC total) but increase risk`,
         glock ? "Pay 10 BTC for another Glock" : "Pay 10 BTC for Glock",
         "Gain 20 BTC (risky)",
       ).then((result) => {
@@ -787,12 +797,37 @@ Choose your response:`,
       break
 
     case "015": // WHALE BUY
+      // Build inventory information string
+      let inventoryInfo = "Your current inventory:\n"
+      let hasItems = false
+
+      for (const item of items) {
+        const itemCount = (inventory[item] || []).length
+        if (itemCount > 0) {
+          hasItems = true
+          // Calculate average purchase price
+          const totalCost = inventory[item].reduce((sum, price) => sum + price, 0)
+          const avgPrice = (totalCost / itemCount).toFixed(1)
+
+          inventoryInfo += `- ${itemNames[item]}: ${itemCount} (avg. cost: ${avgPrice} BTC)\n`
+        }
+      }
+
+      if (!hasItems) {
+        inventoryInfo += "- Empty\n"
+      }
+
+      // Add current market prices
+      inventoryInfo += "\nCurrent market prices:\n"
+      for (const item of items) {
+        if (currentPrices[item]) {
+          inventoryInfo += `- ${itemNames[item]}: ${currentPrices[item]} BTC\n`
+        }
+      }
+
       showPrompt(
         "WHALE BUYOUT",
-        `A big player wants to buy in bulk!
-Choose an item to sell at TRIPLE price:
-
-${items.map((i) => itemNames[i]).join(", ")}`,
+        `A big player wants to buy in bulk!\nChoose an item to sell at TRIPLE price:\n\n${inventoryInfo}`,
       ).then((itemType) => {
         let message = ""
 
@@ -851,9 +886,35 @@ ${items.map((i) => itemNames[i]).join(", ")}`,
       break
 
     case "021": // EMERGENCY SALE
+      // Build inventory information string
+      let emergencyInventoryInfo = "Your current inventory:\n"
+      let emergencyHasItems = false
+      let totalInventoryValue = 0
+      let halfValueTotal = 0
+
+      for (const item of items) {
+        const itemCount = (inventory[item] || []).length
+        if (itemCount > 0) {
+          emergencyHasItems = true
+          const itemValue = itemCount * currentPrices[item]
+          const halfValue = Math.floor(itemValue * 0.5)
+
+          totalInventoryValue += itemValue
+          halfValueTotal += halfValue
+
+          emergencyInventoryInfo += `- ${itemNames[item]}: ${itemCount} (value: ${itemValue} BTC, half: ${halfValue} BTC)\n`
+        }
+      }
+
+      if (!emergencyHasItems) {
+        emergencyInventoryInfo += "- Empty\n"
+        totalInventoryValue = 0
+        halfValueTotal = 0
+      }
+
       showConfirm(
         "EMERGENCY SALE",
-        "The network's volatile. You can liquidate now at a loss...\nor hold and forfeit all buys this cycle.",
+        `The network's volatile. You can liquidate now at a loss...\nor hold and forfeit all buys this cycle.\n\n${emergencyInventoryInfo}\n\nTotal inventory value: ${totalInventoryValue} BTC\nHalf value total: ${halfValueTotal} BTC\n\nYour current BTC: ${btc}`,
         "Sell All (Half Value)",
         "Hold (No Buying)",
       ).then((result) => {
@@ -870,9 +931,29 @@ ${items.map((i) => itemNames[i]).join(", ")}`,
       return "Waiting for your decision..." // Temporary message until user decides
 
     case "022": // CUT AND RUN
+      // Build inventory information string
+      let cutRunInventoryInfo = "Your current inventory:\n"
+      let cutRunHasItems = false
+      let totalInvValue = 0
+
+      for (const item of items) {
+        const itemCount = (inventory[item] || []).length
+        if (itemCount > 0) {
+          cutRunHasItems = true
+          const itemValue = itemCount * currentPrices[item]
+          totalInvValue += itemValue
+
+          cutRunInventoryInfo += `- ${itemNames[item]}: ${itemCount} (value: ${itemValue} BTC)\n`
+        }
+      }
+
+      if (!cutRunHasItems) {
+        cutRunInventoryInfo += "- Empty\n"
+      }
+
       showConfirm(
         "CUT AND RUN",
-        "You've got seconds. Ditch the stash and bolt… or stay and hope they don't breach your door.",
+        `You've got seconds. Ditch the stash and bolt… or stay and hope they don't breach your door.\n\n${cutRunInventoryInfo}\n\nTotal inventory value: ${totalInvValue} BTC\n\nYour current BTC: ${btc}\n\nOption 1: Lose all inventory but gain 40 BTC\nOption 2: Keep inventory but risk consequences`,
         "Lose Inventory (+40 BTC)",
         "Keep Inventory",
       ).then((result) => {
@@ -892,7 +973,7 @@ ${items.map((i) => itemNames[i]).join(", ")}`,
     case "028": // FAMILY EMERGENCY
       showConfirm(
         "FAMILY EMERGENCY",
-        "Your sister's in trouble. Pay off her debt or skip this cycle to help her.",
+        `Your sister's in trouble. Pay off her debt or skip this cycle to help her.\n\nYour current BTC: ${btc}\n\nOption 1: Lose 30 BTC (${btc - 30} BTC remaining)\nOption 2: Skip this turn (can't buy or sell)`,
         "Lose 30 BTC",
         "Skip Turn",
       ).then((result) => {
@@ -998,12 +1079,34 @@ function grantItems(method, count) {
   const actualCount = Math.min(count, spaceLeft)
 
   if (method === "choose") {
+    // Build inventory information string
+    let currentInventoryInfo = "Your current inventory:\n"
+    let hasExistingItems = false
+
+    for (const item of items) {
+      const itemCount = (inventory[item] || []).length
+      if (itemCount > 0) {
+        hasExistingItems = true
+        currentInventoryInfo += `- ${itemNames[item]}: ${itemCount}\n`
+      }
+    }
+
+    if (!hasExistingItems) {
+      currentInventoryInfo += "- Empty\n"
+    }
+
+    // Add current market prices
+    currentInventoryInfo += "\nCurrent market prices:\n"
+    for (const item of items) {
+      if (currentPrices[item]) {
+        currentInventoryInfo += `- ${itemNames[item]}: ${currentPrices[item]} BTC\n`
+      }
+    }
+
     // Use custom prompt instead of browser prompt
     showPrompt(
       "COMMUNITY BOOST",
-      `Choose an item to receive ${actualCount} units of:
-
-${items.map((i) => itemNames[i]).join(", ")}`,
+      `Choose an item to receive ${actualCount} units of:\n\n${currentInventoryInfo}\n\nEnter one of: ${items.map((i) => itemNames[i]).join(", ")}`,
     ).then((itemType) => {
       if (itemType) {
         // Find matching item (case insensitive)
