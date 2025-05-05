@@ -157,7 +157,7 @@ function submitScore() {
   }
 
   // Send the data to the backend
-  fetch("/api/submit-score", {
+  fetch("https://silkave-leaderboard.onrender.com/submit-score", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

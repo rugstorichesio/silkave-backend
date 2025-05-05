@@ -1,246 +1,680 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silk Ave Game Companion</title>
-    <style>
-        body {
-            background-color: #111;
-            color: #0f0;
-            font-family: monospace;
-            margin: 0;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            text-shadow: 0 0 10px #0f0;
-        }
-        
-        .game-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .game-header {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-        }
-        
-        .game-stat {
-            margin: 0 15px;
-        }
-        
-        .game-section {
-            border: 1px solid #0f0;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .section-title {
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #0f0;
-        }
-        
-        .input-group {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        
-        input, select, button {
-            background-color: #000;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 8px 12px;
-            font-family: monospace;
-            margin: 0 5px;
-        }
-        
-        button {
-            cursor: pointer;
-        }
-        
-        button:hover {
-            background-color: #0f0;
-            color: #000;
-        }
-        
-        .outcome {
-            text-align: center;
-            padding: 15px;
-            border: 1px solid #0f0;
-            margin-top: 15px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            border: 1px solid #0f0;
-            padding: 8px 12px;
-            text-align: left;
-        }
-        
-        th {
-            background-color: rgba(0, 255, 0, 0.1);
-        }
-        
-        .home-link {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-        
-        .home-link a {
-            color: #0f0;
-            text-decoration: none;
-        }
-        
-        .home-link a:hover {
-            text-decoration: underline;
-        }
-        
-        .status-bar {
-            text-align: center;
-            margin-top: 20px;
-            font-style: italic;
-            color: #0a0;
-        }
-        
-        .debug-panel {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.8);
-            border: 1px solid #0f0;
-            padding: 5px;
-            font-size: 0.8em;
-            color: #0f0;
-            cursor: pointer;
-        }
-        
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .modal-content {
-            background-color: #111;
-            border: 2px solid #0f0;
-            padding: 20px;
-            max-width: 500px;
-            width: 80%;
-            box-shadow: 0 0 20px #0f0;
-        }
-        
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .card-result {
-            text-align: left;
-            line-height: 1.5;
-        }
-        
-        .error {
-            color: #f00;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Silk Ave Companion</title>
+  <link rel="stylesheet" href="modal.css">
+  <style>
+    body {
+      background-color: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 1rem;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.2rem;
+      text-shadow: 0 0 10px #0f0;
+      margin-top: 1rem;
+    }
+    input, select, button {
+      margin: 0.3rem;
+      background: #000;
+      color: #0f0;
+      border: 1px solid #0f0;
+      padding: 0.3rem;
+      font-family: monospace;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      border: 1px solid #0f0;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    .log, .inventory-status {
+      white-space: pre-line;
+      background: #000;
+      border: 1px solid #0f0;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+    .bottom-bar {
+      text-align: center;
+      margin-top: 2rem;
+      font-weight: bold;
+      font-size: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #0f0;
+    }
+    .card-result {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+    .event-section {
+      border: 1px solid #0f0;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .event-title {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    .event-input {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .highlight-pulse {
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 0 10px #0f0;
+    }
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 5px #0f0;
+      }
+      50% {
+        box-shadow: 0 0 20px #0f0, 0 0 30px #0f0;
+      }
+      100% {
+        box-shadow: 0 0 5px #0f0;
+      }
+    }
+    .game-hint {
+      text-align: center;
+      padding: 0.5rem;
+      margin: 1rem 0;
+      background: #001100;
+      border: 1px dashed #0f0;
+      font-style: italic;
+    }
+    .nav-links {
+      text-align: center;
+      margin: 2rem 0;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .nav-links a {
+      color: #0f0;
+      text-decoration: none;
+      margin: 0 0.5rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid #0f0;
+      transition: all 0.3s ease;
+    }
+    .nav-links a:hover {
+      background: #0f0;
+      color: #000;
+      box-shadow: 0 0 10px #0f0;
+    }
+    
+    /* Media Queries for Responsive Design */
+    /* Mobile Devices (portrait) */
+    @media only screen and (max-width: 600px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+        margin-top: 0.5rem;
+      }
+      
+      h2, h3 {
+        font-size: 1.4rem;
+        margin-top: 1rem;
+      }
+      
+      input, select, button {
+        margin: 0.2rem;
+        padding: 0.4rem;
+        font-size: 0.9rem;
+      }
+      
+      table {
+        font-size: 0.9rem;
+      }
+      
+      th, td {
+        padding: 0.3rem;
+      }
+      
+      .event-section {
+        padding: 0.7rem;
+      }
+      
+      .event-input {
+        flex-direction: column;
+      }
+      
+      .log, .inventory-status {
+        font-size: 0.8rem;
+        padding: 0.7rem;
+      }
+      
+      .bottom-bar {
+        font-size: 0.9rem;
+      }
+      
+      .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 1.5rem 0;
+      }
+      
+      .nav-links a {
+        display: block;
+        width: 80%;
+        margin: 0 auto;
+      }
+      
+      .home-link {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        text-align: center;
+        margin: 1rem 0;
+        display: block;
+      }
+    }
+    
+    /* Tablets and small screens */
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      table {
+        width: 95%;
+        margin: 1rem auto;
+      }
+      
+      .event-section, .log, .inventory-status {
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+    
+    /* Detect if device supports hover - typically indicates a non-touch device */
+    @media (hover: none) {
+      .nav-links a {
+        padding: 0.7rem 1.2rem;
+      }
+      
+      button {
+        padding: 0.6rem;
+      }
+    }
+    .log-container {
+      height: 200px;
+      overflow-y: auto;
+      background: #000;
+      border: 1px solid #0f0;
+      padding: 0;
+      margin-top: 2rem;
+    }
+
+    .log {
+      white-space: pre-line;
+      padding: 1rem;
+      margin: 0;
+    }
+
+    .transaction-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      position: relative;
+    }
+
+    .liquid-btc {
+      display: inline-block;
+      background-color: #000;
+      color: #0f0;
+      border: 1px solid #0f0;
+      padding: 0.5rem;
+      font-weight: bold;
+      text-align: center;
+      animation: btc-pulse 2s infinite;
+    }
+
+    @keyframes btc-pulse {
+      0%, 100% { box-shadow: 0 0 5px #0f0; }
+      50% { box-shadow: 0 0 15px #0f0; }
+    }
+
+    @media only screen and (max-width: 600px) {
+      .liquid-btc {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+    }
+
+    /* Updated burner deal styling */
+    .burner-deal-item {
+      color: #00ff00;
+      font-weight: bold;
+      animation: burner-flash 1s infinite;
+    }
+
+    .burner-deal-item::before {
+      content: "<< ";
+    }
+
+    .burner-deal-item::after {
+      content: " >>";
+    }
+
+    @keyframes burner-flash {
+      0%, 100% { color: #0f0; text-shadow: none; }
+      50% { color: #00ff00; text-shadow: 0 0 8px #00ff00; }
+    }
+
+    @media only screen and (max-width: 600px) {
+      .transaction-buttons {
+        flex-direction: column;
+      }
+      
+      .log-container {
+        height: 150px;
+      }
+    }
+
+  .liquid-btc-container {
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #0f0;
+    border-radius: 4px;
+    color: #0f0;
+    font-weight: bold;
+    animation: subtle-pulse 3s infinite;
+    margin-left: auto;
+    padding: 4px 8px;
+  }
+  
+  @keyframes subtle-pulse {
+    0%, 100% { box-shadow: 0 0 3px #0f0; }
+    50% { box-shadow: 0 0 8px #0f0; }
+  }
+  
+  @media only screen and (max-width: 600px) {
+    .liquid-btc-container {
+      position: static;
+      display: block;
+      margin: 0.5rem auto;
+      width: 80%;
+      text-align: center;
+    }
+  }
+  
+  .liquid-btc-label {
+    font-size: 0.8em;
+    margin-right: 5px;
+  }
+  
+  .liquid-btc-value {
+    font-size: 1em;
+  }
+  
+  /* CRITICAL FIX: Force all modals to have dark background and green text */
+  .modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .modal-container {
+    background-color: #111 !important;
+    color: #0f0 !important;
+    border: 2px solid #0f0 !important;
+    box-shadow: 0 0 20px #0f0 !important;
+    padding: 1.5rem !important;
+    width: 90% !important;
+    max-width: 500px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  .modal-header {
+    color: #0f0 !important;
+    text-align: center !important;
+    margin-bottom: 1rem !important;
+    font-size: 1.5rem !important;
+    text-shadow: 0 0 5px #0f0 !important;
+  }
+
+  .modal-content {
+    color: #0f0 !important;
+    margin-bottom: 1.5rem !important;
+    font-size: 1.1rem !important;
+    line-height: 1.5 !important;
+    white-space: pre-line !important;
+  }
+
+  .modal-buttons {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 1rem !important;
+  }
+
+  .modal-button {
+    background-color: #000 !important;
+    color: #0f0 !important;
+    border: 1px solid #0f0 !important;
+    padding: 0.5rem 1.5rem !important;
+    cursor: pointer !important;
+    font-family: monospace !important;
+    font-size: 1rem !important;
+  }
+
+  .modal-button:hover {
+    background-color: #0f0 !important;
+    color: #000 !important;
+  }
+
+  .modal-input {
+    width: 100% !important;
+    background-color: #000 !important;
+    color: #0f0 !important;
+    border: 1px solid #0f0 !important;
+    padding: 0.5rem !important;
+    margin-bottom: 1rem !important;
+    font-family: monospace !important;
+  }
+
+  /* Override any browser default styles that might be interfering */
+  div[class^="modal"], div[class*=" modal"] {
+    background-color: #111 !important;
+    color: #0f0 !important;
+  }
+
+  button[class^="modal"], button[class*=" modal"] {
+    background-color: #000 !important;
+    color: #0f0 !important;
+  }
+
+  /* Max button styling */
+  .max-button {
+    display: inline-block !important;
+    background-color: #000 !important;
+    color: #0f0 !important;
+    border: 1px solid #0f0 !important;
+    padding: 2px 5px !important;
+    margin-left: 5px !important;
+    font-size: 0.8rem !important;
+    cursor: pointer !important;
+    font-family: monospace !important;
+  }
+
+  .max-button:hover {
+    background-color: #0f0 !important;
+    color: #000 !important;
+    box-shadow: 0 0 5px #0f0 !important;
+  }
+  </style>
 </head>
 <body>
-    <div class="home-link">
-        <a href="index.html">← Return to Home</a>
+  <div class="home-link" style="position: absolute; top: 1rem; right: 2rem;">
+    <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
+  </div>
+
+  <h1>Silk Ave Game Companion</h1>
+  <div>
+    <h2>Cycle: <span id="cycle">1</span> / 10</h2>
+    <h3>BTC: <span id="btc">100</span> | Glock: <span id="glock">No</span> | Inventory: <span id="invCount">0</span>/20</h3>
+  </div>
+
+  <div id="gameHint" class="game-hint">Enter a 3-digit event card code</div>
+
+  <div id="eventCodeSection" class="event-section">
+    <h3 class="event-title">Event Card</h3>
+    <div class="event-input">
+      <label>Event Card Code: <input type="text" id="eventCode" placeholder="Enter code"></label>
+      <button id="applyEventBtn" onclick="applyEvent()">Apply Event</button>
     </div>
-    
-    <div class="game-container">
-        <h1>Silk Ave Game Companion</h1>
-        
-        <div class="game-header">
-            <div class="game-stat">BTC: <span id="btcDisplay">100</span></div>
-            <div class="game-stat">Glock: <span id="glockDisplay">No</span></div>
-            <div class="game-stat">Inventory: <span id="inventoryDisplay">0/20</span></div>
-        </div>
-        
-        <div class="game-section">
-            <div class="status-bar" id="statusBar">Roll the market prices</div>
-        </div>
-        
-        <div class="game-section">
-            <h2 class="section-title">Event Card</h2>
-            <div class="input-group">
-                <label for="eventCodeInput">Event Card Code:</label>
-                <input type="text" id="eventCodeInput" maxlength="3">
-                <button id="applyEventButton">Apply Event</button>
-            </div>
-            <div class="outcome" id="outcomeDisplay">
-                Enter an event card code to see the outcome
-            </div>
-        </div>
-        
-        <div class="game-section">
-            <h2 class="section-title">Market Setup</h2>
-            <div class="input-group">
-                <button id="rollMarketButton">Roll Market Prices</button>
-            </div>
-            
-            <div class="input-group">
-                <label for="burnerDealSelect">Burner Deal Item:</label>
-                <select id="burnerDealSelect">
-                    <option>--Select--</option>
-                    <option value="lsd">LSD</option>
-                    <option value="weed">Weed</option>
-                    <option value="cocaine">Cocaine</option>
-                    <option value="mdma">MDMA</option>
-                    <option value="passports">Forged Passports</option>
-                    <option value="accounts">Hacked Accounts</option>
-                    <option value="ccs">Skimmed Credit Cards</option>
-                    <option value="files">Leaked Intel</option>
-                </select>
-                <button id="applyBurnerDealButton">Apply Burner Deal</button>
-            </div>
-        </div>
-        
-        <div class="game-section">
-            <h2 class="section-title">Market Prices</h2>
-            <table id="marketTable">
-                <tr>
-                    <th>Item</th>
-                    <th>Price</th>
-                </tr>
-                <!-- Market prices will be populated by JavaScript -->
-            </table>
-        </div>
-        
-        <div class="game-section">
-            <div class="input-group">
-                <button id="submitScoreButton">End Game & Submit Score</button>
-            </div>
-        </div>
+    <div class="card-result">
+      <button id="rollCardBtn" onclick="rollCardDice()" style="display: none;">🎲 Roll for Card</button>
+      <div id="cardDiceResult"></div>
     </div>
+  </div>
+
+  <div class="actions">
+    <h3>Market Setup</h3>
+    <button id="rollMarketBtn" onclick="rollMarket()">🎲 Roll Market Prices</button>
+    <span id="marketDiceResult"></span>
+    <br>
+    <div id="burnerDealSection">
+      <label>Burner Deal Item:
+        <select id="burnerDeal">
+          <option value="">--Select--</option>
+          <option value="lsd">LSD</option>
+          <option value="weed">Weed</option>
+          <option value="cocaine">Cocaine</option>
+          <option value="mdma">MDMA</option>
+          <option value="passports">Forged Passports</option>
+          <option value="accounts">Hacked Accounts</option>
+          <option value="ccs">Skimmed Credit Cards</option>
+          <option value="files">Leaked Intel</option>
+        </select>
+      </label>
+      <button id="applyBurnerBtn" onclick="applyBurnerDeal()">Apply Burner Deal</button>
+    </div>
+  </div>
+
+  <div class="market">
+    <h3>Market Prices</h3>
+    <table id="marketTable">
+      <thead><tr><th>Item</th><th>Price</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="transactionSection" class="inventory">
+    <h3>Buy/Sell</h3>
+    <table id="transactionTable">
+      <thead><tr><th style="text-align: left; padding-left: 10px;">Item</th><th>Owned</th><th>Buy</th><th>Sell</th></tr></thead>
+      <tbody>
+        <!-- Fallback static rows in case JavaScript fails -->
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">LSD</td>
+          <td style="text-align: center;" id="owned-lsd">0</td>
+          <td>
+            <input type="number" id="buy-lsd" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('lsd')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-lsd" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('lsd')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Weed</td>
+          <td style="text-align: center;" id="owned-weed">0</td>
+          <td>
+            <input type="number" id="buy-weed" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('weed')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-weed" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('weed')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Cocaine</td>
+          <td style="text-align: center;" id="owned-cocaine">0</td>
+          <td>
+            <input type="number" id="buy-cocaine" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('cocaine')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-cocaine" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('cocaine')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">MDMA</td>
+          <td style="text-align: center;" id="owned-mdma">0</td>
+          <td>
+            <input type="number" id="buy-mdma" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('mdma')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-mdma" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('mdma')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Forged Passports</td>
+          <td style="text-align: center;" id="owned-passports">0</td>
+          <td>
+            <input type="number" id="buy-passports" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('passports')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-passports" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('passports')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Hacked Accounts</td>
+          <td style="text-align: center;" id="owned-accounts">0</td>
+          <td>
+            <input type="number" id="buy-accounts" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('accounts')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-accounts" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('accounts')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Skimmed Credit Cards</td>
+          <td style="text-align: center;" id="owned-ccs">0</td>
+          <td>
+            <input type="number" id="buy-ccs" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('ccs')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-ccs" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('ccs')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Leaked Intel</td>
+          <td style="text-align: center;" id="owned-files">0</td>
+          <td>
+            <input type="number" id="buy-files" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('files')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-files" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('files')">Max</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="transaction-buttons">
+      <button id="executeTransactionsBtn" onclick="executeTransactions()">Execute Transactions</button>
+      <button id="buyGlockBtn" onclick="buyGlock()">Buy Glock (20 BTC)</button>
+      <button id="sellAllBtn" onclick="sellEverything()">Sell Everything</button>
+      <div class="liquid-btc-container">
+        <span class="liquid-btc-label">Liquid BTC:</span>
+        <span id="liquidBtc" class="liquid-btc-value">100</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Moved inventory status here -->
+  <div class="inventory-status" id="inventoryStatus"></div>
+
+  <div class="log-container">
+    <div class="log" id="log"></div>
+  </div>
+
+  <div style="text-align: center; margin-top: 2rem;">
+    <button id="advanceCycleBtn" onclick="advanceCycle()">Advance to Next Cycle</button>
+  </div>
+
+  <div class="bottom-bar">
+    Cycle: <span id="cycleBottom">1</span> / 10 |
+    BTC: <span id="btcBottom">100</span> |
+    Glock: <span id="glockBottom">No</span> |
+    Inventory: <span id="invCountBottom">0</span>/20
+  </div>
+
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="submit.html">Submit Score</a>
+  </div>
+
+  <!-- Sound effects -->
+  <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
+  <audio id="typing" src="https://assets.mixkit.co/sfx/preview/mixkit-keyboard-typing-1386.mp3" preload="auto" loop></audio>
+  <audio id="crackles" src="https://assets.mixkit.co/sfx/preview/mixkit-radio-static-noise-2556.mp3" preload="auto" loop volume="0.3"></audio>
+
+  <!-- Scripts - Note the order is important -->
+  <script src="modal.js"></script>
+  <script src="script.js"></script>
+  
+  <script>
+    // Play sound on button clicks
+    function playBleep() {
+      const sound = document.getElementById('bleep');
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Audio play failed:", e));
+      }
+    }
     
-    <div class="debug-panel">Debug</div>
-    
-    <script src="script.js"></script>
+    // Check if we're on a mobile device
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.matchMedia("(max-width: 600px)").matches) {
+        const homeLink = document.querySelector('.home-link');
+        if (homeLink) {
+          homeLink.style.position = 'relative';
+          homeLink.style.top = 'auto';
+          homeLink.style.right = 'auto';
+        }
+      }
+      
+      // Add click sound to all buttons
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('click', playBleep);
+      });
+      
+      // Also add to select elements when they change
+      const selects = document.querySelectorAll('select');
+      selects.forEach(select => {
+        select.addEventListener('change', playBleep);
+      });
+    });
+  </script>
 </body>
 </html>
