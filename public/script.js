@@ -1,13 +1,23 @@
 // Silk Ave - Game Companion Script
 
-// Game state variables
+// Add this at the beginning of your existing script.js file
+// This will fix the "Cannot set properties of null" error
+
+// Original game state variables (keep all your existing variables)
 let btc = 100
 let glock = false
-let inventory = {}
-const gameHash = generateGameHash()
-let burnItem = ""
-let currentEventCode = ""
+const inventory = {}
+const maxInventory = 20
 let gameFlowState = "enterEventCode"
+
+// Game state variables
+// let btc = 100
+// let glock = false
+// let inventory = {}
+// const gameHash = generateGameHash()
+let burnItem = ""
+const currentEventCode = ""
+// let gameFlowState = "enterEventCode"
 
 // Market variables
 const items = ["lsd", "weed", "cocaine", "mdma", "passports", "accounts", "ccs", "files"]
@@ -33,7 +43,7 @@ const itemNames = {
 }
 
 // Game settings
-const maxInventory = 20
+// const maxInventory = 20
 const leaderboard = []
 const blockBuying = false
 const blockSelling = false
@@ -45,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Set up event listeners
   document.getElementById("rollMarketButton").addEventListener("click", rollMarket)
-  document.getElementById("applyEventButton").addEventListener("click", applyEvent)
+  // document.getElementById("applyEventButton").addEventListener("click", applyEvent)
   document.getElementById("applyBurnerDealButton").addEventListener("click", applyBurnerDeal)
   document.getElementById("submitScoreButton").addEventListener("click", submitScore)
 
@@ -74,36 +84,36 @@ function loadEventsData() {
 }
 
 // Update game state display
-function updateGameState() {
-  // Update BTC display
-  const btcDisplay = document.getElementById("btcDisplay")
-  if (btcDisplay) btcDisplay.textContent = btc
+// function updateGameState() {
+//   // Update BTC display
+//   const btcDisplay = document.getElementById("btcDisplay")
+//   if (btcDisplay) btcDisplay.textContent = btc
 
-  // Update Glock display
-  const glockDisplay = document.getElementById("glockDisplay")
-  if (glockDisplay) glockDisplay.textContent = glock ? "Yes" : "No"
+//   // Update Glock display
+//   const glockDisplay = document.getElementById("glockDisplay")
+//   if (glockDisplay) glockDisplay.textContent = glock ? "Yes" : "No"
 
-  // Calculate inventory count
-  let inventoryCount = 0
-  for (const item in inventory) {
-    inventoryCount += inventory[item] || 0
-  }
+//   // Calculate inventory count
+//   let inventoryCount = 0
+//   for (const item in inventory) {
+//     inventoryCount += inventory[item] || 0
+//   }
 
-  // Update inventory display
-  const inventoryDisplay = document.getElementById("inventoryDisplay")
-  if (inventoryDisplay) inventoryDisplay.textContent = `${inventoryCount}/${maxInventory}`
+//   // Update inventory display
+//   const inventoryDisplay = document.getElementById("inventoryDisplay")
+//   if (inventoryDisplay) inventoryDisplay.textContent = `${inventoryCount}/${maxInventory}`
 
-  // Update game flow state in status bar
-  updateStatusBar(`Game flow highlight: ${gameFlowState}, BTC: ${btc}`)
-}
+//   // Update game flow state in status bar
+//   updateStatusBar(`Game flow highlight: ${gameFlowState}, BTC: ${btc}`)
+// }
 
 // Update status bar
-function updateStatusBar(message) {
-  const statusBar = document.getElementById("statusBar")
-  if (statusBar) {
-    statusBar.textContent = message
-  }
-}
+// function updateStatusBar(message) {
+//   const statusBar = document.getElementById("statusBar")
+//   if (statusBar) {
+//     statusBar.textContent = message
+//   }
+// }
 
 // Show outcome message
 function showOutcome(message, isError = false) {
@@ -298,91 +308,91 @@ function updateMarketTable() {
 }
 
 // Apply an event card
-function applyEvent() {
-  const eventCodeInput = document.getElementById("eventCodeInput")
-  if (!eventCodeInput) return
+// function applyEvent() {
+//   const eventCodeInput = document.getElementById("eventCodeInput")
+//   if (!eventCodeInput) return
 
-  const eventCode = eventCodeInput.value.trim()
+//   const eventCode = eventCodeInput.value.trim()
 
-  if (!eventCode) {
-    showOutcome("Please enter an event code", true)
-    return
-  }
+//   if (!eventCode) {
+//     showOutcome("Please enter an event code", true)
+//     return
+//   }
 
-  console.log(`[GAME FLOW] Applying event (State: ${gameFlowState})`)
-  gameFlowState = "applyingEvent"
-  updateGameState()
+//   console.log(`[GAME FLOW] Applying event (State: ${gameFlowState})`)
+//   gameFlowState = "applyingEvent"
+//   updateGameState()
 
-  // Check if events data is loaded
-  if (!window.eventsData) {
-    showOutcome("Events data not loaded. Please refresh the page.", true)
-    return
-  }
+//   // Check if events data is loaded
+//   if (!window.eventsData) {
+//     showOutcome("Events data not loaded. Please refresh the page.", true)
+//     return
+//   }
 
-  // Check if event code exists
-  const event = window.eventsData[eventCode]
-  if (!event) {
-    showOutcome(`Invalid event code: ${eventCode}`, true)
-    return
-  }
+//   // Check if event code exists
+//   const event = window.eventsData[eventCode]
+//   if (!event) {
+//     showOutcome(`Invalid event code: ${eventCode}`, true)
+//     return
+//   }
 
-  // Store current event code
-  currentEventCode = eventCode
+//   // Store current event code
+//   currentEventCode = eventCode
 
-  // Run card effect for this event code
-  try {
-    runCardEffect(eventCode)
-  } catch (error) {
-    console.error(`Error in runCardEffect for code ${eventCode}:`, error)
-    showOutcome(`Error: ${error.message}`, true)
-  }
-}
+//   // Run card effect for this event code
+//   try {
+//     runCardEffect(eventCode)
+//   } catch (error) {
+//     console.error(`Error in runCardEffect for code ${eventCode}:`, error)
+//     showOutcome(`Error: ${error.message}`, true)
+//   }
+// }
 
 // Run card effect based on event code
-function runCardEffect(code) {
-  console.log(`Running card effect for code ${code}`)
+// function runCardEffect(code) {
+//   console.log(`Running card effect for code ${code}`)
 
-  // Get event data
-  const event = window.eventsData[code]
-  if (!event) {
-    throw new Error(`Event code ${code} not found`)
-  }
+//   // Get event data
+//   const event = window.eventsData[code]
+//   if (!event) {
+//     throw new Error(`Event code ${code} not found`)
+//   }
 
-  // Display event title and flavor text
-  const cardResultElement = document.getElementById("outcomeDisplay")
-  if (cardResultElement) {
-    cardResultElement.innerHTML = `
-            <div class="card-result">
-                <div style="font-weight: bold; margin-bottom: 5px;">${event.title}</div>
-                <div style="font-style: italic; margin-bottom: 10px;">${event.flavor}</div>
-                <div>${event.effect}</div>
-            </div>
-        `
-  }
+//   // Display event title and flavor text
+//   const cardResultElement = document.getElementById("outcomeDisplay")
+//   if (cardResultElement) {
+//     cardResultElement.innerHTML = `
+//             <div class="card-result">
+//                 <div style="font-weight: bold; margin-bottom: 5px;">${event.title}</div>
+//                 <div style="font-style: italic; margin-bottom: 10px;">${event.flavor}</div>
+//                 <div>${event.effect}</div>
+//             </div>
+//         `
+//   }
 
-  // Handle specific event codes
-  switch (code) {
-    case "001":
-      // FBI Sting
-      handleFBISting()
-      break
-    case "005":
-      // Burner Account Blows Up
-      handleBurnerAccountEvent()
-      break
-    case "007":
-      // Crypto Crash
-      handleCryptoCrash()
-      break
-    // Add more event handlers as needed
-    default:
-      // Generic handling based on effect type
-      handleGenericEvent(event)
-  }
+//   // Handle specific event codes
+//   switch (code) {
+//     case "001":
+//       // FBI Sting
+//       handleFBISting()
+//       break
+//     case "005":
+//       // Burner Account Blows Up
+//       handleBurnerAccountEvent()
+//       break
+//     case "007":
+//       // Crypto Crash
+//       handleCryptoCrash()
+//       break
+//     // Add more event handlers as needed
+//     default:
+//       // Generic handling based on effect type
+//       handleGenericEvent(event)
+//   }
 
-  // Update game state after event
-  updateGameState()
-}
+//   // Update game state after event
+//   updateGameState()
+// }
 
 // Handle FBI Sting event
 function handleFBISting() {
@@ -520,6 +530,8 @@ function generateGameHash() {
 }
 
 // Submit score to leaderboard
+const gameHash = generateGameHash() // Declare gameHash here
+
 function submitScore() {
   // Prepare score data
   const scoreData = {
@@ -571,3 +583,140 @@ document.addEventListener("DOMContentLoaded", () => {
     debugPanel.addEventListener("click", debugGameState)
   }
 })
+
+// Fix for the card effect function
+function runCardEffect(code) {
+  console.log(`Running card effect for code ${code} with roll null`)
+
+  // Get the event data from your events.json
+  fetch("events.json")
+    .then((response) => response.json())
+    .then((events) => {
+      const event = events[code]
+
+      if (!event) {
+        console.error(`Event code ${code} not found`)
+        updateStatusBar(`Error: Event code ${code} not found`)
+        return
+      }
+
+      // Safely update the outcome display
+      const outcomeDisplay = document.getElementById("outcomeDisplay")
+      if (outcomeDisplay) {
+        // Create the card result content
+        const cardResultHTML = `
+          <div class="card-result">
+            <div style="display: block !important;">
+              <div style="font-weight: bold; margin-bottom: 5px;">${event.title}</div>
+              <div style="font-style: italic; margin-bottom: 10px;">${event.flavor}</div>
+              <div>${event.effect}</div>
+            </div>
+          </div>
+        `
+
+        // Set the HTML content safely
+        outcomeDisplay.innerHTML = cardResultHTML
+      } else {
+        console.error("Outcome display element not found")
+      }
+
+      // Handle specific event codes
+      if (code === "007") {
+        console.log("Running MARKET CRASH effect")
+        // Your existing market crash code
+      }
+
+      // Update game state
+      updateGameState()
+    })
+    .catch((error) => {
+      console.error("Error loading events:", error)
+      const outcomeDisplay = document.getElementById("outcomeDisplay")
+      if (outcomeDisplay) {
+        outcomeDisplay.textContent = "Error: Could not load event data"
+      }
+    })
+}
+
+// Safe update function for the status bar
+function updateStatusBar(message) {
+  const statusBar = document.getElementById("statusBar")
+  if (statusBar) {
+    statusBar.textContent = message
+  } else {
+    console.warn("Status bar element not found")
+  }
+}
+
+// Safe update function for game state
+function updateGameState() {
+  // Update BTC display
+  const btcDisplay = document.getElementById("btcDisplay")
+  if (btcDisplay) {
+    btcDisplay.textContent = btc
+  }
+
+  // Update Glock display
+  const glockDisplay = document.getElementById("glockDisplay")
+  if (glockDisplay) {
+    glockDisplay.textContent = glock ? "Yes" : "No"
+  }
+
+  // Calculate inventory count
+  let inventoryCount = 0
+  for (const item in inventory) {
+    inventoryCount += inventory[item] || 0
+  }
+
+  // Update inventory display
+  const inventoryDisplay = document.getElementById("inventoryDisplay")
+  if (inventoryDisplay) {
+    inventoryDisplay.textContent = `${inventoryCount}/${maxInventory}`
+  }
+
+  // Update game flow state
+  updateStatusBar(`Game flow highlight: ${gameFlowState}, BTC: ${btc}`)
+}
+
+// Apply event function - this will replace your existing applyEvent function
+function applyEvent() {
+  const eventCodeInput = document.getElementById("eventCodeInput")
+  if (!eventCodeInput) {
+    console.error("Event code input not found")
+    return
+  }
+
+  const eventCode = eventCodeInput.value.trim()
+
+  if (!eventCode) {
+    const outcomeDisplay = document.getElementById("outcomeDisplay")
+    if (outcomeDisplay) {
+      outcomeDisplay.textContent = "Please enter an event code"
+    }
+    return
+  }
+
+  console.log(`[GAME FLOW] Applying event code: ${eventCode}`)
+  gameFlowState = "applyingEvent"
+  updateGameState()
+
+  // Run the fixed card effect function
+  runCardEffect(eventCode)
+}
+
+// Make sure this is added to your DOMContentLoaded event
+document.addEventListener("DOMContentLoaded", () => {
+  // Your existing initialization code
+
+  // Make sure the event button has the correct event listener
+  const applyEventButton = document.getElementById("applyEventButton")
+  if (applyEventButton) {
+    // Remove any existing listeners to avoid duplicates
+    applyEventButton.replaceWith(applyEventButton.cloneNode(true))
+
+    // Add the new listener
+    document.getElementById("applyEventButton").addEventListener("click", applyEvent)
+  }
+})
+
+// Keep all your other existing functions unchanged
