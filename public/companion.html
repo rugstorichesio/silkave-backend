@@ -488,16 +488,18 @@
 
   <div class="market">
     <h3>Market Prices</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Owned</th>
-          <th>Buy</th>
-          <th>Sell</th>
-        </tr>
-      </thead>
+    <table id="marketTable">
+      <thead><tr><th>Item</th><th>Price</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="transactionSection" class="inventory">
+    <h3>Buy/Sell</h3>
+    <table id="transactionTable">
+      <thead><tr><th style="text-align: left; padding-left: 10px;">Item</th><th>Owned</th><th>Buy</th><th>Sell</th></tr></thead>
       <tbody>
+        <!-- Fallback static rows in case JavaScript fails -->
         <tr>
           <td style="text-align: left; padding-left: 10px;">LSD</td>
           <td style="text-align: center;" id="owned-lsd">0</td>
@@ -596,36 +598,83 @@
         </tr>
       </tbody>
     </table>
+    <div class="transaction-buttons">
+      <button id="executeTransactionsBtn" onclick="executeTransactions()">Execute Transactions</button>
+      <button id="buyGlockBtn" onclick="buyGlock()">Buy Glock (20 BTC)</button>
+      <button id="sellAllBtn" onclick="sellEverything()">Sell Everything</button>
+      <div class="liquid-btc-container">
+        <span class="liquid-btc-label">Liquid BTC:</span>
+        <span id="liquidBtc" class="liquid-btc-value">100</span>
+      </div>
+    </div>
   </div>
 
-  <div class="transaction-buttons">
-    <button onclick="buyItems()">Buy Items</button>
-    <button onclick="sellItems()">Sell Items</button>
-  </div>
-
-  <div class="liquid-btc-container">
-    <span class="liquid-btc-label">Liquid BTC:</span>
-    <span class="liquid-btc-value" id="liquid-btc">0</span>
-  </div>
+  <!-- Moved inventory status here -->
+  <div class="inventory-status" id="inventoryStatus"></div>
 
   <div class="log-container">
-    <div id="log" class="log"></div>
+    <div class="log" id="log"></div>
   </div>
 
-  <div id="inventoryStatus" class="inventory-status"></div>
+  <div style="text-align: center; margin-top: 2rem;">
+    <button id="advanceCycleBtn" onclick="advanceCycle()">Advance to Next Cycle</button>
+  </div>
 
   <div class="bottom-bar">
-    &copy; 2024 Silk Ave Game - v0.9 - by R.A.
+    Cycle: <span id="cycleBottom">1</span> / 10 |
+    BTC: <span id="btcBottom">100</span> |
+    Glock: <span id="glockBottom">No</span> |
+    Inventory: <span id="invCountBottom">0</span>/20
   </div>
 
-  <script>
-    // JavaScript functions will go here
-    // Example:
-    function applyEvent() {
-      alert('Applying event!');
-    }
-  </script>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="submit.html">Submit Score</a>
+  </div>
+
+  <!-- Sound effects -->
+  <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
+  <audio id="typing" src="https://assets.mixkit.co/sfx/preview/mixkit-keyboard-typing-1386.mp3" preload="auto" loop></audio>
+  <audio id="crackles" src="https://assets.mixkit.co/sfx/preview/mixkit-radio-static-noise-2556.mp3" preload="auto" loop volume="0.3"></audio>
+
+  <!-- Scripts - Note the order is important -->
   <script src="modal.js"></script>
-  <script src="companion.js"></script>
+  <script src="script.js"></script>
+  
+  <script>
+    // Play sound on button clicks
+    function playBleep() {
+      const sound = document.getElementById('bleep');
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Audio play failed:", e));
+      }
+    }
+    
+    // Check if we're on a mobile device
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.matchMedia("(max-width: 600px)").matches) {
+        const homeLink = document.querySelector('.home-link');
+        if (homeLink) {
+          homeLink.style.position = 'relative';
+          homeLink.style.top = 'auto';
+          homeLink.style.right = 'auto';
+        }
+      }
+      
+      // Add click sound to all buttons
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('click', playBleep);
+      });
+      
+      // Also add to select elements when they change
+      const selects = document.querySelectorAll('select');
+      selects.forEach(select => {
+        select.addEventListener('change', playBleep);
+      });
+    });
+  </script>
 </body>
 </html>

@@ -125,47 +125,6 @@ function showPrompt(title, message) {
   })
 }
 
-// Declare missing functions
-function cashOutInventory() {
-  let totalEarnings = 0
-  const soldItems = []
-
-  for (const item in inventory) {
-    if (inventory.hasOwnProperty(item)) {
-      const itemCount = inventory[item].length
-      const itemPrice = currentPrices[item] || 1 // Use current price or default to 1
-      const earnings = itemCount * itemPrice
-
-      totalEarnings += earnings
-      soldItems.push(`${itemCount} ${itemNames[item]} for ${earnings} BTC`)
-
-      // Clear the inventory for this item
-      inventory[item] = []
-
-      log(`-- Cashed out ${itemCount} ${itemNames[item]} for ${earnings} BTC.`)
-    }
-  }
-
-  // Update BTC
-  btc += totalEarnings
-
-  updateInventoryDisplay()
-  updateStatusBars()
-
-  return {
-    itemsSold: soldItems.length,
-    soldItems: soldItems,
-    totalEarnings: totalEarnings,
-  }
-}
-
-function scrollToTop() {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth", // For a smooth scrolling effect
-  })
-}
-
 // Initialize the game when the page loads
 document.addEventListener("DOMContentLoaded", () => {
   updateStatusBars()
@@ -759,6 +718,7 @@ function grantItems(method, count) {
   const spaceLeft = inventoryLimit - currentCount
 
   if (spaceLeft <= 0) {
+    // If inventory is full, give bonus BTC instead of items
     btc += 25 // Bonus if inventory is full
     return `Inventory full - gained 25 BTC instead`
   }
@@ -803,56 +763,6 @@ ${items.map((i) => itemNames[i]).join(", ")}`,
   } else {
     return grantRandomItems(actualCount)
   }
-}
-
-// Helper function for random item grants
-// function grantRandomItems(count) {
-//   let added = 0
-//   const itemsAdded = []
-
-//   for (let i = 0; i < count; i++) {
-//     const randomItem = items[Math.floor(Math.random() * items.length)]
-//     if (!inventory[randomItem]) inventory[randomItem] = []
-//     inventory[randomItem].push(currentPrices[randomItem] || 5) // Use current price or default to 5
-//     itemsAdded.push(itemNames[randomItem])
-//     added++
-//   }
-
-//   updateInventoryDisplay()
-//   updateStatusBars()
-//   return `Gained ${added} random items: ${itemsAdded.join(", ")}`;
-// }
-
-// Replace prompt in applyWhaleBuyout function
-function applyWhaleBuyout() {
-  showPrompt(
-    "WHALE BUYOUT",
-    `A big player wants to buy in bulk!\nChoose an item to sell at TRIPLE price:\n\n${items.map((i) => itemNames[i]).join(", ")}`,
-  ).then((itemType) => {
-    let message = ""
-
-    if (itemType) {
-      // Find matching item (case insensitive)
-      const matchedItem = items.find(
-        (i) => itemNames[i].toLowerCase() === itemType.toLowerCase() || i.toLowerCase() === itemType.toLowerCase(),
-      )
-
-      if (matchedItem && currentPrices[matchedItem]) {
-        const originalPrice = currentPrices[matchedItem]
-        currentPrices[matchedItem] = originalPrice * 3
-        updateMarketTable()
-        message = `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
-      } else {
-        message = "Invalid item choice - no effect"
-      }
-    } else {
-      message = "No item selected - no effect"
-    }
-
-    document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + message
-  })
-
-  return "Waiting for your item selection..."
 }
 
 // Roll market prices
@@ -1245,76 +1155,48 @@ function executeTransactions() {
 function advanceCycle() {
   playSound("bleep")
 
-  if (cycle >= 10) {
-    // This is the final round - cash out and end game
-    const cashOutResult = cashOutInventory()
-
-    log("-- GAME OVER! You've gone dark with your earnings.")
-
-    // Generate a game verification hash
-    const gameHash = generateGameHash()
-
-    // Create game data for submission
-    const gameData = {
-      btc: btc,
-      glock: glock,
-      gameHistory: gameHistory,
-      hash: gameHash,
-    }
-
-    // Encode game data for URL
-    const encodedGameData = btoa(JSON.stringify(gameData))
-
-    // Show game over message with final results
-    let cashOutDetails = ""
-    if (cashOutResult.itemsSold > 0) {
-      cashOutDetails = `\nCashed out: ${cashOutResult.soldItems.join(", ")}`
-    }
-
-    // Use custom confirm instead of browser confirm
-    showConfirm(
-      "GAME OVER",
-      `You've gone dark with your earnings.\n\nFinal score: ${btc} BTC with${glock ? "" : "out"} a Glock.${cashOutDetails}\n\nSubmit your score to the leaderboard?`,
-      "Submit Score",
-      "Stay Here",
-    ).then((result) => {
-      if (result) {
-        // Redirect to submit page with verified game data
-        window.location.href = `submit.html?gameData=${encodedGameData}`
-      }
-    })
-
-    return
-  }
-
-  // Rest of the function remains the same
-  cycle++
-
-  // Reset event effects
-  resetEventEffects()
-
-  // Reset event code and roll button
-  eventCode = ""
-  isRollCard = false
+  // Reset event code
   document.getElementById("eventCode").value = ""
-  document.getElementById("rollCardBtn").style.display = "none"
   document.getElementById("cardDiceResult").textContent = ""
   document.getElementById("marketDiceResult").textContent = ""
 
   // Reset burner deal
   document.getElementById("burnerDeal").value = ""
 
-  log(`-- Advanced to Cycle ${cycle}/10`)
-  updateStatusBars()
+  // Reset transaction inputs
+  const buyInputs = document.querySelectorAll(".buy-input")
+  buyInputs.forEach((input) => (input.value = ""))
+  const sellInputs = document.querySelectorAll(".sell-input")
+  sellInputs.forEach((input) => (input.value = ""))
 
-  // Reset game flow state
+  // Reset any previous event effects
+  resetEventEffects()
+
+  // Update game flow state
   gameFlowState = "enterEventCode"
 
   // Update the highlighted element
   updateGameFlowHighlight()
 
-  // Robust scroll to top implementation
-  scrollToTop()
+  // Roll market prices
+  rollMarket()
+
+  // Update market table
+  updateMarketTable()
+
+  // Repopulate transaction table
+  populateTransactionTable()
+
+  // Increment cycle
+  cycle++
+
+  // Update button text on last cycle
+  const advanceButton = document.getElementById("advanceCycleBtn")
+  if (cycle === 10) {
+    advanceButton.textContent = "Cash Out and Go Dark"
+  }
+
+  log(`-- Advanced to cycle ${cycle}.`)
 }
 
 // Sell all items at half price
@@ -1346,26 +1228,4 @@ function sellAllAtHalf() {
   updateStatusBars()
 
   return `Sold all ${itemsSold} items at half price for ${totalEarnings} BTC.`
-}
-
-// Generate a game hash for verification
-function generateGameHash() {
-  const gameData = {
-    btc: btc,
-    glock: glock,
-    cycle: cycle,
-    inventory: JSON.stringify(inventory),
-  }
-
-  // Simple hash function
-  let hash = 0
-  const str = JSON.stringify(gameData)
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i)
-    hash = (hash << 5) - hash + char
-    hash = hash & hash // Convert to 32bit integer
-  }
-
-  // Convert to hex and ensure it's positive
-  return Math.abs(hash).toString(16).padStart(8, "0")
 }
