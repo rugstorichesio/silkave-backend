@@ -43,280 +43,589 @@
       padding: 0.5rem;
       text-align: center;
     }
-    #btcBalance {
-      font-size: 1.5rem;
-      text-shadow: 0 0 5px #0f0;
-      margin-bottom: 0.5rem;
-      display: block;
-    }
-    #cycleNumber {
-      font-size: 1.2rem;
-      text-shadow: 0 0 3px #0f0;
-      margin-bottom: 1rem;
-      display: block;
-    }
-    #inventoryDisplay {
-      margin-top: 1rem;
-      font-size: 1rem;
-      text-shadow: 0 0 3px #0f0;
-      display: block;
-    }
-    .market-container {
+    .log, .inventory-status {
+      white-space: pre-line;
+      background: #000;
       border: 1px solid #0f0;
       padding: 1rem;
-      margin-top: 1rem;
-      position: relative;
+      margin-top: 2rem;
     }
-    .market-container::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url('your-camel-image.png');
-      background-size: contain;
-      background-position: center;
-      background-repeat: no-repeat;
-      opacity: 0.1;
-      z-index: 1;
-      filter: brightness(0.7) contrast(1.1);
+    .bottom-bar {
+      text-align: center;
+      margin-top: 2rem;
+      font-weight: bold;
+      font-size: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #0f0;
     }
-    .input-group {
+    .card-result {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+    .event-section {
+      border: 1px solid #0f0;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .event-title {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+    .event-input {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
     }
-    .input-group label {
-      margin-right: 0.5rem;
+    .highlight-pulse {
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 0 10px #0f0;
     }
-    #gameLog {
-      border: 1px solid #0f0;
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 5px #0f0;
+      }
+      50% {
+        box-shadow: 0 0 20px #0f0, 0 0 30px #0f0;
+      }
+      100% {
+        box-shadow: 0 0 5px #0f0;
+      }
+    }
+    .game-hint {
+      text-align: center;
       padding: 0.5rem;
-      margin-top: 1rem;
-      max-height: 150px;
-      overflow-y: scroll;
-      font-size: 0.8rem;
+      margin: 1rem 0;
+      background: #001100;
+      border: 1px dashed #0f0;
+      font-style: italic;
     }
-    #eventCode {
-      width: 50px;
-    }
-    .card-result {
-      border: 1px solid #0f0;
-      padding: 0.5rem;
-      margin-top: 0.5rem;
-      display: none;
-      min-height: 2.5rem;
-      white-space: pre-line;
-    }
-    #marketDiceResult {
-      display: none;
-      min-height: 1.5rem;
-      font-weight: bold;
-    }
-    .nav-buttons {
+    .nav-links {
+      text-align: center;
+      margin: 2rem 0;
       display: flex;
       justify-content: center;
-      margin-top: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
-    .nav-buttons button {
-      margin: 0.5rem;
-    }
-    .btc-bar-container {
-      width: 100%;
-      height: 1rem;
+    .nav-links a {
+      color: #0f0;
+      text-decoration: none;
+      margin: 0 0.5rem;
+      padding: 0.5rem 1rem;
       border: 1px solid #0f0;
-      margin-bottom: 0.5rem;
+      transition: all 0.3s ease;
+    }
+    .nav-links a:hover {
+      background: #0f0;
+      color: #000;
+      box-shadow: 0 0 10px #0f0;
+    }
+    
+    /* Media Queries for Responsive Design */
+    /* Mobile Devices (portrait) */
+    @media only screen and (max-width: 600px) {
+      body {
+        padding: 0.5rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+        margin-top: 0.5rem;
+      }
+      
+      h2, h3 {
+        font-size: 1.4rem;
+        margin-top: 1rem;
+      }
+      
+      input, select, button {
+        margin: 0.2rem;
+        padding: 0.4rem;
+        font-size: 0.9rem;
+      }
+      
+      table {
+        font-size: 0.9rem;
+      }
+      
+      th, td {
+        padding: 0.3rem;
+      }
+      
+      .event-section {
+        padding: 0.7rem;
+      }
+      
+      .event-input {
+        flex-direction: column;
+      }
+      
+      .log, .inventory-status {
+        font-size: 0.8rem;
+        padding: 0.7rem;
+      }
+      
+      .bottom-bar {
+        font-size: 0.9rem;
+      }
+      
+      .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 1.5rem 0;
+      }
+      
+      .nav-links a {
+        display: block;
+        width: 80%;
+        margin: 0 auto;
+      }
+      
+      .home-link {
+        position: relative !important;
+        top: auto !important;
+        right: auto !important;
+        text-align: center;
+        margin: 1rem 0;
+        display: block;
+      }
+    }
+    
+    /* Tablets and small screens */
+    @media only screen and (min-width: 601px) and (max-width: 1024px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      table {
+        width: 95%;
+        margin: 1rem auto;
+      }
+      
+      .event-section, .log, .inventory-status {
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+    
+    /* Detect if device supports hover - typically indicates a non-touch device */
+    @media (hover: none) {
+      .nav-links a {
+        padding: 0.7rem 1.2rem;
+      }
+      
+      button {
+        padding: 0.6rem;
+      }
+    }
+    .log-container {
+      height: 200px;
+      overflow-y: auto;
+      background: #000;
+      border: 1px solid #0f0;
+      padding: 0;
+      margin-top: 2rem;
+    }
+
+    .log {
+      white-space: pre-line;
+      padding: 1rem;
+      margin: 0;
+    }
+
+    .transaction-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
       position: relative;
     }
-    .btc-bar {
-      height: 100%;
-      background-color: #0f0;
-      width: 0%;
-      transition: width 0.3s ease;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    .inv-bar-container {
-      width: 100%;
-      height: 1rem;
+
+    .liquid-btc {
+      display: inline-block;
+      background-color: #000;
+      color: #0f0;
       border: 1px solid #0f0;
-      margin-bottom: 1rem;
-      position: relative;
+      padding: 0.5rem;
+      font-weight: bold;
+      text-align: center;
+      animation: btc-pulse 2s infinite;
     }
-    .inv-bar {
-      height: 100%;
-      background-color: #0f0;
-      width: 0%;
-      transition: width 0.3s ease;
-      position: absolute;
-      top: 0;
-      left: 0;
+
+    @keyframes btc-pulse {
+      0%, 100% { box-shadow: 0 0 5px #0f0; }
+      50% { box-shadow: 0 0 15px #0f0; }
     }
-    .max-button {
-      padding: 0.1rem 0.3rem;
-      margin-left: 0.2rem;
-      font-size: 0.7rem;
+
+    @media only screen and (max-width: 600px) {
+      .liquid-btc {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
     }
-    .game-flow-highlight {
-      border: 2px solid #0f0;
-      animation: pulseBorder 2s infinite;
+
+    /* Updated burner deal styling */
+    .burner-deal-item {
+      color: #00ff00;
+      font-weight: bold;
+      animation: burner-flash 1s infinite;
     }
-    @keyframes pulseBorder {
-      0% { border-color: #0f0; }
-      50% { border-color: #000; }
-      100% { border-color: #0f0; }
+
+    .burner-deal-item::before {
+      content: "<< ";
     }
+
+    .burner-deal-item::after {
+      content: " >>";
+    }
+
+    @keyframes burner-flash {
+      0%, 100% { color: #0f0; text-shadow: none; }
+      50% { color: #00ff00; text-shadow: 0 0 8px #00ff00; }
+    }
+
+    @media only screen and (max-width: 600px) {
+      .transaction-buttons {
+        flex-direction: column;
+      }
+      
+      .log-container {
+        height: 150px;
+      }
+    }
+
+  .liquid-btc-container {
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #0f0;
+    border-radius: 4px;
+    color: #0f0;
+    font-weight: bold;
+    animation: subtle-pulse 3s infinite;
+    margin-left: auto;
+    padding: 4px 8px;
+  }
+  
+  @keyframes subtle-pulse {
+    0%, 100% { box-shadow: 0 0 3px #0f0; }
+    50% { box-shadow: 0 0 8px #0f0; }
+  }
+  
+  @media only screen and (max-width: 600px) {
+    .liquid-btc-container {
+      position: static;
+      display: block;
+      margin: 0.5rem auto;
+      width: 80%;
+      text-align: center;
+    }
+  }
+  
+  .liquid-btc-label {
+    font-size: 0.8em;
+    margin-right: 5px;
+  }
+  
+  .liquid-btc-value {
+    font-size: 1em;
+  }
+  
+  /* CRITICAL FIX: Force all modals to have dark background and green text */
+  .modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .modal-container {
+    background-color: #111 !important;
+    color: #0f0 !important;
+    border: 2px solid #0f0 !important;
+    box-shadow: 0 0 20px #0f0 !important;
+    padding: 1.5rem !important;
+    width: 90% !important;
+    max-width: 500px !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+
+  .modal-header {
+    color: #0f0 !important;
+    text-align: center !important;
+    margin-bottom: 1rem !important;
+    font-size: 1.5rem !important;
+    text-shadow: 0 0 5px #0f0 !important;
+  }
+
+  .modal-content {
+    color: #0f0 !important;
+    margin-bottom: 1.5rem !important;
+    font-size: 1.1rem !important;
+    line-height: 1.5 !important;
+    white-space: pre-line !important;
+  }
+
+  .modal-buttons {
+    display: flex !important;
+    justify-content: center !important;
+    gap: 1rem !important;
+  }
+
+  .modal-button {
+    background-color: #000 !important;
+    color: #0f0 !important;
+    border: 1px solid #0f0 !important;
+    padding: 0.5rem 1.5rem !important;
+    cursor: pointer !important;
+    font-family: monospace !important;
+    font-size: 1rem !important;
+  }
+
+  .modal-button:hover {
+    background-color: #0f0 !important;
+    color: #000 !important;
+  }
+
+  .modal-input {
+    width: 100% !important;
+    background-color: #000 !important;
+    color: #0f0 !important;
+    border: 1px solid #0f0 !important;
+    padding: 0.5rem !important;
+    margin-bottom: 1rem !important;
+    font-family: monospace !important;
+  }
+
+  /* Override any browser default styles that might be interfering */
+  div[class^="modal"], div[class*=" modal"] {
+    background-color: #111 !important;
+    color: #0f0 !important;
+  }
+
+  button[class^="modal"], button[class*=" modal"] {
+    background-color: #000 !important;
+    color: #0f0 !important;
+  }
+
+  /* Max button styling */
+  .max-button {
+    display: inline-block !important;
+    background-color: #000 !important;
+    color: #0f0 !important;
+    border: 1px solid #0f0 !important;
+    padding: 2px 5px !important;
+    margin-left: 5px !important;
+    font-size: 0.8rem !important;
+    cursor: pointer !important;
+    font-family: monospace !important;
+  }
+
+  .max-button:hover {
+    background-color: #0f0 !important;
+    color: #000 !important;
+    box-shadow: 0 0 5px #0f0 !important;
+  }
   </style>
-  <script src="modal.js"></script>
-  <script src="script.js"></script>
 </head>
 <body>
-  <h1>Silk Ave Companion</h1>
-  <div class="btc-bar-container">
-    <div id="btcBar" class="btc-bar"></div>
+  <div class="home-link" style="position: absolute; top: 1rem; right: 2rem;">
+    <a href="index.html" style="color: #0f0; text-decoration: underline; font-weight: bold;">&larr; Return to Home</a>
   </div>
-  <span id="btcBalance"></span>
-  <div class="inv-bar-container">
-    <div id="inventoryBar" class="inv-bar"></div>
+
+  <h1>Silk Ave Game Companion</h1>
+  <div>
+    <h2>Cycle: <span id="cycle">1</span> / 10</h2>
+    <h3>BTC: <span id="btc">100</span> | Glock: <span id="glock">No</span> | Inventory: <span id="invCount">0</span>/20</h3>
   </div>
-  <span id="inventoryDisplay"></span>
-  <span id="cycleNumber"></span>
-  <div class="input-group">
-    <label for="eventCode">Enter Event Code:</label>
-    <input type="text" id="eventCode">
-    <button onclick="applyEvent()">Apply Event</button>
+
+  <div id="gameHint" class="game-hint">Enter a 3-digit event card code</div>
+
+  <div id="eventCodeSection" class="event-section">
+    <h3 class="event-title">Event Card</h3>
+    <div class="event-input">
+      <label>Event Card Code: <input type="text" id="eventCode" placeholder="Enter code"></label>
+      <button id="applyEventBtn" onclick="applyEvent()">Apply Event</button>
+    </div>
+    <div class="card-result">
+      <button id="rollCardBtn" onclick="rollCardDice()" style="display: none;">🎲 Roll for Card</button>
+      <div id="cardDiceResult"></div>
+    </div>
   </div>
-  <div class="card-result" id="cardDiceResult"></div>
-  <div class="market-container">
-    <h2>Market Prices</h2>
+
+  <div class="actions">
+    <h3>Market Setup</h3>
+    <button id="rollMarketBtn" onclick="rollMarket()">🎲 Roll Market Prices</button>
     <span id="marketDiceResult"></span>
-    <button id="rollMarketBtn" onclick="updateMarketPrices()">Roll Market</button>
+    <br>
+    <div id="burnerDealSection">
+      <label>Burner Deal Item:
+        <select id="burnerDeal">
+          <option value="">--Select--</option>
+          <option value="lsd">LSD</option>
+          <option value="weed">Weed</option>
+          <option value="cocaine">Cocaine</option>
+          <option value="mdma">MDMA</option>
+          <option value="passports">Forged Passports</option>
+          <option value="accounts">Hacked Accounts</option>
+          <option value="ccs">Skimmed Credit Cards</option>
+          <option value="files">Leaked Intel</option>
+        </select>
+      </label>
+      <button id="applyBurnerBtn" onclick="applyBurnerDeal()">Apply Burner Deal</button>
+    </div>
+  </div>
+
+  <div class="market">
+    <h3>Market Prices</h3>
     <table>
       <thead>
         <tr>
           <th>Item</th>
-          <th>Price</th>
+          <th>Owned</th>
           <th>Buy</th>
           <th>Sell</th>
         </tr>
       </thead>
-      <tbody id="marketPrices"></tbody>
+      <tbody>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">LSD</td>
+          <td style="text-align: center;" id="owned-lsd">0</td>
+          <td>
+            <input type="number" id="buy-lsd" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('lsd')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-lsd" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('lsd')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Weed</td>
+          <td style="text-align: center;" id="owned-weed">0</td>
+          <td>
+            <input type="number" id="buy-weed" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('weed')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-weed" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('weed')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Cocaine</td>
+          <td style="text-align: center;" id="owned-cocaine">0</td>
+          <td>
+            <input type="number" id="buy-cocaine" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('cocaine')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-cocaine" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('cocaine')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">MDMA</td>
+          <td style="text-align: center;" id="owned-mdma">0</td>
+          <td>
+            <input type="number" id="buy-mdma" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('mdma')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-mdma" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('mdma')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Forged Passports</td>
+          <td style="text-align: center;" id="owned-passports">0</td>
+          <td>
+            <input type="number" id="buy-passports" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('passports')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-passports" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('passports')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Hacked Accounts</td>
+          <td style="text-align: center;" id="owned-accounts">0</td>
+          <td>
+            <input type="number" id="buy-accounts" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('accounts')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-accounts" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('accounts')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Skimmed Credit Cards</td>
+          <td style="text-align: center;" id="owned-ccs">0</td>
+          <td>
+            <input type="number" id="buy-ccs" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('ccs')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-ccs" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('ccs')">Max</button>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: left; padding-left: 10px;">Leaked Intel</td>
+          <td style="text-align: center;" id="owned-files">0</td>
+          <td>
+            <input type="number" id="buy-files" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxBuy('files')">Max</button>
+          </td>
+          <td>
+            <input type="number" id="sell-files" min="0" style="width: 50px">
+            <button class="max-button" onclick="setMaxSell('files')">Max</button>
+          </td>
+        </tr>
+      </tbody>
     </table>
   </div>
-  <div id="gameLog"></div>
-  <div class="nav-buttons">
-    <button id="advanceCycleBtn" onclick="advanceCycle()">Advance to Next Cycle</button>
-    <button onclick="resetGame()">Reset Game</button>
+
+  <div class="transaction-buttons">
+    <button onclick="buyItems()">Buy Items</button>
+    <button onclick="sellItems()">Sell Items</button>
   </div>
+
+  <div class="liquid-btc-container">
+    <span class="liquid-btc-label">Liquid BTC:</span>
+    <span class="liquid-btc-value" id="liquid-btc">0</span>
+  </div>
+
+  <div class="log-container">
+    <div id="log" class="log"></div>
+  </div>
+
+  <div id="inventoryStatus" class="inventory-status"></div>
+
+  <div class="bottom-bar">
+    &copy; 2024 Silk Ave Game - v0.9 - by R.A.
+  </div>
+
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      loadGameState();
-      updateUI();
-      updateStatusBars();
-      updateGameFlowHighlight();
-    });
-
-    function scrollToTopFunc() {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+    // JavaScript functions will go here
+    // Example:
+    function applyEvent() {
+      alert('Applying event!');
     }
-
-    function setMaxBuy(item) {
-      const price = currentPrices[item];
-      const maxQuantity = Math.floor(btc / price);
-      document.getElementById(`buy-${item}-qty`).value = maxQuantity;
-    }
-
-    function setMaxSell(item) {
-      document.getElementById(`sell-${item}-qty`).value = inventory[item] || 0;
-    }
-
-    function updateGameFlowHighlight() {
-      const eventCodeInput = document.getElementById('eventCode');
-      const applyEventButton = document.querySelector('.input-group button');
-      const advanceCycleButton = document.getElementById('advanceCycleBtn');
-
-      [eventCodeInput, applyEventButton, advanceCycleButton].forEach(el => {
-        if (el) el.classList.remove('game-flow-highlight');
-      });
-
-      if (gameFlowState === 'enterEventCode') {
-        if (eventCodeInput) eventCodeInput.classList.add('game-flow-highlight');
-        if (applyEventButton) applyEventButton.classList.add('game-flow-highlight');
-      } else if (gameFlowState === 'advanceCycle') {
-        if (advanceCycleButton) advanceCycleButton.classList.add('game-flow-highlight');
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const style = document.createElement("style");
-      style.textContent = `
-        .card-result {
-          display: block !important;
-          min-height: 2.5rem !important;
-          white-space: pre-line !important;
-          margin-top: 1rem !important;
-        }
-        #cardDiceResult {
-          display: block !important;
-          min-height: 1.5rem !important;
-          font-weight: bold !important;
-        }
-      `;
-      document.head.appendChild(style);
-
-      const sellLsdCell = document.querySelector('td:has(#sell-lsd)');
-      if (sellLsdCell && sellLsdCell.querySelectorAll('input').length > 1) {
-        sellLsdCell.innerHTML = `
-          <input type="number" id="sell-lsd" min="0" style="width: 50px">
-          <button class="max-button" onclick="setMaxSell('lsd')">Max</button>
-        `;
-      }
-
-      window.debugCardResult = function() {
-        const cardResult = document.getElementById("cardDiceResult");
-        console.log("Card Result Element:", cardResult);
-        console.log("Card Result Content:", cardResult.innerHTML);
-        console.log("Card Result Style:", window.getComputedStyle(cardResult));
-      };
-
-      window.testCard = function(code) {
-        document.getElementById("eventCode").value = code;
-        applyEvent();
-        console.log("Card result after applying:", document.getElementById("cardDiceResult").innerHTML);
-      };
-
-      window.initPrices = function() {
-        if (Object.keys(currentPrices).length === 0) {
-          for (const item of items) {
-            currentPrices[item] = priceMatrix[item][2];
-          }
-          console.log("Prices initialized:", currentPrices);
-        }
-      };
-
-      window.debugInventory = function() {
-        console.log("Current Inventory:", inventory);
-      };
-
-      window.debugGameState = function() {
-        console.log("Current Game State:", { btc, glock, cycle, inventory, currentPrices });
-      };
-
-      window.debugMarket = function() {
-        console.log("Current Market Prices:", currentPrices);
-      };
-
-      window.debugEvents = function() {
-        console.log("Events Data:", events);
-      };
-
-    });
   </script>
+  <script src="modal.js"></script>
+  <script src="companion.js"></script>
 </body>
 </html>
