@@ -13,6 +13,7 @@ let bannedItem = null
 const inventoryLimit = 20
 const gameHistory = []
 let ignoreNextNegative = false // For card 022 - Silk Security Patch
+let isAdvancing = false // Flag to prevent multiple advances
 
 // Game flow state tracking
 let gameFlowState = "enterEventCode"
@@ -243,8 +244,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Add direct event listener for the advance cycle button
   const advanceButton = document.getElementById("advanceCycleBtn")
   if (advanceButton) {
-    advanceButton.addEventListener("click", () => {
-      advanceCycle()
+    // Remove any existing event listeners to prevent duplicates
+    const newAdvanceButton = advanceButton.cloneNode(true)
+    advanceButton.parentNode.replaceChild(newAdvanceButton, advanceButton)
+
+    // Add the event listener to the new button
+    newAdvanceButton.addEventListener("click", (e) => {
+      e.preventDefault()
+      if (!isAdvancing) {
+        isAdvancing = true
+        advanceCycle()
+        // Reset the flag after a delay
+        setTimeout(() => {
+          isAdvancing = false
+        }, 1000)
+      }
     })
   }
 
@@ -1342,11 +1356,13 @@ function advanceCycle() {
   // Update status bars
   updateStatusBars()
 
-  // Update game flow state
+  // Update game flow state - CRITICAL: Set to enterEventCode to wait for user input
   gameFlowState = "enterEventCode"
 
   // Update the highlighted element
   updateGameFlowHighlight()
+
+  // DO NOT automatically roll market prices or do anything else that would advance the game flow
 }
 
 // Add the missing cashOutInventory function
