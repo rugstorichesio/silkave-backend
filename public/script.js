@@ -1,5 +1,6 @@
 // Silk Ave - Game Companion Script
 
+// Game state variables
 const btc = 100
 const glock = false
 const cycle = 1
@@ -14,154 +15,99 @@ const inventoryLimit = 20
 const gameHistory = []
 const ignoreNextNegative = false // For card 022 - Silk Security Patch
 let isAdvancing = false // Flag to prevent multiple advances
-
-// Add this after the other global variables
 const specialPriceItems = {} // Track items with special prices from events
 
-// Replace the entire sound system implementation at the top of the file with this more compatible version:
+// Sound system using pre-loaded audio files
+const soundFiles = {
+  bleep: "sounds/bleep.wav",
+  click: "sounds/bleep.wav", // Use bleep.wav for click sound too
+  error: "sounds/error.mp3",
+  success: "sounds/success.mp3",
+}
 
-// Sound system using Web Audio API with better browser compatibility
-const AudioContext = window.AudioContext || window.webkitAudioContext
-let audioContext
+// Fallback sound URLs if local files aren't available
+const fallbackSounds = {
+  bleep: "https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3",
+  click: "https://assets.mixkit.co/sfx/preview/mixkit-mouse-click-close-1113.mp3",
+  error: "https://assets.mixkit.co/sfx/preview/mixkit-negative-guitar-tone-2324.mp3",
+  success: "https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3",
+}
 
-// Initialize audio context on first user interaction
+// Audio elements cache
+const audioElements = {}
+
+// Initialize audio elements
 function initAudio() {
-  if (!audioContext) {
+  console.log("Initializing audio elements")
+
+  // Create audio elements for each sound type
+  for (const [soundType, soundPath] of Object.entries(soundFiles)) {
     try {
-      audioContext = new AudioContext()
-      console.log("Audio context initialized successfully")
+      // Create a new audio element
+      const audio = new Audio()
+
+      // Try the local file first
+      audio.src = soundPath
+
+      // Add error handler to fall back to remote URL if local file fails
+      audio.addEventListener("error", function () {
+        console.log(`Local sound file ${soundPath} failed to load, trying fallback`)
+        if (fallbackSounds[soundType]) {
+          this.src = fallbackSounds[soundType]
+        }
+      })
+
+      // Set other properties
+      audio.preload = "auto"
+      audio.volume = 0.3 // Lower volume
+
+      // Store in cache
+      audioElements[soundType] = audio
+
+      console.log(`Created audio element for ${soundType}`)
     } catch (e) {
-      console.error("Failed to initialize audio context:", e)
+      console.error(`Failed to create audio element for ${soundType}:`, e)
     }
   }
 }
 
-// Play a cyberpunk-themed sound with the Web Audio API
+// Play a sound
 function playSound(soundType = "click") {
   try {
-    // Initialize audio if needed
-    if (!audioContext) {
-      initAudio()
-    }
+    console.log(`Attempting to play sound: ${soundType}`)
 
-    if (!audioContext || audioContext.state === "suspended") {
-      console.log("Audio context is not available or is suspended. Resuming...")
-      if (audioContext) {
-        audioContext.resume().catch((err) => console.error("Failed to resume audio context:", err))
-      }
+    // Get the audio element
+    const audio = audioElements[soundType]
+
+    if (!audio) {
+      console.error(`No audio element found for ${soundType}`)
       return Promise.resolve(false)
     }
 
-    console.log(`Attempting to play sound: ${soundType}`)
+    // Reset the audio to the beginning if it's already playing
+    audio.currentTime = 0
 
-    // Create oscillator and gain nodes
-    const oscillator = audioContext.createOscillator()
-    const gainNode = audioContext.createGain()
+    // Play the sound
+    const playPromise = audio.play()
 
-    // Map sound type to appropriate parameters
-    switch (soundType) {
-      case "bleep": // Terminal beep sound
-        oscillator.type = "square"
-        oscillator.frequency.value = 660
-        gainNode.gain.value = 0.1
+    // Handle play promise
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          console.log(`Sound played: ${soundType}`)
+        })
+        .catch((error) => {
+          console.error(`Error playing ${soundType}:`, error)
 
-        // Connect nodes: oscillator -> gain -> destination
-        oscillator.connect(gainNode)
-        gainNode.connect(audioContext.destination)
-
-        // Start and stop
-        oscillator.start()
-        setTimeout(() => {
-          try {
-            oscillator.stop()
-          } catch (e) {
-            console.log("Oscillator already stopped")
+          // Try playing a different sound as fallback
+          if (soundType !== "click" && audioElements["click"]) {
+            console.log("Trying fallback sound (click)")
+            audioElements["click"].currentTime = 0
+            audioElements["click"].play().catch((e) => console.error("Even fallback sound failed:", e))
           }
-        }, 150)
-        break
-
-      case "click": // Data packet transmission sound
-        oscillator.type = "sine"
-        oscillator.frequency.value = 1000
-        gainNode.gain.value = 0.05
-
-        // Connect nodes
-        oscillator.connect(gainNode)
-        gainNode.connect(audioContext.destination)
-
-        // Start and stop
-        oscillator.start()
-        setTimeout(() => {
-          try {
-            oscillator.stop()
-          } catch (e) {
-            console.log("Oscillator already stopped")
-          }
-        }, 30)
-        break
-
-      case "error": // System error sound
-        oscillator.type = "sawtooth"
-        oscillator.frequency.value = 220
-        gainNode.gain.value = 0.1
-
-        oscillator.connect(gainNode)
-        gainNode.connect(audioContext.destination)
-
-        oscillator.start()
-        setTimeout(() => {
-          try {
-            oscillator.stop()
-          } catch (e) {
-            console.log("Oscillator already stopped")
-          }
-        }, 200)
-        break
-
-      case "success": // Transaction complete sound
-        oscillator.type = "triangle"
-        oscillator.frequency.value = 440
-        gainNode.gain.value = 0.1
-
-        oscillator.connect(gainNode)
-        gainNode.connect(audioContext.destination)
-
-        oscillator.start()
-        setTimeout(() => {
-          try {
-            oscillator.frequency.value = 660
-          } catch (e) {
-            console.log("Could not change frequency")
-          }
-        }, 100)
-        setTimeout(() => {
-          try {
-            oscillator.stop()
-          } catch (e) {
-            console.log("Oscillator already stopped")
-          }
-        }, 200)
-        break
-
-      default: // Default to click sound
-        oscillator.type = "sine"
-        oscillator.frequency.value = 800
-        gainNode.gain.value = 0.05
-
-        oscillator.connect(gainNode)
-        gainNode.connect(audioContext.destination)
-
-        oscillator.start()
-        setTimeout(() => {
-          try {
-            oscillator.stop()
-          } catch (e) {
-            console.log("Oscillator already stopped")
-          }
-        }, 50)
+        })
     }
 
-    console.log(`Sound played: ${soundType}`)
     return Promise.resolve(true)
   } catch (e) {
     console.error("Failed to play sound:", e)
@@ -169,76 +115,17 @@ function playSound(soundType = "click") {
   }
 }
 
-// Add a test sound function that plays different sounds in sequence
+// Test sound function
 function testSound() {
   console.log("Testing sounds...")
 
-  // Initialize audio on first interaction
-  initAudio()
+  // Play each sound with a delay
+  setTimeout(() => playSound("bleep"), 0)
+  setTimeout(() => playSound("success"), 800)
+  setTimeout(() => playSound("error"), 1600)
 
-  // Make sure audio context is resumed
-  if (audioContext && audioContext.state === "suspended") {
-    audioContext.resume().catch((err) => console.error("Failed to resume audio context:", err))
-  }
-
-  // Play a simple beep as a fallback if the other sounds fail
-  const simpleBeep = () => {
-    try {
-      if (!audioContext || audioContext.state !== "running") {
-        console.log("Audio context not available for simple beep")
-        return
-      }
-
-      const osc = audioContext.createOscillator()
-      const gain = audioContext.createGain()
-
-      osc.type = "sine"
-      osc.frequency.value = 440
-      gain.gain.value = 0.1
-
-      osc.connect(gain)
-      gain.connect(audioContext.destination)
-
-      osc.start()
-      setTimeout(() => osc.stop(), 200)
-
-      console.log("Simple beep played")
-    } catch (e) {
-      console.error("Even simple beep failed:", e)
-    }
-  }
-
-  // Try to play the sequence, with fallback to simple beep
-  simpleBeep()
-
-  // Log that we attempted to play sounds
-  console.log("Sound test complete - check console for errors")
+  console.log("Sound test initiated")
 }
-
-// Initialize audio on first user interaction
-document.addEventListener(
-  "click",
-  function initSound() {
-    console.log("First user interaction - initializing audio")
-    initAudio()
-
-    // Try to resume audio context if it's suspended
-    if (audioContext && audioContext.state === "suspended") {
-      audioContext
-        .resume()
-        .then(() => {
-          console.log("AudioContext resumed successfully")
-        })
-        .catch((err) => {
-          console.error("Failed to resume AudioContext:", err)
-        })
-    }
-
-    // Remove this listener after first click
-    document.removeEventListener("click", initSound)
-  },
-  { once: true },
-)
 
 // Game flow state tracking
 let gameFlowState = "enterEventCode"
@@ -575,6 +462,9 @@ function wipeHalfInventory() {
 
 // Initialize the game when the page loads
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize audio
+  initAudio()
+
   // Initialize the game log
   const logElement = document.getElementById("log")
   if (logElement && logElement.textContent === "") {
@@ -670,9 +560,6 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log(`GAME INIT: Starting at cycle ${cycle}`)
   isAdvancing = false
 })
-
-// Add this function to play a sound directly using the Web Audio API
-// as a last resort if the audio elements aren't working
 
 // Declare the missing variables
 function updateMarketTable() {}
