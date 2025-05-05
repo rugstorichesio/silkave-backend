@@ -15,6 +15,9 @@ const gameHistory = []
 let ignoreNextNegative = false // For card 022 - Silk Security Patch
 let isAdvancing = false // Flag to prevent multiple advances
 
+// Add this after the other global variables
+let specialPriceItems = {} // Track items with special prices from events
+
 // Game flow state tracking
 let gameFlowState = "enterEventCode"
 
@@ -673,6 +676,10 @@ function runCardEffect(code, roll) {
 
     case "005": // MARKET CRASH
       currentPrices = halvePrices()
+      // Mark all items as having special prices
+      for (const item of items) {
+        specialPriceItems[item] = true
+      }
       message = "BTC value halves this round"
       break
 
@@ -683,6 +690,10 @@ function runCardEffect(code, roll) {
 
     case "007": // LUCKY CONNECTION
       currentPrices = doublePrices()
+      // Mark all items as having special prices
+      for (const item of items) {
+        specialPriceItems[item] = true
+      }
       message = "Sell items at double price this round"
       break
 
@@ -840,6 +851,8 @@ function runCardEffect(code, roll) {
           if (matchedItem && currentPrices[matchedItem]) {
             const originalPrice = currentPrices[matchedItem]
             currentPrices[matchedItem] = originalPrice * 3
+            // Mark this item as having a special price
+            specialPriceItems[matchedItem] = true
             updateMarketTable()
             message = `Whale buyout: ${itemNames[matchedItem]} sell price tripled to ${currentPrices[matchedItem]} BTC`
           } else {
@@ -857,6 +870,10 @@ function runCardEffect(code, roll) {
     case "016": // LUCKY FLIP
       // Double the value of all inventory items
       currentPrices = doublePrices()
+      // Mark all items as having special prices
+      for (const item of items) {
+        specialPriceItems[item] = true
+      }
       message = "Doubled your inventory's market value this round"
       break
 
@@ -1144,11 +1161,18 @@ function grantItems(method, count) {
 function rollMarket() {
   playSound("bleep")
 
-  // Reset prices from any previous effects
+  // Reset prices from any previous effects, but preserve special prices
+  const oldPrices = { ...currentPrices }
   currentPrices = {}
 
   // Roll for each item
   for (const item of items) {
+    // Skip items with special prices from events
+    if (specialPriceItems[item]) {
+      currentPrices[item] = oldPrices[item] || priceMatrix[item][0]
+      continue
+    }
+
     const roll = Math.ceil(Math.random() * 6) - 1 // 0-5 index
     currentPrices[item] = priceMatrix[item][roll]
   }
@@ -1597,6 +1621,9 @@ function advanceCycle() {
 
   // Reset event effects
   resetEventEffects()
+
+  // Add this to the advanceCycle function after resetEventEffects()
+  specialPriceItems = {} // Reset special price tracking
 
   // Reset event code and related UI
   eventCode = ""
