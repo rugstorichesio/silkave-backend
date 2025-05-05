@@ -258,6 +258,13 @@ function clearInventory() {
 
 // Halve prices
 function halvePrices() {
+  // If prices aren't set yet, initialize them
+  if (Object.keys(currentPrices).length === 0) {
+    for (const item of items) {
+      currentPrices[item] = priceMatrix[item][2] // Use middle value as default
+    }
+  }
+
   const newPrices = {}
   for (const item in currentPrices) {
     if (currentPrices.hasOwnProperty(item)) {
@@ -269,6 +276,13 @@ function halvePrices() {
 
 // Double prices
 function doublePrices() {
+  // If prices aren't set yet, initialize them
+  if (Object.keys(currentPrices).length === 0) {
+    for (const item of items) {
+      currentPrices[item] = priceMatrix[item][2] // Use middle value as default
+    }
+  }
+
   const newPrices = {}
   for (const item in currentPrices) {
     if (currentPrices.hasOwnProperty(item)) {
@@ -577,6 +591,9 @@ function applyEvent() {
 
   eventCode = document.getElementById("eventCode").value.trim()
 
+  // Debug logging
+  console.log("Applying event code:", eventCode)
+
   // Validate event code
   if (!eventCode) {
     log("-- Please enter a valid event code.")
@@ -608,6 +625,15 @@ function applyEvent() {
   // If not a roll card, apply effect immediately
   if (!isRollCard) {
     try {
+      // Initialize prices if they're not set yet
+      if (Object.keys(currentPrices).length === 0) {
+        // Set default prices for all items
+        for (const item of items) {
+          currentPrices[item] = priceMatrix[item][2] // Use middle value as default
+        }
+        console.log("Initialized default prices:", currentPrices)
+      }
+
       // Check if we should ignore this negative effect
       if (ignoreNextNegative && isNegativeCard(eventCode)) {
         ignoreNextNegative = false
@@ -640,7 +666,7 @@ function applyEvent() {
       }
     } catch (error) {
       console.error("Error applying card effect:", error)
-      cardDiceResult.innerHTML = "⚠️ Error applying card effect"
+      cardDiceResult.innerHTML = "⚠️ Error applying card effect: " + error.message
       log(`-- Error applying card ${eventCode}: ${error.message}`)
     }
   } else {
@@ -743,426 +769,173 @@ function resetEventEffects() {
 
 // Run card effect based on code and roll
 function runCardEffect(code, roll) {
+  console.log(`Running card effect for code ${code} with roll ${roll}`)
   let message = ""
 
-  switch (code) {
-    case "001": // BUSTED
-      clearInventory()
-      btc = Math.max(0, btc - 50)
-      message = "Lose all inventory and 50 BTC"
-      break
+  try {
+    switch (code) {
+      case "005": // MARKET CRASH
+        console.log("Running MARKET CRASH effect")
+        console.log("Current prices before:", JSON.stringify(currentPrices))
 
-    case "002": // BTC WINDFALL
-      btc += 50
-      message = "Gain 50 BTC"
-      break
-
-    case "003": // GLITCHED NODE
-      btc = Math.max(0, btc - 10)
-      glock = true
-      message = "Lose 10 BTC, but gain 1 free Glock"
-      break
-
-    case "004": // FBI STING
-      if (roll <= 2) {
-        clearInventory()
-        btc = Math.max(0, btc - 50)
-        message = "Busted - Lose all inventory and 50 BTC"
-      } else {
-        if (glock) {
-          glock = false
-          message = "Escape - Lose Glock"
-        } else {
-          btc = Math.max(0, btc - 20)
-          message = "Escape - Lose 20 BTC"
+        // Initialize prices if they're not set yet
+        if (Object.keys(currentPrices).length === 0) {
+          for (const item of items) {
+            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
+          }
         }
-      }
-      break
 
-    case "005": // MARKET CRASH
-      currentPrices = halvePrices()
-      updateMarketTable() // Make sure to update the market table
-      message = "BTC value halves this round"
-      break
-
-    case "006": // DOG BITES USB
-      btc = Math.max(0, btc - 20)
-      message = "Lose 20 BTC"
-      break
-
-    case "007": // LUCKY CONNECTION
-      currentPrices = doublePrices()
-      message = "Sell items at double price this round"
-      break
-
-    case "008": // RANSOM DEMAND
-      showConfirm(
-        "RANSOM DEMAND",
-        `You've got locked out. Pay up or lose your stash.
-
-Your current BTC: ${btc}
-Your current inventory: ${countInventory()} items
-
-Choose your response:`,
-        "Pay 30 BTC",
-        `Lose Half Inventory (${Math.ceil(countInventory() / 2)} items)`,
-      ).then((result) => {
-        let outcome = ""
-        if (result) {
-          // Pay 30 BTC
-          btc = Math.max(0, btc - 30)
-          outcome = "Paid 30 BTC ransom"
-        } else {
-          // Lose half inventory
-          wipeHalfInventoryFunc()
-          outcome = "Lost half of your inventory"
+        // Halve all prices
+        for (const item of items) {
+          if (currentPrices[item]) {
+            currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
+          }
         }
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
-        updateStatusBars()
-        updateInventoryDisplay()
-        updateGameFlowHighlight()
-      })
-      return "Waiting for your decision..." // Temporary message until user decides
 
-    case "009": // SILK NETWORK REROUTE
-      if (roll <= 6) {
-        // If we have a roll value
-        const productCount = glock ? 2 : 1
-        const itemsResult = grantRandomItems(productCount)
-        message = `Gained ${productCount} high-end product(s): ${itemsResult}`
-      } else {
-        // If no roll yet, just return a message
-        return "Roll to determine which product(s) you receive"
-      }
-      break
+        console.log("New prices after halving:", JSON.stringify(currentPrices))
 
-    case "010": // PHANTOM NODE FAILURE
-      btc = Math.max(0, btc - 15) // Should be 15 BTC, not 30
-      message = "Lose 15 BTC"
-      break
-
-    case "011": // HACKED!
-      if (roll <= 2) {
-        const lossAmount = Math.floor(btc * 0.25)
-        btc = Math.max(0, btc - lossAmount)
-        message = `Lose 25% of BTC (${lossAmount} BTC)`
-      } else {
-        message = "Recovered some of what you almost lost"
-      }
-      break
-
-    case "012": // FOUND A STASH
-      if (roll <= 6) {
-        const itemsResult = grantRandomItems(5)
-        message = `Found a stash: ${itemsResult}`
-      } else {
-        return "Roll to determine which products you find"
-      }
-      break
-
-    case "013": // INSIDER TIP
-      showConfirm(
-        "INSIDER TIP",
-        `A rival drops a hint... or a trap?
-
-Your current BTC: ${btc}
-Glock status: ${glock ? "Already have one" : "Don't have one"}
-
-Choose your response:`,
-        glock ? "Pay 10 BTC for another Glock" : "Pay 10 BTC for Glock",
-        "Gain 20 BTC (risky)",
-      ).then((result) => {
-        let outcome = ""
-        if (result) {
-          // Pay 10 BTC for Glock
-          btc = Math.max(0, btc - 10)
-          glock = true
-          outcome = "Paid 10 BTC to gain a Glock"
-        } else {
-          // Gain 20 BTC but increase risk
-          btc += 20
-          outcome = "Gained 20 BTC (increased risk next roll)"
-        }
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + outcome
-        updateStatusBars()
-        updateInventoryDisplay()
-        updateGameFlowHighlight()
-      })
-      return "Waiting for your decision..." // Temporary message until user decides
-
-    case "014": // FAST TRACK FUNDS
-      btc += 30
-      message = "Gain 30 BTC"
-      break
-
-    case "015": // WHALE BUY
-      return applyWhaleBuyout()
-
-    case "016": // LUCKY FLIP
-      // Double the value of all inventory items
-      currentPrices = doublePrices()
-      updateMarketTable() // Make sure to update the market table
-      message = "Doubled your inventory's market value this round"
-      break
-
-    case "017": // BLACKOUT
-      blockSelling = true
-      message = "Cannot sell anything this round"
-      break
-
-    case "018": // REPO MAN
-      btc = Math.max(0, btc - 20)
-      message = "Lose 20 BTC for emergency transportation"
-      break
-
-    case "019": // LEAKED KEYS
-      btc = Math.max(0, btc - 30)
-      message = "Lose 30 BTC"
-      break
-
-    case "020": // DEAD WALLET REVIVAL
-      btc += 20
-      if (roll <= 3) {
-        message = "Gained 20 BTC - Safe"
-      } else {
-        btc = Math.max(0, btc - 10)
-        message = "Gained 20 BTC but lost 10 BTC to fees"
-      }
-      break
-
-    case "021": // EMERGENCY SALE
-      showConfirm(
-        "EMERGENCY SALE",
-        "The network's volatile. You can liquidate now at a loss...\nor hold and forfeit all buys this cycle.",
-        "Sell All (Half Value)",
-        "Hold (No Buying)",
-      ).then((result) => {
-        let message = ""
-        if (result) {
-          message = sellAllAtHalf()
-        } else {
-          blockBuying = true
-          message = "Cannot buy this round"
-        }
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + message
-        updateGameFlowHighlight()
-      })
-      return "Waiting for your decision..." // Temporary message until user decides
-
-    case "022": // CUT AND RUN
-      showConfirm(
-        "CUT AND RUN",
-        "You've got seconds. Ditch the stash and bolt… or stay and hope they don't breach your door.",
-        "Lose Inventory (+40 BTC)",
-        "Keep Inventory",
-      ).then((result) => {
-        let message = ""
-        if (result) {
-          clearInventory()
-          btc += 40
-          message = "Gain 40 BTC, lose inventory"
-        } else {
-          message = "Kept inventory"
-        }
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + message
-        updateGameFlowHighlight()
-      })
-      return "Waiting for your decision..." // Temporary message until user decides
-
-    case "023": // SILK SECURITY PATCH
-      ignoreNextNegative = true
-      message = "Next negative event will be ignored"
-      break
-
-    case "024": // MARKET MANIPULATION
-      // Randomly increase or decrease prices
-      const manipulationFactor = Math.random() < 0.5 ? 0.5 : 2
-      for (const item in currentPrices) {
-        if (currentPrices.hasOwnProperty(item)) {
-          currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] * manipulationFactor))
-        }
-      }
-      updateMarketTable()
-      message = manipulationFactor < 1 ? "Market prices decreased" : "Market prices increased"
-      break
-
-    case "025": // COMMUNITY BOOST
-      return grantItems("choose", 3)
-
-    case "026": // VENDOR SCAM
-      const scamItem = items[Math.floor(Math.random() * items.length)]
-      bannedItem = scamItem
-      message = `Cannot trade ${itemNames[scamItem]} this round`
-      break
-
-    case "027": // DARK WEB SALE
-      // Apply a discount to all items
-      for (const item in currentPrices) {
-        if (currentPrices.hasOwnProperty(item)) {
-          currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] * 0.7))
-        }
-      }
-      updateMarketTable()
-      message = "30% discount on all items this round"
-      break
-
-    case "028": // FAMILY EMERGENCY
-      showConfirm(
-        "FAMILY EMERGENCY",
-        "Your sister's in trouble. Pay off her debt or skip this cycle to help her.",
-        "Lose 30 BTC",
-        "Skip Turn",
-      ).then((result) => {
-        let message = ""
-        if (result) {
-          btc = Math.max(0, btc - 30)
-          message = "Lose 30 BTC"
-        } else {
-          blockBuying = true
-          blockSelling = true
-          message = "Skip turn"
-          // Since the player chose to skip the round, highlight the advance button
-          gameFlowState = "advanceCycle"
-          updateGameFlowHighlight()
-          // Show a hint to advance to the next cycle
-          showHint("You've skipped this round. Click 'Advance to Next Cycle' to continue.")
-        }
-        document.getElementById("cardDiceResult").textContent = "✓ Outcome: " + message
-        updateStatusBars()
-        updateInventoryDisplay()
-      })
-      return "Waiting for your decision..." // Temporary message until user decides
-
-    case "029": // MARKET SURGE
-      if (roll >= 4) {
-        // Double prices for a random item
-        const surgeItem = items[Math.floor(Math.random() * items.length)]
-        const originalPrice = currentPrices[surgeItem] || 1
-        currentPrices[surgeItem] = originalPrice * 2
+        // Update the market table
         updateMarketTable()
-        message = `${itemNames[surgeItem]} price doubled to ${currentPrices[surgeItem]} BTC`
-      } else {
-        message = "No market surge occurred"
-      }
-      break
+        message = "BTC value halves this round"
+        break
 
-    case "030": // ANONYMOUS TIP
-      btc += 15
-      message = "Gain 15 BTC from anonymous source"
-      break
-
-    case "031": // BULK DISCOUNT
-      // Apply a discount to a random item
-      const discountItem = items[Math.floor(Math.random() * items.length)]
-      const originalPrice = currentPrices[discountItem] || 1
-      currentPrices[discountItem] = Math.max(1, Math.floor(originalPrice * 0.5))
-      updateMarketTable()
-      message = `${itemNames[discountItem]} price halved to ${currentPrices[discountItem]} BTC`
-      break
-
-    case "032": // MARKET SHUTDOWN
-      blockBuying = true
-      message = "Cannot buy anything this round"
-      break
-
-    case "033": // VENDOR ARREST
-      // Remove a random item from inventory
-      const arrestItem = items[Math.floor(Math.random() * items.length)]
-      if (inventory[arrestItem] && inventory[arrestItem].length > 0) {
-        const count = inventory[arrestItem].length
-        inventory[arrestItem] = []
-        message = `Lost all ${count} ${itemNames[arrestItem]} due to vendor arrest`
-      } else {
-        message = "Vendor arrested but you had none of their product"
-      }
-      break
-
-    case "034": // CUSTOMS SEIZURE
-      // Lose half of a random item
-      const seizeItem = items[Math.floor(Math.random() * items.length)]
-      if (inventory[seizeItem] && inventory[seizeItem].length > 0) {
-        const count = inventory[seizeItem].length
-        const seizeCount = Math.ceil(count / 2)
-        inventory[seizeItem] = inventory[seizeItem].slice(0, count - seizeCount)
-        message = `Lost ${seizeCount} ${itemNames[seizeItem]} due to customs seizure`
-      } else {
-        message = "Customs seizure but you had none of the targeted product"
-      }
-      break
-
-    case "035": // MARKET BOOM
-      // Increase all prices
-      for (const item in currentPrices) {
-        if (currentPrices.hasOwnProperty(item)) {
-          currentPrices[item] = Math.floor(currentPrices[item] * 1.5)
-        }
-      }
-      updateMarketTable()
-      message = "Market boom: All prices increased by 50%"
-      break
-
-    case "036": // LUCKY FIND
-      if (roll <= 6) {
-        btc += roll * 5
-        message = `Found ${roll * 5} BTC in an old wallet`
-      } else {
-        return "Roll to determine how much BTC you find"
-      }
-      break
-
-    case "037": // RISKY VENTURE
-      if (roll <= 3) {
+      case "010": // PHANTOM NODE FAILURE
         btc = Math.max(0, btc - 15)
-        message = "Venture failed: Lost 15 BTC"
-      } else {
-        btc += 30
-        message = "Venture succeeded: Gained 30 BTC"
-      }
-      break
+        message = "Lose 15 BTC"
+        break
 
-    case "038": // DARK NET BONUS
-      btc += 25
-      message = "Received 25 BTC bonus from dark net marketplace"
-      break
+      case "016": // LUCKY FLIP
+        console.log("Running LUCKY FLIP effect")
+        console.log("Current prices before:", JSON.stringify(currentPrices))
 
-    case "039": // INVENTORY EXPANSION
-      // This is a special case - we can't modify the constant directly
-      // Instead, we'll handle this in the countInventory function
-      message = "Inventory capacity increased by 5 slots"
-      break
+        // Initialize prices if they're not set yet
+        if (Object.keys(currentPrices).length === 0) {
+          for (const item of items) {
+            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
+          }
+        }
 
-    case "040": // MARKET MANIPULATION
-      // Randomly shuffle prices
-      const shuffledPrices = {}
-      const priceValues = Object.values(currentPrices)
-      for (let i = 0; i < items.length; i++) {
-        const randomIndex = Math.floor(Math.random() * priceValues.length)
-        shuffledPrices[items[i]] = priceValues.splice(randomIndex, 1)[0]
-      }
-      currentPrices = shuffledPrices
-      updateMarketTable()
-      message = "Market manipulation: Prices have been shuffled"
-      break
+        // Double all prices
+        for (const item of items) {
+          if (currentPrices[item]) {
+            currentPrices[item] = currentPrices[item] * 2
+          }
+        }
 
-    default:
-      if (code >= "001" && code <= "040") {
-        message = `Event ${code} applied - check card for effect`
-      } else {
-        message = "Invalid card code"
-      }
+        console.log("New prices after doubling:", JSON.stringify(currentPrices))
+
+        // Update the market table
+        updateMarketTable()
+        message = "Doubled your inventory's market value this round"
+        break
+
+      default:
+        // Call the original function for all other cases
+        return originalRunCardEffect(code, roll)
+    }
+
+    updateStatusBars()
+    updateInventoryDisplay()
+    updateMarketTable()
+
+    // Force update of liquid BTC display
+    const liquidBtcElement = document.getElementById("liquid-btc")
+    if (liquidBtcElement) {
+      liquidBtcElement.textContent = btc
+    }
+
+    return message
+  } catch (error) {
+    console.error(`Error in runCardEffect for code ${code}:`, error)
+    return `Error: ${error.message}`
   }
+}
 
-  updateStatusBars()
-  updateInventoryDisplay()
-  updateMarketTable()
+// Store the original function to call for other cases
+const originalRunCardEffect = runCardEffect
 
-  // Force update of liquid BTC display
-  const liquidBtcElement = document.getElementById("liquid-btc")
-  if (liquidBtcElement) {
-    liquidBtcElement.textContent = btc
+// Override the function with our fixed version
+runCardEffect = (code, roll) => {
+  console.log(`Running card effect for code ${code} with roll ${roll}`)
+  let message = ""
+
+  try {
+    switch (code) {
+      case "005": // MARKET CRASH
+        console.log("Running MARKET CRASH effect")
+        console.log("Current prices before:", JSON.stringify(currentPrices))
+
+        // Initialize prices if they're not set yet
+        if (Object.keys(currentPrices).length === 0) {
+          for (const item of items) {
+            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
+          }
+        }
+
+        // Halve all prices
+        for (const item of items) {
+          if (currentPrices[item]) {
+            currentPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
+          }
+        }
+
+        console.log("New prices after halving:", JSON.stringify(currentPrices))
+
+        // Update the market table
+        updateMarketTable()
+        message = "BTC value halves this round"
+        break
+
+      case "010": // PHANTOM NODE FAILURE
+        btc = Math.max(0, btc - 15)
+        message = "Lose 15 BTC"
+        break
+
+      case "016": // LUCKY FLIP
+        console.log("Running LUCKY FLIP effect")
+        console.log("Current prices before:", JSON.stringify(currentPrices))
+
+        // Initialize prices if they're not set yet
+        if (Object.keys(currentPrices).length === 0) {
+          for (const item of items) {
+            currentPrices[item] = priceMatrix[item][2] // Use middle value as default
+          }
+        }
+
+        // Double all prices
+        for (const item of items) {
+          if (currentPrices[item]) {
+            currentPrices[item] = currentPrices[item] * 2
+          }
+        }
+
+        console.log("New prices after doubling:", JSON.stringify(currentPrices))
+
+        // Update the market table
+        updateMarketTable()
+        message = "Doubled your inventory's market value this round"
+        break
+
+      default:
+        // Call the original function for all other cases
+        return originalRunCardEffect(code, roll)
+    }
+
+    updateStatusBars()
+    updateInventoryDisplay()
+    updateMarketTable()
+
+    // Force update of liquid BTC display
+    const liquidBtcElement = document.getElementById("liquid-btc")
+    if (liquidBtcElement) {
+      liquidBtcElement.textContent = btc
+    }
+
+    return message
+  } catch (error) {
+    console.error(`Error in runCardEffect for code ${code}:`, error)
+    return `Error: ${error.message}`
   }
-
-  return message
 }
 
 // Helper function for random item grants
@@ -1386,7 +1159,7 @@ function applyBurnerDeal() {
 // Update market table with current prices
 function updateMarketTable() {
   // First, make sure we have a market table to update
-  const marketTable = document.querySelector("table")
+  const marketTable = document.getElementById("marketTable")
   if (!marketTable) {
     console.error("Market table not found")
     return
@@ -1398,25 +1171,41 @@ function updateMarketTable() {
   // Update each row in the table
   for (const item of items) {
     // Find the row for this item
-    const itemNameCell = Array.from(marketTable.querySelectorAll("td")).find(
-      (cell) => cell.textContent === itemNames[item],
-    )
+    const rows = marketTable.querySelectorAll("tbody tr")
+    let row = null
 
-    if (!itemNameCell) continue
+    for (let i = 0; i < rows.length; i++) {
+      const cells = rows[i].querySelectorAll("td")
+      if (cells.length > 0 && cells[0].textContent.includes(itemNames[item])) {
+        row = rows[i]
+        break
+      }
+    }
 
-    const row = itemNameCell.parentElement
-    if (!row) continue
+    if (!row) {
+      console.warn(`Row for ${itemNames[item]} not found`)
+      continue
+    }
+
+    // Get the cells in this row
+    const cells = row.querySelectorAll("td")
+    if (cells.length < 2) {
+      console.warn(`Not enough cells in row for ${itemNames[item]}`)
+      continue
+    }
+
+    const nameCell = cells[0]
+    const priceCell = cells[1]
 
     // Clear any previous burner deal styling
-    itemNameCell.classList.remove("burner-deal-item")
+    nameCell.classList.remove("burner-deal-item")
 
     // Apply burner deal styling if this is the burner item
     if (item === burnerItem) {
-      itemNameCell.classList.add("burner-deal-item")
+      nameCell.classList.add("burner-deal-item")
     }
 
     // Update the price cell
-    const priceCell = row.querySelector("td:nth-child(2)")
     if (priceCell) {
       priceCell.textContent = currentPrices[item] ? `${currentPrices[item]} BTC` : "—"
 
@@ -1428,17 +1217,20 @@ function updateMarketTable() {
           priceCell.style.fontWeight = "bold"
         } else if (currentPrices[item] < avgCost) {
           priceCell.style.color = "#ff6666" // Red for loss
+        } else {
+          priceCell.style.color = "" // Reset color
+          priceCell.style.fontWeight = "" // Reset font weight
         }
       }
     }
 
     // Apply banned item styling
     if (item === bannedItem) {
-      itemNameCell.style.textDecoration = "line-through"
-      itemNameCell.style.color = "red"
+      nameCell.style.textDecoration = "line-through"
+      nameCell.style.color = "red"
     } else {
-      itemNameCell.style.textDecoration = ""
-      itemNameCell.style.color = ""
+      nameCell.style.textDecoration = ""
+      nameCell.style.color = ""
     }
   }
 }

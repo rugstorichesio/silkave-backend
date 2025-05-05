@@ -671,7 +671,6 @@
         </td>
         <td>
           <input type="number" id="sell-lsd" min="0" style="width: 50px">
-          <input type="number" id="sell-lsd" min="0" style="width: 50px">
           <button class="max-button" onclick="setMaxSell('lsd')">Max</button>
         </td>
       </tr>
@@ -834,6 +833,80 @@ document.addEventListener("DOMContentLoaded", function() {
     console.log("Card Result Content:", cardResult.innerHTML);
     console.log("Card Result Style:", window.getComputedStyle(cardResult));
   };
+});
+</script>
+
+// Add this script at the end of the body to fix the event card system
+// and add more debugging capabilities
+
+<script>
+// Fix for event card system
+document.addEventListener("DOMContentLoaded", function() {
+  // Add extra CSS to ensure card result is always visible
+  const style = document.createElement("style");
+  style.textContent = `
+    #cardDiceResult {
+      display: block !important;
+      min-height: 1.5rem !important;
+      font-weight: bold !important;
+      color: #0f0 !important;
+      font-size: 1.1rem !important;
+      padding: 0.5rem !important;
+      margin-top: 0.5rem !important;
+      text-shadow: 0 0 3px #0f0 !important;
+    }
+    
+    .card-result {
+      display: block !important;
+      min-height: 2.5rem !important;
+      white-space: pre-line !important;
+      margin-top: 1rem !important;
+      background-color: rgba(0, 20, 0, 0.3) !important;
+      padding: 0.5rem !important;
+      border: 1px dashed #0f0 !important;
+      box-shadow: 0 0 5px rgba(0, 255, 0, 0.2) !important;
+    }
+  `;
+  document.head.appendChild(style);
+  
+  // Fix duplicate input in the LSD row
+  const sellLsdCell = document.querySelector('td:has(#sell-lsd)');
+  if (sellLsdCell && sellLsdCell.querySelectorAll('input').length > 1) {
+    sellLsdCell.innerHTML = `
+      <input type="number" id="sell-lsd" min="0" style="width: 50px">
+      <button class="max-button" onclick="setMaxSell('lsd')">Max</button>
+    `;
+  }
+  
+  // Add debug functions
+  window.debugCardResult = function() {
+    const cardResult = document.getElementById("cardDiceResult");
+    console.log("Card Result Element:", cardResult);
+    console.log("Card Result Content:", cardResult.innerHTML);
+    console.log("Card Result Style:", window.getComputedStyle(cardResult));
+  };
+  
+  window.testCard = function(code) {
+    document.getElementById("eventCode").value = code;
+    applyEvent();
+    console.log("Card result after applying:", document.getElementById("cardDiceResult").innerHTML);
+  };
+  
+  window.initPrices = function() {
+    // Initialize prices if they're not set yet
+    if (Object.keys(currentPrices).length === 0) {
+      for (const item of items) {
+        currentPrices[item] = priceMatrix[item][2]; // Use middle value as default
+      }
+      console.log("Initialized default prices:", currentPrices);
+      updateMarketTable();
+    }
+  };
+  
+  // Initialize prices on page load
+  setTimeout(function() {
+    window.initPrices();
+  }, 500);
 });
 </script>
 </body>
