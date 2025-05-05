@@ -413,7 +413,7 @@
     color: #0f0 !important;
   }
 
-  button[class^="modal"] {
+  button[class^="modal"], button[class*=" modal"] {
     background-color: #000 !important;
     color: #0f0 !important;
   }
@@ -444,7 +444,6 @@
   </div>
 
   <h1>Silk Ave Game Companion</h1>
-  
   <div>
     <h2>Cycle: <span id="cycle">1</span> / 10</h2>
     <h3>BTC: <span id="btc">100</span> | Glock: <span id="glock">No</span> | Inventory: <span id="invCount">0</span>/20</h3>
@@ -634,51 +633,69 @@
     <a href="submit.html">Submit Score</a>
   </div>
 
-  <!-- Add a hidden audio element as a fallback -->
-  <audio id="bleepAudio" src="bleep.wav" preload="auto" style="display: none;"></audio>
+  <!-- Sound effects -->
+  <audio id="bleep" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
+  <audio id="typing" src="https://assets.mixkit.co/sfx/preview/mixkit-keyboard-typing-1386.mp3" preload="auto" loop></audio>
+  <audio id="crackles" src="https://assets.mixkit.co/sfx/preview/mixkit-radio-static-noise-2556.mp3" preload="auto" loop volume="0.3"></audio>
 
   <!-- Scripts - Note the order is important -->
+  <!-- Remove the reference to modal.js since we're now implementing the modals directly in script.js -->
+  <!-- <script src="modal.js"></script> -->
   <script src="script.js"></script>
-  <script>
-  // Fallback sound function in case the main one doesn't work
-  function playBleepFallback() {
-    try {
-      const audio = document.getElementById('bleepAudio');
-      if (audio) {
-        audio.currentTime = 0;
-        audio.play().catch(e => console.error("Fallback audio failed:", e));
-      }
-    } catch (e) {
-      console.error("Fallback audio error:", e);
-    }
-  }
   
-  // Add click handlers to specific buttons
-  document.addEventListener('DOMContentLoaded', function() {
-    // List of button IDs that should play the sound
-    const soundButtons = [
-      'applyEventBtn',
-      'applyBurnerBtn',
-      'executeTransactionsBtn',
-      'buyGlockBtn',
-      'sellAllBtn',
-      'advanceCycleBtn'
-    ];
-    
-    // Add click handlers to each button
-    soundButtons.forEach(id => {
-      const button = document.getElementById(id);
-      if (button) {
-        button.addEventListener('click', function() {
-          console.log(`Button clicked: ${id}`);
-          // Try both sound methods
-          playBleep();
-          setTimeout(playBleepFallback, 50); // Try fallback with slight delay
-        });
+  <script>
+    // Play sound on button clicks
+    function playBleep() {
+      const sound = document.getElementById('bleep');
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log("Audio play failed:", e));
       }
-    });
+    }
     
-    console.log("Added sound handlers to buttons");
+    // Check if we're on a mobile device
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.matchMedia("(max-width: 600px)").matches) {
+        const homeLink = document.querySelector('.home-link');
+        if (homeLink) {
+          homeLink.style.position = 'relative';
+          homeLink.style.top = 'auto';
+          homeLink.style.right = 'auto';
+        }
+      }
+      
+      // Add click sound to all buttons
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('click', playBleep);
+      });
+      
+      // Also add to select elements when they change
+      const selects = document.querySelectorAll('select');
+      selects.forEach(select => {
+        select.addEventListener('change', playBleep);
+      });
+    });
+  </script>
+  <script>
+  // Initialize the game log and inventory display on page load
+  document.addEventListener("DOMContentLoaded", function() {
+    // Initialize the log with a welcome message
+    const logElement = document.getElementById("log");
+    if (logElement && logElement.textContent === "") {
+      logElement.textContent = "[" + new Date().toLocaleTimeString() + "] Welcome to Silk Ave. You start with 100 BTC. Good luck.";
+    }
+    
+    // Initialize the inventory display
+    const inventoryStatus = document.getElementById("inventoryStatus");
+    if (inventoryStatus && inventoryStatus.textContent === "") {
+      inventoryStatus.textContent = "Current Inventory:\nEmpty";
+    }
+    
+    // IMPORTANT: Do NOT add any event listeners to the advance button here
+    // All button event handling is now in script.js
+    
+    console.log("INIT: Companion page initialized");
   });
 </script>
 </body>
