@@ -416,6 +416,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })
 
+  // Add sound effects to all buttons
+  document.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", (e) => {
+      // Don't interfere with other click handlers
+      if (!e.defaultPrevented) {
+        playSound("bleep")
+      }
+    })
+  })
+
+  // Also add sound effects to select elements when they change
+  document.querySelectorAll("select").forEach((select) => {
+    select.addEventListener("change", () => {
+      playSound("bleep")
+    })
+  })
+
+  // Add sound effects to the event code input when user presses Enter
+  const eventCodeInputEnter = document.getElementById("eventCode")
+  if (eventCodeInputEnter) {
+    eventCodeInputEnter.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        playSound("bleep")
+        applyEvent()
+      }
+    })
+  }
+
   // Initialize the game state
   console.log(`GAME INIT: Starting at cycle ${cycle}`)
   isAdvancing = false
