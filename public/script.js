@@ -39,7 +39,7 @@ const priceMatrix = {
   files: [4, 5, 6, 7, 8, 10],
 }
 
-// Mock functions to resolve undeclared variable errors
+// Update status bars with current game state
 function updateStatusBars() {
   // Update the status bars at the top and bottom
   document.getElementById("cycle").textContent = cycle
@@ -64,27 +64,108 @@ function updateStatusBars() {
   document.getElementById("liquidBtc").textContent = btc
 }
 
+// Update inventory display with current items
 function updateInventoryDisplay() {
-  console.log("updateInventoryDisplay called")
+  const inventoryStatus = document.getElementById("inventoryStatus")
+  let inventoryText = "Current Inventory:\n"
+
+  let totalItems = 0
+
+  for (const item of items) {
+    const itemInventory = inventory[item] || []
+    if (itemInventory.length > 0) {
+      // Calculate average purchase price
+      const totalCost = itemInventory.reduce((sum, price) => sum + price, 0)
+      const avgPrice = (totalCost / itemInventory.length).toFixed(1)
+
+      // Show item count and purchase prices
+      inventoryText += `${itemNames[item]}: ${itemInventory.length} (bought @ ${avgPrice} BTC each)`
+
+      // Add individual prices if there are few items
+      if (itemInventory.length <= 5) {
+        inventoryText += ` [${itemInventory.join(", ")} BTC]`
+      }
+
+      inventoryText += "\n"
+      totalItems += itemInventory.length
+    }
+  }
+
+  if (totalItems === 0) {
+    inventoryText += "Empty"
+  }
+
+  inventoryStatus.textContent = inventoryText
+
+  // Update the owned quantities in the transaction table
+  for (const item of items) {
+    const ownedElement = document.getElementById(`owned-${item}`)
+    if (ownedElement) {
+      const itemCount = (inventory[item] || []).length
+      ownedElement.textContent = itemCount
+
+      // Highlight if player owns any
+      if (itemCount > 0) {
+        ownedElement.style.color = "#0f0"
+        ownedElement.style.fontWeight = "bold"
+      } else {
+        ownedElement.style.color = ""
+        ownedElement.style.fontWeight = ""
+      }
+    }
+  }
 }
 
+// Add log message to the game log
 function log(message) {
-  console.log(message)
+  const logElement = document.getElementById("log")
+  if (logElement) {
+    // Add timestamp to the message
+    const timestamp = new Date().toLocaleTimeString()
+    const formattedMessage = `[${timestamp}] ${message}`
+
+    // Prepend the message to the log (newest at top)
+    logElement.textContent = formattedMessage + "\n" + logElement.textContent
+
+    // Trim log if it gets too long
+    const maxLines = 100
+    const lines = logElement.textContent.split("\n")
+    if (lines.length > maxLines) {
+      logElement.textContent = lines.slice(0, maxLines).join("\n")
+    }
+  }
+  console.log(message) // Also log to console for debugging
 }
 
+// Clear all inventory
 function clearInventory() {
-  console.log("clearInventory called")
+  for (const item of items) {
+    inventory[item] = []
+  }
+  log("-- Inventory cleared")
+  updateInventoryDisplay()
 }
 
+// Halve all prices
 function halvePrices() {
-  console.log("halvePrices called")
-  return currentPrices
+  const newPrices = {}
+  for (const item in currentPrices) {
+    if (currentPrices.hasOwnProperty(item)) {
+      newPrices[item] = Math.max(1, Math.floor(currentPrices[item] / 2))
+    }
+  }
+  return newPrices
 }
 
-// Declare missing functions
+// Double all prices
 function doublePrices() {
-  console.log("doublePrices called")
-  return currentPrices
+  const newPrices = {}
+  for (const item in currentPrices) {
+    if (currentPrices.hasOwnProperty(item)) {
+      newPrices[item] = currentPrices[item] * 2
+    }
+  }
+  return newPrices
 }
 
 function showConfirm(title, message, confirmText, cancelText) {
@@ -147,11 +228,12 @@ function showPrompt(title, message) {
 
 // Initialize the game when the page loads
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize the game log
+  log("Welcome to Silk Ave. You start with 100 BTC. Good luck.")
+
   updateStatusBars()
   updateInventoryDisplay()
   updateMarketTable()
-  // We'll use the static rows in the HTML instead of calling populateTransactionTable()
-  log("Welcome to Silk Ave. You start with 100 BTC. Good luck.")
 
   // Add event listener for event code input
   document.getElementById("eventCode").addEventListener("input", function () {
@@ -160,6 +242,12 @@ document.addEventListener("DOMContentLoaded", () => {
       updateGameFlowHighlight()
     }
   })
+
+  // Add event listener for the sell everything button
+  const sellAllButton = document.getElementById("sellAllBtn")
+  if (sellAllButton) {
+    sellAllButton.addEventListener("click", sellEverything)
+  }
 
   // Start the guided highlighting
   updateGameFlowHighlight()
