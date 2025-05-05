@@ -1249,3 +1249,79 @@ function sellAllAtHalf() {
 
   return `Sold all ${itemsSold} items at half price for ${totalEarnings} BTC.`
 }
+
+// Add this function to handle selling everything at current market prices
+function sellEverything() {
+  playSound("bleep")
+
+  if (blockSelling) {
+    log("-- Cannot sell this round due to event effect.")
+    return
+  }
+
+  let totalEarnings = 0
+  let itemsSold = 0
+
+  for (const item in inventory) {
+    if (inventory.hasOwnProperty(item)) {
+      const itemCount = inventory[item].length
+
+      if (itemCount > 0) {
+        const itemPrice = currentPrices[item] || 1 // Use current price or default to 1
+        const earnings = itemCount * itemPrice
+
+        totalEarnings += earnings
+        itemsSold += itemCount
+
+        // Clear the inventory for this item
+        inventory[item] = []
+
+        log(`-- Sold ${itemCount} ${itemNames[item]} for ${earnings} BTC.`)
+      }
+    }
+  }
+
+  if (itemsSold === 0) {
+    log("-- No items in inventory to sell.")
+    return
+  }
+
+  // Update BTC
+  btc += totalEarnings
+
+  updateInventoryDisplay()
+  updateStatusBars()
+
+  log(`-- Sold all ${itemsSold} items for ${totalEarnings} BTC.`)
+
+  // Update game flow state if all items are sold
+  if (itemsSold > 0) {
+    gameFlowState = "advanceCycle"
+    updateGameFlowHighlight()
+  }
+}
+
+// Add the buyGlock function since it's referenced but not implemented
+function buyGlock() {
+  playSound("bleep")
+
+  const glockPrice = 20
+
+  if (btc < glockPrice) {
+    log(`-- Cannot afford a Glock. You need ${glockPrice} BTC.`)
+    return
+  }
+
+  if (glock) {
+    log("-- You already have a Glock.")
+    return
+  }
+
+  btc -= glockPrice
+  glock = true
+
+  log(`-- Bought a Glock for ${glockPrice} BTC.`)
+
+  updateStatusBars()
+  updateInventoryDisplay()
+}
